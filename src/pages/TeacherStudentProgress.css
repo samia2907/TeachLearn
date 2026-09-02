@@ -1,0 +1,1150 @@
+* {
+  box-sizing: border-box;
+}
+
+
+.teacher-student-progress-page {
+  min-height: 100vh;
+
+  padding: 28px 36px 70px;
+
+  font-family:
+    "Segoe UI",
+    Tahoma,
+    Arial,
+    sans-serif;
+
+  color: #172033;
+
+  background:
+    radial-gradient(
+      circle at 3% 0%,
+      rgba(124, 58, 237, 0.08),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 96% 2%,
+      rgba(59, 130, 246, 0.07),
+      transparent 28%
+    ),
+    #f7f8fc;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.teacher-progress-header {
+  max-width: 1200px;
+
+  margin: 0 auto 18px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 23px 26px;
+
+  border: 1px solid #e8ebf2;
+
+  border-radius: 22px;
+
+  background: white;
+
+  box-shadow:
+    0 12px 32px
+    rgba(15, 23, 42, 0.05);
+}
+
+
+.teacher-progress-back {
+  padding: 8px 12px;
+
+  border: 1px solid #ddd6fe;
+
+  border-radius: 10px;
+
+  background: white;
+
+  color: #6d28d9;
+
+  font-size: 10px;
+
+  font-weight: 850;
+
+  cursor: pointer;
+}
+
+
+.teacher-progress-header h1 {
+  margin: 8px 0 4px;
+
+  font-size: 26px;
+
+  font-weight: 900;
+}
+
+
+.teacher-progress-header p {
+  margin: 0;
+
+  color: #94a3b8;
+
+  font-size: 11px;
+}
+
+
+/* LANGUAGE */
+
+.teacher-progress-language {
+  display: flex;
+
+  padding: 4px;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 11px;
+
+  background: #f8fafc;
+}
+
+
+.teacher-progress-language button {
+  min-width: 42px;
+
+  padding: 7px 9px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: #94a3b8;
+
+  font-size: 9px;
+
+  font-weight: 850;
+
+  cursor: pointer;
+}
+
+
+.teacher-progress-language button.active {
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #4f46e5
+    );
+}
+
+
+/* =====================================================
+   STUDENT
+===================================================== */
+
+.teacher-progress-student {
+  max-width: 1200px;
+
+  margin: 0 auto 18px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+
+  padding: 19px 21px;
+
+  border: 1px solid #ddd6fe;
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #faf5ff,
+      #eff6ff
+    );
+}
+
+
+.progress-student-avatar {
+  width: 62px;
+  height: 62px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 18px;
+
+  background: white;
+
+  font-size: 31px;
+}
+
+
+.progress-student-info {
+  flex: 1;
+}
+
+
+.progress-student-info small {
+  color: #8b5cf6;
+
+  font-size: 8px;
+
+  font-weight: 900;
+}
+
+
+.progress-student-info h2 {
+  margin: 2px 0;
+
+  font-size: 19px;
+}
+
+
+.progress-student-info p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 10px;
+}
+
+
+/* STUDENT STATS */
+
+.progress-student-stats {
+  display: flex;
+
+  gap: 8px;
+}
+
+
+.progress-student-stats > div {
+  min-width: 90px;
+
+  padding: 10px 13px;
+
+  border-radius: 12px;
+
+  background: white;
+
+  text-align: center;
+}
+
+
+.progress-student-stats strong {
+  display: block;
+
+  color: #6d28d9;
+
+  font-size: 18px;
+}
+
+
+.progress-student-stats span {
+  color: #94a3b8;
+
+  font-size: 8px;
+}
+
+
+/* =====================================================
+   LESSON LIST
+===================================================== */
+
+.teacher-progress-lessons {
+  max-width: 1200px;
+
+  margin: auto;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+
+.teacher-progress-lesson-card {
+  padding: 22px;
+
+  border: 1px solid #e7eaf2;
+
+  border-radius: 21px;
+
+  background: white;
+
+  box-shadow:
+    0 10px 30px
+    rgba(15, 23, 42, 0.045);
+}
+
+
+/* LESSON TOP */
+
+.progress-lesson-top {
+  display: flex;
+
+  align-items: center;
+
+  gap: 13px;
+}
+
+
+.progress-lesson-icon {
+  width: 55px;
+  height: 55px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ede9fe,
+      #dbeafe
+    );
+
+  font-size: 27px;
+}
+
+
+.progress-lesson-title {
+  flex: 1;
+}
+
+
+.progress-lesson-title small {
+  color: #8b5cf6;
+
+  font-size: 7px;
+
+  font-weight: 900;
+
+  letter-spacing: 0.7px;
+}
+
+
+.progress-lesson-title h2 {
+  margin: 2px 0 4px;
+
+  font-size: 17px;
+}
+
+
+.progress-lesson-title p {
+  margin: 0;
+
+  color: #94a3b8;
+
+  font-size: 9px;
+}
+
+
+/* STATUS */
+
+.progress-status {
+  padding: 7px 10px;
+
+  border-radius: 999px;
+
+  font-size: 9px;
+
+  font-weight: 850;
+}
+
+
+.progress-status.completed {
+  background: #ecfdf5;
+
+  color: #047857;
+}
+
+
+.progress-status.active {
+  background: #eff6ff;
+
+  color: #2563eb;
+}
+
+
+/* =====================================================
+   PROGRESS BAR
+===================================================== */
+
+.teacher-progress-bar-info {
+  display: flex;
+
+  justify-content: space-between;
+
+  margin:
+    17px 0 6px;
+
+  color: #64748b;
+
+  font-size: 9px;
+}
+
+
+.teacher-progress-bar {
+  width: 100%;
+
+  height: 7px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background: #eef2f7;
+}
+
+
+.teacher-progress-bar > div {
+  height: 100%;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #8b5cf6,
+      #3b82f6
+    );
+}
+
+
+/* =====================================================
+   LESSON STATS
+===================================================== */
+
+.progress-lesson-stats {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 8px;
+
+  margin-top: 13px;
+}
+
+
+.progress-lesson-stats > div {
+  padding: 9px;
+
+  border-radius: 10px;
+
+  background: #f8fafc;
+
+  text-align: center;
+}
+
+
+.progress-lesson-stats strong {
+  display: block;
+
+  color: #334155;
+
+  font-size: 13px;
+}
+
+
+.progress-lesson-stats span {
+  color: #94a3b8;
+
+  font-size: 7px;
+}
+
+
+/* =====================================================
+   ANSWERS
+===================================================== */
+
+.teacher-answers-section {
+  margin-top: 20px;
+
+  padding-top: 18px;
+
+  border-top: 1px solid #edf0f5;
+}
+
+
+.teacher-answers-title {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-bottom: 12px;
+}
+
+
+.teacher-answers-title small {
+  color: #8b5cf6;
+
+  font-size: 7px;
+
+  font-weight: 900;
+}
+
+
+.teacher-answers-title h3 {
+  margin: 2px 0 0;
+
+  font-size: 15px;
+}
+
+
+.teacher-answers-title > span {
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  background: #f5f3ff;
+
+  color: #7c3aed;
+
+  font-size: 10px;
+
+  font-weight: 900;
+}
+
+
+.teacher-answer-list {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 11px;
+}
+
+
+.teacher-answer-card {
+  padding: 15px;
+
+  border: 1px solid #e8ecf2;
+
+  border-radius: 14px;
+
+  background: #fafbfe;
+}
+
+
+.teacher-answer-heading {
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+
+  margin-bottom: 9px;
+}
+
+
+.teacher-answer-heading > span {
+  width: 38px;
+  height: 38px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background: white;
+
+  font-size: 19px;
+}
+
+
+.teacher-answer-heading small {
+  color: #8b5cf6;
+
+  font-size: 7px;
+
+  font-weight: 900;
+}
+
+
+.teacher-answer-heading h4 {
+  margin: 1px 0 0;
+
+  font-size: 11px;
+}
+
+
+.teacher-question-text {
+  margin: 0 0 9px;
+
+  color: #475569;
+
+  font-size: 10px;
+
+  line-height: 1.7;
+}
+
+
+/* WRITTEN ANSWER */
+
+.student-written-answer {
+  padding: 11px;
+
+  border: 1px solid #dbeafe;
+
+  border-radius: 10px;
+
+  background: white;
+}
+
+
+.student-written-answer small {
+  color: #3b82f6;
+
+  font-size: 7px;
+
+  font-weight: 850;
+}
+
+
+.student-written-answer p {
+  margin: 4px 0 0;
+
+  color: #334155;
+
+  font-size: 10px;
+
+  line-height: 1.75;
+
+  white-space: pre-wrap;
+}
+
+
+/* QUIZ ANSWER */
+
+.student-quiz-answer {
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+
+  padding: 11px;
+
+  border-radius: 10px;
+}
+
+
+.student-quiz-answer > span {
+  font-size: 18px;
+}
+
+
+.student-quiz-answer small {
+  display: block;
+
+  font-size: 7px;
+}
+
+
+.student-quiz-answer strong {
+  display: block;
+
+  margin-top: 2px;
+
+  font-size: 10px;
+}
+
+
+.student-quiz-answer.correct {
+  border: 1px solid #a7f3d0;
+
+  background: #ecfdf5;
+
+  color: #047857;
+}
+
+
+.student-quiz-answer.wrong {
+  border: 1px solid #fecaca;
+
+  background: #fef2f2;
+
+  color: #b91c1c;
+}
+
+
+/* =====================================================
+   EMPTY
+===================================================== */
+
+.teacher-progress-empty {
+  max-width: 1200px;
+
+  min-height: 350px;
+
+  margin: auto;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 35px;
+
+  border: 1px dashed #dbe2ea;
+
+  border-radius: 21px;
+
+  background: white;
+
+  text-align: center;
+}
+
+
+.teacher-progress-empty > div {
+  font-size: 50px;
+}
+
+
+.teacher-progress-empty h2 {
+  margin:
+    10px 0 5px;
+
+  font-size: 17px;
+}
+
+
+.teacher-progress-empty p {
+  margin: 0;
+
+  color: #94a3b8;
+
+  font-size: 10px;
+}
+
+
+.teacher-no-answers {
+  padding: 17px;
+
+  border-radius: 11px;
+
+  background: #f8fafc;
+
+  color: #94a3b8;
+
+  font-size: 10px;
+
+  text-align: center;
+}
+
+
+/* =====================================================
+   ERROR / LOADING
+===================================================== */
+
+.teacher-progress-error {
+  max-width: 1200px;
+
+  margin:
+    0 auto 15px;
+
+  padding: 11px 13px;
+
+  border: 1px solid #fecaca;
+
+  border-radius: 10px;
+
+  background: #fef2f2;
+
+  color: #b91c1c;
+
+  font-size: 10px;
+
+  font-weight: 800;
+}
+
+
+.teacher-progress-loading {
+  min-height: 100vh;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background: #f7f8fc;
+
+  font-size: 50px;
+}
+
+
+/* RTL */
+
+[dir="rtl"]
+.teacher-student-progress-page {
+  direction: rtl;
+
+  text-align: right;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 800px) {
+
+  .teacher-student-progress-page {
+    padding:
+      18px 14px 50px;
+  }
+
+
+  .teacher-progress-header {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+
+  .teacher-progress-student {
+    flex-wrap: wrap;
+  }
+
+
+  .progress-student-stats {
+    width: 100%;
+  }
+
+
+  .progress-student-stats > div {
+    flex: 1;
+  }
+
+
+  .teacher-answer-list {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+@media (max-width: 500px) {
+
+  .progress-student-stats {
+    flex-direction: column;
+  }
+
+
+  .progress-lesson-top {
+    align-items: flex-start;
+
+    flex-wrap: wrap;
+  }
+
+
+  .progress-status {
+    width: 100%;
+
+    text-align: center;
+  }
+/* =====================================================
+   SUCCESS
+===================================================== */
+
+.teacher-progress-success {
+  max-width: 1200px;
+
+  margin:
+    0 auto 15px;
+
+  padding: 12px 15px;
+
+  border: 1px solid #a7f3d0;
+
+  border-radius: 11px;
+
+  background: #ecfdf5;
+
+  color: #047857;
+
+  font-size: 11px;
+
+  font-weight: 800;
+}
+
+
+/* =====================================================
+   TEACHER FEEDBACK
+===================================================== */
+
+.teacher-feedback-editor {
+  margin-top: 14px;
+
+  padding: 14px;
+
+  border: 1px solid #ddd6fe;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #faf5ff,
+      #f8fafc
+    );
+}
+
+
+.feedback-editor-heading {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 11px;
+}
+
+
+.feedback-editor-heading small {
+  color: #7c3aed;
+
+  font-size: 8px;
+
+  font-weight: 900;
+
+  letter-spacing: 0.4px;
+}
+
+
+.feedback-editor-heading h5 {
+  margin: 3px 0 0;
+
+  color: #334155;
+
+  font-size: 12px;
+}
+
+
+.feedback-reviewed-badge {
+  padding: 6px 9px;
+
+  border-radius: 999px;
+
+  background: #ecfdf5;
+
+  color: #047857;
+
+  font-size: 8px;
+
+  font-weight: 850;
+}
+
+
+/* =====================================================
+   FEEDBACK SCORE
+===================================================== */
+
+.teacher-feedback-score {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 10px;
+}
+
+
+.teacher-feedback-score > span {
+  color: #64748b;
+
+  font-size: 10px;
+
+  font-weight: 800;
+}
+
+
+.teacher-feedback-score > strong {
+  color: #b45309;
+
+  font-size: 11px;
+}
+
+
+.feedback-stars {
+  display: flex;
+
+  gap: 3px;
+}
+
+
+.feedback-star {
+  padding: 2px;
+
+  border: none;
+
+  background: transparent;
+
+  font-size: 18px;
+
+  opacity: 0.28;
+
+  filter: grayscale(1);
+
+  cursor: pointer;
+
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+
+
+.feedback-star:hover {
+  opacity: 0.75;
+
+  transform: scale(1.1);
+}
+
+
+.feedback-star.active {
+  opacity: 1;
+
+  filter: none;
+}
+
+
+/* =====================================================
+   FEEDBACK TEXT
+===================================================== */
+
+.teacher-feedback-editor textarea {
+  width: 100%;
+
+  min-height: 90px;
+
+  padding: 11px 12px;
+
+  border: 1px solid #d8dee9;
+
+  border-radius: 10px;
+
+  outline: none;
+
+  background: white;
+
+  color: #334155;
+
+  font-family: inherit;
+
+  font-size: 11px;
+
+  line-height: 1.7;
+
+  resize: vertical;
+}
+
+
+.teacher-feedback-editor textarea:focus {
+  border-color: #8b5cf6;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(
+      139,
+      92,
+      246,
+      0.08
+    );
+}
+
+
+/* =====================================================
+   SAVE FEEDBACK
+===================================================== */
+
+.save-teacher-feedback-button {
+  width: 100%;
+
+  min-height: 39px;
+
+  margin-top: 9px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #4f46e5,
+      #3b82f6
+    );
+
+  font-size: 10px;
+
+  font-weight: 850;
+
+  cursor: pointer;
+
+  transition: 0.18s ease;
+}
+
+
+.save-teacher-feedback-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 8px 18px
+    rgba(
+      99,
+      102,
+      241,
+      0.17
+    );
+}
+
+
+.save-teacher-feedback-button:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+}

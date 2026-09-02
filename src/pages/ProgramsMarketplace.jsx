@@ -1,0 +1,1333 @@
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  collection,
+  doc,
+  getDoc,
+  onSnapshot,
+  query,
+  serverTimestamp,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+
+import {
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  auth,
+  db,
+} from "../firebase/firebase";
+
+import {
+  useLanguage,
+} from "../context/LanguageContext";
+
+import "./ProgramsMarketplace.css";
+
+
+function ProgramsMarketplace() {
+  const navigate =
+    useNavigate();
+
+  const {
+    language,
+    setLanguage,
+  } = useLanguage();
+
+
+  const [
+    userProfile,
+    setUserProfile,
+  ] = useState(null);
+
+  const [
+    programs,
+    setPrograms,
+  ] = useState([]);
+
+  const [
+    classes,
+    setClasses,
+  ] = useState([]);
+
+  const [
+    accessMap,
+    setAccessMap,
+  ] = useState({});
+
+  const [
+    selectedClasses,
+    setSelectedClasses,
+  ] = useState({});
+
+  const [
+    loading,
+    setLoading,
+  ] = useState(true);
+
+  const [
+    processingId,
+    setProcessingId,
+  ] = useState("");
+
+  const [
+    search,
+    setSearch,
+  ] = useState("");
+
+  const [
+    message,
+    setMessage,
+  ] = useState("");
+
+
+  const text = (
+    english,
+    arabic
+  ) =>
+    language === "ar"
+      ? arabic
+      : english;
+
+
+  const localized =
+    (value) => {
+      if (!value) {
+        return "";
+      }
+
+      if (
+        typeof value ===
+        "string"
+      ) {
+        return value;
+      }
+
+      return (
+        value[language] ||
+        value.en ||
+        value.ar ||
+        ""
+      );
+    };
+
+
+  const safeId =
+    (value) =>
+      String(value || "")
+        .replace(/\//g, "_")
+        .replace(/\s+/g, "_");
+
+
+  /* =====================================================
+     LOAD USER
+  ===================================================== */
+
+  useEffect(() => {
+    const loadUser =
+      async () => {
+        const user =
+          auth.currentUser;
+
+
+        if (!user) {
+          navigate("/login");
+          return;
+        }
+
+
+        try {
+          const snapshot =
+            await getDoc(
+              doc(
+                db,
+                "users",
+                user.uid
+              )
+            );
+
+
+          if (!snapshot.exists()) {
+            navigate("/login");
+            return;
+          }
+
+
+          setUserProfile({
+            uid:
+              user.uid,
+
+            ...snapshot.data(),
+          });
+
+        } catch (error) {
+          console.error(
+            "Marketplace user error:",
+            error
+          );
+
+          setMessage(
+            text(
+              "Could not load your account.",
+              "تعذر تحميل حسابك."
+            )
+          );
+        }
+      };
+
+
+    loadUser();
+
+  }, [navigate]);
+
+
+  /* =====================================================
+     LOAD PUBLISHED PROGRAMS
+  ===================================================== */
+
+  useEffect(() => {
+    const programsQuery =
+      query(
+        collection(
+          db,
+          "programs"
+        ),
+
+        where(
+          "status",
+          "==",
+          "published"
+        )
+      );
+
+
+    const unsubscribe =
+      onSnapshot(
+        programsQuery,
+
+        (snapshot) => {
+          const list =
+            snapshot.docs.map(
+              (programDoc) => ({
+                id:
+                  programDoc.id,
+
+                ...programDoc.data(),
+              })
+            );
+
+
+          setPrograms(list);
+          setLoading(false);
+        },
+
+        (error) => {
+          console.error(
+            "Marketplace programs error:",
+            error
+          );
+
+          setLoading(false);
+
+          setMessage(
+            text(
+              "Could not load programs.",
+              "تعذر تحميل البرامج."
+            )
+          );
+        }
+      );
+
+
+    return () =>
+      unsubscribe();
+
+  }, []);
+
+
+  /* =====================================================
+     LOAD TEACHER CLASSES
+  ===================================================== */
+
+  useEffect(() => {
+    if (
+      !userProfile ||
+      userProfile.role !==
+        "teacher"
+    ) {
+      return undefined;
+    }
+
+
+    const classesQuery =
+      query(
+        collection(
+          db,
+          "classes"
+        ),
+
+        where(
+          "teacherId",
+          "==",
+          userProfile.uid
+        )
+      );
+
+
+    const unsubscribe =
+      onSnapshot(
+        classesQuery,
+
+        (snapshot) => {
+          const list =
+            snapshot.docs.map(
+              (classDoc) => ({
+                id:
+                  classDoc.id,
+
+                ...classDoc.data(),
+              })
+            );
+
+
+          setClasses(list);
+
+
+          if (list.length > 0) {
+            setSelectedClasses(
+              (current) => {
+                const next = {
+                  ...current,
+                };
+
+
+                programs.forEach(
+                  (program) => {
+                    if (
+                      !next[
+                        program.id
+                      ]
+                    ) {
+                      next[
+                        program.id
+                      ] =
+                        list[0].id;
+                    }
+                  }
+                );
+
+
+                return next;
+              }
+            );
+          }
+        }
+      );
+
+
+    return () =>
+      unsubscribe();
+
+  }, [
+    userProfile,
+    programs,
+  ]);
+
+
+  /* =====================================================
+     LOAD PROGRAM ACCESS
+  ===================================================== */
+
+  useEffect(() => {
+    const checkAccess =
+      async () => {
+        if (
+          !userProfile ||
+          programs.length === 0
+        ) {
+          return;
+        }
+
+
+        const result = {};
+
+
+        await Promise.all(
+          programs.map(
+            async (
+              program
+            ) => {
+              try {
+                let personalAccessId;
+
+
+                if (
+                  userProfile.role ===
+                  "teacher"
+                ) {
+                  personalAccessId =
+                    `teacher_${safeId(
+                      userProfile.uid
+                    )}_${safeId(
+                      program.id
+                    )}`;
+
+                } else {
+                  personalAccessId =
+                    `student_${safeId(
+                      userProfile.uid
+                    )}_${safeId(
+                      program.id
+                    )}`;
+                }
+
+
+                const personalSnapshot =
+                  await getDoc(
+                    doc(
+                      db,
+                      "programAccess",
+                      personalAccessId
+                    )
+                  );
+
+
+                if (
+                  personalSnapshot.exists() &&
+                  personalSnapshot.data()
+                    .status ===
+                    "active"
+                ) {
+                  result[
+                    program.id
+                  ] = true;
+
+                  return;
+                }
+
+
+                /*
+                  Student may also have access
+                  through a teacher's class license.
+                */
+
+                if (
+                  userProfile.role ===
+                    "student" &&
+                  userProfile.classId
+                ) {
+                  const classAccessId =
+                    `class_${safeId(
+                      userProfile.classId
+                    )}_${safeId(
+                      program.id
+                    )}`;
+
+
+                  const classSnapshot =
+                    await getDoc(
+                      doc(
+                        db,
+                        "programAccess",
+                        classAccessId
+                      )
+                    );
+
+
+                  if (
+                    classSnapshot.exists() &&
+                    classSnapshot.data()
+                      .status ===
+                      "active"
+                  ) {
+                    result[
+                      program.id
+                    ] = true;
+                  }
+                }
+
+              } catch (error) {
+                console.error(
+                  "Access check error:",
+                  program.id,
+                  error
+                );
+              }
+            }
+          )
+        );
+
+
+        setAccessMap(result);
+      };
+
+
+    checkAccess();
+
+  }, [
+    userProfile,
+    programs,
+  ]);
+
+
+  /* =====================================================
+     FILTER
+  ===================================================== */
+
+  const filteredPrograms =
+    useMemo(
+      () => {
+        const value =
+          search
+            .trim()
+            .toLowerCase();
+
+
+        if (!value) {
+          return programs;
+        }
+
+
+        return programs.filter(
+          (program) =>
+            [
+              localized(
+                program.title
+              ),
+
+              localized(
+                program.description
+              ),
+
+              program.category,
+              program.level,
+            ]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase()
+              .includes(value)
+        );
+      },
+
+      [
+        programs,
+        search,
+        language,
+      ]
+    );
+
+
+  /* =====================================================
+     PURCHASE
+  ===================================================== */
+
+  const startPurchase =
+    async (
+      program,
+      licenseType,
+      classId = null
+    ) => {
+      const user =
+        auth.currentUser;
+
+
+      if (
+        !user ||
+        !userProfile
+      ) {
+        navigate("/login");
+        return;
+      }
+
+
+      if (
+        userProfile.role ===
+        "owner"
+      ) {
+        setMessage(
+          text(
+            "Owner accounts can preview programs but cannot purchase them.",
+            "حساب المالك مخصص لمعاينة البرامج ولا يقوم بالشراء."
+          )
+        );
+
+        return;
+      }
+
+
+      if (
+        accessMap[
+          program.id
+        ] &&
+        licenseType !==
+          "class"
+      ) {
+        setMessage(
+          text(
+            "You already have access to this program.",
+            "لديك وصول لهذا البرنامج بالفعل."
+          )
+        );
+
+        return;
+      }
+
+
+      if (
+        licenseType ===
+          "class"
+      ) {
+        if (!classId) {
+          setMessage(
+            text(
+              "Please select a class first.",
+              "اختاري صفًا أولًا."
+            )
+          );
+
+          return;
+        }
+
+
+        /*
+          Avoid charging again if this
+          class already owns the program.
+        */
+
+        const classAccessId =
+          `class_${safeId(
+            classId
+          )}_${safeId(
+            program.id
+          )}`;
+
+
+        const classAccessSnapshot =
+          await getDoc(
+            doc(
+              db,
+              "programAccess",
+              classAccessId
+            )
+          );
+
+
+        if (
+          classAccessSnapshot.exists() &&
+          classAccessSnapshot.data()
+            .status ===
+            "active"
+        ) {
+          setMessage(
+            text(
+              "This class already has access to the program.",
+              "هذا الصف لديه وصول للبرنامج بالفعل."
+            )
+          );
+
+          return;
+        }
+      }
+
+
+      try {
+        setProcessingId(
+          `${program.id}-${licenseType}`
+        );
+
+        setMessage("");
+
+
+        await updateDoc(
+          doc(
+            db,
+            "users",
+            user.uid
+          ),
+
+          {
+            pendingPurchase: {
+              type:
+                "program",
+
+              programId:
+                program.id,
+
+              licenseType,
+
+              classId:
+                licenseType ===
+                  "class"
+                  ? classId
+                  : null,
+
+              createdAt:
+                new Date().toISOString(),
+            },
+
+            pendingPurchaseUpdatedAt:
+              serverTimestamp(),
+          }
+        );
+
+
+        navigate(
+          "/checkout?type=program"
+        );
+
+      } catch (error) {
+        console.error(
+          "Program purchase error:",
+          error
+        );
+
+
+        setMessage(
+          text(
+            "Could not start the purchase.",
+            "تعذر بدء عملية الشراء."
+          )
+        );
+
+      } finally {
+        setProcessingId("");
+      }
+    };
+
+
+  /* =====================================================
+     OPEN PROGRAM
+  ===================================================== */
+
+  const openProgram =
+    (programId) => {
+      /*
+        We'll build this program-learning
+        page after confirming purchase flow.
+      */
+
+      navigate(
+        `/programs/${programId}`
+      );
+    };
+
+
+  /* =====================================================
+     LOADING
+  ===================================================== */
+
+  if (
+    loading ||
+    !userProfile
+  ) {
+    return (
+      <div className="marketplace-loading">
+        🚀
+
+        <p>
+          {text(
+            "Loading TechMinds programs...",
+            "جارٍ تحميل برامج TechMinds..."
+          )}
+        </p>
+      </div>
+    );
+  }
+
+
+  /* =====================================================
+     PAGE
+  ===================================================== */
+
+  return (
+    <div className="program-marketplace">
+
+      <header className="marketplace-header">
+
+        <div>
+
+          <button
+            type="button"
+            className="marketplace-back"
+            onClick={() => {
+              if (
+                userProfile.role ===
+                "owner"
+              ) {
+                navigate("/owner");
+
+              } else if (
+                userProfile.role ===
+                "teacher"
+              ) {
+                navigate("/teacher");
+
+              } else {
+                navigate("/student");
+              }
+            }}
+          >
+            {language === "ar"
+              ? "↩ رجوع"
+              : "← Back"}
+          </button>
+
+
+          <small>
+            TECHMINDS MARKETPLACE
+          </small>
+
+
+          <h1>
+            🚀{" "}
+            {text(
+              "Learning Programs",
+              "البرامج التعليمية"
+            )}
+          </h1>
+
+
+          <p>
+            {text(
+              "Choose a complete interactive learning program.",
+              "اختاري برنامجًا تعليميًا تفاعليًا متكاملًا."
+            )}
+          </p>
+
+        </div>
+
+
+        <div className="marketplace-language">
+
+          <button
+            type="button"
+            className={
+              language === "en"
+                ? "active"
+                : ""
+            }
+            onClick={() =>
+              setLanguage("en")
+            }
+          >
+            EN
+          </button>
+
+
+          <button
+            type="button"
+            className={
+              language === "ar"
+                ? "active"
+                : ""
+            }
+            onClick={() =>
+              setLanguage("ar")
+            }
+          >
+            عربي
+          </button>
+
+        </div>
+
+      </header>
+
+
+      {message && (
+        <div className="marketplace-message">
+          {message}
+        </div>
+      )}
+
+
+      <div className="marketplace-toolbar">
+
+        <span>
+          🔎
+        </span>
+
+
+        <input
+          type="text"
+          value={search}
+          onChange={(event) =>
+            setSearch(
+              event.target.value
+            )
+          }
+          placeholder={
+            text(
+              "Search programs...",
+              "ابحثي عن برنامج..."
+            )
+          }
+        />
+
+      </div>
+
+
+      {filteredPrograms.length ===
+      0 ? (
+
+        <div className="marketplace-empty">
+
+          <div>
+            📚
+          </div>
+
+
+          <h2>
+            {text(
+              "No published programs yet",
+              "لا توجد برامج منشورة حاليًا"
+            )}
+          </h2>
+
+        </div>
+
+      ) : (
+
+        <div className="marketplace-program-grid">
+
+          {filteredPrograms.map(
+            (program) => {
+
+              const hasAccess =
+                Boolean(
+                  accessMap[
+                    program.id
+                  ]
+                );
+
+
+              const studentPrice =
+                Number(
+                  program.pricing
+                    ?.student ||
+                  0
+                );
+
+
+              const teacherPrice =
+                Number(
+                  program.pricing
+                    ?.teacher ||
+                  0
+                );
+
+
+              const classPrice =
+                Number(
+                  program.pricing
+                    ?.class ||
+                  0
+                );
+
+
+              return (
+                <article
+                  className="marketplace-program-card"
+                  key={program.id}
+                >
+
+                  <div className="marketplace-program-top">
+
+                    <div className="marketplace-program-icon">
+                      {program.icon ||
+                        "🚀"}
+                    </div>
+
+
+                    <div>
+
+                      <span className="marketplace-program-status">
+                        ✓{" "}
+                        {text(
+                          "Published",
+                          "منشور"
+                        )}
+                      </span>
+
+
+                      <h2>
+                        {localized(
+                          program.title
+                        )}
+                      </h2>
+
+                    </div>
+
+                  </div>
+
+
+                  <p className="marketplace-description">
+
+                    {localized(
+                      program.description
+                    ) ||
+                      text(
+                        "Interactive TechMinds learning program.",
+                        "برنامج تعليمي تفاعلي من TechMinds."
+                      )}
+
+                  </p>
+
+
+                  <div className="marketplace-meta">
+
+                    <span>
+                      📚{" "}
+                      {program.lessonCount ||
+                        0}{" "}
+                      {text(
+                        "Lessons",
+                        "دروس"
+                      )}
+                    </span>
+
+
+                    {program.level && (
+                      <span>
+                        🎯{" "}
+                        {program.level}
+                      </span>
+                    )}
+
+
+                    {program.ageFrom && (
+                      <span>
+                        👦{" "}
+                        {program.ageFrom}
+                        -
+                        {program.ageTo ||
+                          program.ageFrom}
+                      </span>
+                    )}
+
+                  </div>
+
+
+                  {program.finalProject && (
+                    <div className="marketplace-project">
+
+                      <small>
+                        🏆{" "}
+                        {text(
+                          "FINAL PROJECT",
+                          "المشروع النهائي"
+                        )}
+                      </small>
+
+
+                      <p>
+                        {localized(
+                          program.finalProject
+                        )}
+                      </p>
+
+                    </div>
+                  )}
+
+
+                  {/* STUDENT */}
+
+                  {userProfile.role ===
+                    "student" && (
+
+                    <div className="marketplace-purchase-area">
+
+                      <div className="marketplace-price">
+
+                        <small>
+                          {text(
+                            "Student Access",
+                            "وصول الطالب"
+                          )}
+                        </small>
+
+
+                        <strong>
+                          ₪{studentPrice}
+                        </strong>
+
+                      </div>
+
+
+                      {hasAccess ? (
+
+                        <button
+                          type="button"
+                          className="marketplace-open-button"
+                          onClick={() =>
+                            openProgram(
+                              program.id
+                            )
+                          }
+                        >
+                          ✅{" "}
+                          {text(
+                            "Open Program",
+                            "فتح البرنامج"
+                          )}
+                        </button>
+
+                      ) : (
+
+                        <button
+                          type="button"
+                          className="marketplace-buy-button"
+                          disabled={
+                            processingId ===
+                            `${program.id}-student`
+                          }
+                          onClick={() =>
+                            startPurchase(
+                              program,
+                              "student"
+                            )
+                          }
+                        >
+                          {processingId ===
+                          `${program.id}-student`
+                            ? text(
+                                "Preparing...",
+                                "جارٍ التجهيز..."
+                              )
+                            : `🔒 ${text(
+                                "Buy Program",
+                                "شراء البرنامج"
+                              )}`}
+                        </button>
+
+                      )}
+
+                    </div>
+
+                  )}
+
+
+                  {/* TEACHER */}
+
+                  {userProfile.role ===
+                    "teacher" && (
+
+                    <div className="marketplace-teacher-options">
+
+                      <div className="marketplace-license-box">
+
+                        <div className="marketplace-price">
+
+                          <small>
+                            👩‍🏫{" "}
+                            {text(
+                              "Teacher Access",
+                              "وصول المعلّم"
+                            )}
+                          </small>
+
+
+                          <strong>
+                            ₪{teacherPrice}
+                          </strong>
+
+                        </div>
+
+
+                        {hasAccess ? (
+
+                          <button
+                            type="button"
+                            className="marketplace-open-button"
+                            onClick={() =>
+                              openProgram(
+                                program.id
+                              )
+                            }
+                          >
+                            ✅{" "}
+                            {text(
+                              "Open Program",
+                              "فتح البرنامج"
+                            )}
+                          </button>
+
+                        ) : (
+
+                          <button
+                            type="button"
+                            className="marketplace-buy-button"
+                            disabled={
+                              processingId ===
+                              `${program.id}-teacher`
+                            }
+                            onClick={() =>
+                              startPurchase(
+                                program,
+                                "teacher"
+                              )
+                            }
+                          >
+                            🔒{" "}
+                            {text(
+                              "Buy for Me",
+                              "شراء للمعلّم"
+                            )}
+                          </button>
+
+                        )}
+
+                      </div>
+
+
+                      <div className="marketplace-license-box class-license">
+
+                        <div className="marketplace-price">
+
+                          <small>
+                            👥{" "}
+                            {text(
+                              "Class License",
+                              "ترخيص صف"
+                            )}
+                          </small>
+
+
+                          <strong>
+                            ₪{classPrice}
+                          </strong>
+
+                        </div>
+
+
+                        {classes.length ===
+                        0 ? (
+
+                          <button
+                            type="button"
+                            className="marketplace-secondary-button"
+                            onClick={() =>
+                              navigate(
+                                "/teacher/classes"
+                              )
+                            }
+                          >
+                            +{" "}
+                            {text(
+                              "Create Class First",
+                              "أنشئ صفًا أولًا"
+                            )}
+                          </button>
+
+                        ) : (
+
+                          <>
+                            <select
+                              value={
+                                selectedClasses[
+                                  program.id
+                                ] ||
+                                classes[0]?.id ||
+                                ""
+                              }
+                              onChange={(event) =>
+                                setSelectedClasses({
+                                  ...selectedClasses,
+
+                                  [program.id]:
+                                    event.target.value,
+                                })
+                              }
+                            >
+
+                              {classes.map(
+                                (classItem) => (
+                                  <option
+                                    key={
+                                      classItem.id
+                                    }
+                                    value={
+                                      classItem.id
+                                    }
+                                  >
+                                    {classItem.name}
+                                  </option>
+                                )
+                              )}
+
+                            </select>
+
+
+                            <button
+                              type="button"
+                              className="marketplace-class-button"
+                              disabled={
+                                processingId ===
+                                `${program.id}-class`
+                              }
+                              onClick={() =>
+                                startPurchase(
+                                  program,
+                                  "class",
+                                  selectedClasses[
+                                    program.id
+                                  ] ||
+                                    classes[0]?.id
+                                )
+                              }
+                            >
+                              👥{" "}
+                              {text(
+                                "Buy for Class",
+                                "شراء للصف"
+                              )}
+                            </button>
+                          </>
+
+                        )}
+
+                      </div>
+
+                    </div>
+
+                  )}
+
+
+                  {/* OWNER */}
+
+                  {userProfile.role ===
+                    "owner" && (
+
+                    <div className="marketplace-owner-preview">
+
+                      👑{" "}
+
+                      {text(
+                        "Owner Preview",
+                        "معاينة المالك"
+                      )}
+
+                    </div>
+
+                  )}
+
+                </article>
+              );
+            }
+          )}
+
+        </div>
+
+      )}
+
+    </div>
+  );
+}
+
+
+export default ProgramsMarketplace;

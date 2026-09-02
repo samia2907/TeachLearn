@@ -1,0 +1,875 @@
+/* =========================================================
+   TECHMINDS OWNER SETTINGS
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+
+.owner-settings-page {
+  width: 100%;
+  min-height: 100vh;
+
+  padding: 28px 34px 70px;
+
+  background:
+    radial-gradient(
+      circle at 5% 0%,
+      rgba(124, 58, 237, 0.08),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 95% 0%,
+      rgba(59, 130, 246, 0.07),
+      transparent 28%
+    ),
+    #f7f8fc;
+
+  color: #172033;
+
+  font-family:
+    "Segoe UI",
+    Tahoma,
+    Arial,
+    sans-serif;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.owner-settings-header {
+  margin-bottom: 17px;
+
+  padding: 23px 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  border: 1px solid #e7eaf2;
+  border-radius: 20px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 10px 30px
+    rgba(15, 23, 42, 0.04);
+}
+
+
+.owner-settings-back {
+  margin-bottom: 9px;
+
+  padding: 7px 11px;
+
+  border: 1px solid #ddd6fe;
+  border-radius: 9px;
+
+  background: #faf5ff;
+
+  color: #6d28d9;
+
+  font-family: inherit;
+
+  font-size: 11px;
+  font-weight: 850;
+
+  cursor: pointer;
+}
+
+
+.owner-settings-header > div:first-child > small {
+  color: #7c3aed;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  letter-spacing: 0.08em;
+}
+
+
+.owner-settings-header h1 {
+  margin: 4px 0 5px;
+
+  color: #172033;
+
+  font-size: 30px;
+  font-weight: 900;
+}
+
+
+.owner-settings-header p {
+  margin: 0;
+
+  color: #8490a3;
+
+  font-size: 13px;
+}
+
+
+.owner-settings-language {
+  padding: 4px;
+
+  display: flex;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+
+  background: #f8fafc;
+}
+
+
+.owner-settings-language button {
+  padding: 8px 11px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: transparent;
+
+  color: #94a3b8;
+
+  font-size: 10px;
+  font-weight: 850;
+
+  cursor: pointer;
+}
+
+
+.owner-settings-language button.active {
+  background: #6d28d9;
+
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   MESSAGES
+========================================================= */
+
+.owner-settings-success,
+.owner-settings-error {
+  margin-bottom: 14px;
+
+  padding: 12px 14px;
+
+  border-radius: 11px;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+
+.owner-settings-success {
+  border: 1px solid #a7f3d0;
+
+  background: #ecfdf5;
+
+  color: #047857;
+}
+
+
+.owner-settings-error {
+  border: 1px solid #fecaca;
+
+  background: #fef2f2;
+
+  color: #b91c1c;
+}
+
+
+/* =========================================================
+   ACCOUNT OVERVIEW
+========================================================= */
+
+.owner-settings-overview {
+  margin-bottom: 17px;
+
+  padding: 18px 20px;
+
+  display: grid;
+
+  grid-template-columns:
+    60px
+    minmax(0, 1fr)
+    180px
+    160px;
+
+  gap: 13px;
+
+  align-items: center;
+
+  border: 1px solid #ddd6fe;
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #faf8ff
+    );
+}
+
+
+.owner-settings-avatar {
+  width: 58px;
+  height: 58px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ede9fe,
+      #dbeafe
+    );
+
+  font-size: 28px;
+}
+
+
+.owner-settings-account small {
+  color: #7c3aed;
+
+  font-size: 8px;
+  font-weight: 900;
+}
+
+
+.owner-settings-account h2 {
+  margin: 3px 0;
+
+  color: #172033;
+
+  font-size: 18px;
+}
+
+
+.owner-settings-account p {
+  margin: 0;
+
+  color: #94a3b8;
+
+  font-size: 10px;
+}
+
+
+.owner-settings-role,
+.owner-settings-status {
+  min-height: 58px;
+
+  padding: 9px 11px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  border: 1px solid #e8ebf2;
+  border-radius: 11px;
+
+  background: #ffffff;
+}
+
+
+.owner-settings-role > span {
+  font-size: 20px;
+}
+
+
+.owner-settings-role small,
+.owner-settings-status small {
+  display: block;
+
+  color: #94a3b8;
+
+  font-size: 7px;
+  font-weight: 850;
+}
+
+
+.owner-settings-role strong,
+.owner-settings-status strong {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #334155;
+
+  font-size: 10px;
+}
+
+
+.owner-settings-status i {
+  width: 10px;
+  height: 10px;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+
+  box-shadow:
+    0 0 0 5px
+    rgba(34, 197, 94, 0.1);
+}
+
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.owner-settings-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap: 13px;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.owner-settings-card {
+  min-width: 0;
+
+  padding: 21px;
+
+  border: 1px solid #e7eaf2;
+  border-radius: 18px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 8px 25px
+    rgba(15, 23, 42, 0.035);
+}
+
+
+.owner-settings-support-card,
+.owner-settings-password-card {
+  grid-column: 1 / -1;
+}
+
+
+.owner-settings-card-header {
+  margin-bottom: 18px;
+
+  padding-bottom: 14px;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 10px;
+
+  border-bottom: 1px solid #eef1f5;
+}
+
+
+.owner-settings-card-header > span {
+  width: 43px;
+  height: 43px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ede9fe,
+      #dbeafe
+    );
+
+  font-size: 20px;
+}
+
+
+.owner-settings-card-header small {
+  color: #7c3aed;
+
+  font-size: 8px;
+  font-weight: 900;
+}
+
+
+.owner-settings-card-header h2 {
+  margin: 2px 0 3px;
+
+  color: #172033;
+
+  font-size: 17px;
+}
+
+
+.owner-settings-card-header p {
+  margin: 0;
+
+  color: #94a3b8;
+
+  font-size: 9px;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.owner-settings-form {
+  display: flex;
+  flex-direction: column;
+
+  gap: 13px;
+}
+
+
+.owner-settings-form label {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+
+  color: #475569;
+
+  font-size: 11px;
+  font-weight: 850;
+}
+
+
+.owner-settings-form input {
+  width: 100%;
+
+  min-height: 45px;
+
+  padding: 9px 11px;
+
+  border: 1px solid #dce3ed;
+  border-radius: 10px;
+
+  outline: none;
+
+  background: #fbfcfe;
+
+  color: #172033;
+
+  font-family: inherit;
+
+  font-size: 12px;
+}
+
+
+.owner-settings-form input:focus {
+  border-color: #8b5cf6;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(139, 92, 246, 0.08);
+}
+
+
+.owner-settings-readonly {
+  background: #f1f5f9 !important;
+
+  color: #94a3b8 !important;
+
+  cursor: not-allowed;
+}
+
+
+.owner-settings-field-note {
+  color: #94a3b8 !important;
+
+  font-size: 8px !important;
+
+  font-weight: 600 !important;
+}
+
+
+.owner-settings-form > button {
+  align-self: flex-start;
+
+  min-height: 42px;
+
+  padding: 8px 16px;
+
+  border: none;
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #4f46e5
+    );
+
+  color: #ffffff;
+
+  font-family: inherit;
+
+  font-size: 10px;
+  font-weight: 850;
+
+  cursor: pointer;
+}
+
+
+.owner-settings-form > button:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   SUPPORT
+========================================================= */
+
+.owner-settings-support-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+  gap: 10px;
+}
+
+
+.owner-settings-support-preview {
+  padding: 14px;
+
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #eff6ff,
+      #f7faff
+    );
+}
+
+
+.owner-settings-support-preview > small {
+  color: #2563eb;
+
+  font-size: 7px;
+  font-weight: 900;
+}
+
+
+.owner-settings-support-preview h3 {
+  margin: 4px 0 9px;
+
+  color: #1e3a8a;
+
+  font-size: 13px;
+}
+
+
+.owner-settings-support-preview > div {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 7px;
+}
+
+
+.owner-settings-support-preview span {
+  padding: 6px 8px;
+
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  color: #475569;
+
+  font-size: 9px;
+  font-weight: 750;
+}
+
+
+/* =========================================================
+   PASSWORD
+========================================================= */
+
+.owner-settings-password-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+  gap: 10px;
+}
+
+
+.owner-settings-password-button {
+  background:
+    linear-gradient(
+      135deg,
+      #334155,
+      #0f172a
+    ) !important;
+}
+
+
+/* =========================================================
+   LANGUAGE OPTIONS
+========================================================= */
+
+.owner-settings-language-options {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap: 9px;
+}
+
+
+.owner-settings-language-options button {
+  min-height: 74px;
+
+  padding: 11px;
+
+  display: grid;
+
+  grid-template-columns:
+    39px
+    1fr
+    25px;
+
+  align-items: center;
+
+  gap: 9px;
+
+  border: 1px solid #e7eaf2;
+  border-radius: 11px;
+
+  background: #fafbfe;
+
+  color: #475569;
+
+  text-align: start;
+
+  cursor: pointer;
+}
+
+
+.owner-settings-language-options button.selected {
+  border-color: #a78bfa;
+
+  background: #f5f3ff;
+}
+
+
+.owner-settings-language-options button > span {
+  width: 39px;
+  height: 39px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  color: #6d28d9;
+
+  font-size: 12px;
+  font-weight: 900;
+}
+
+
+.owner-settings-language-options strong {
+  display: block;
+
+  color: #334155;
+
+  font-size: 11px;
+}
+
+
+.owner-settings-language-options small {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #94a3b8;
+
+  font-size: 7px;
+}
+
+
+.owner-settings-language-options b {
+  color: #7c3aed;
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.owner-settings-loading {
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+
+  background: #f7f8fc;
+}
+
+
+.owner-settings-loading > div {
+  width: 68px;
+  height: 68px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 19px;
+
+  background: #ede9fe;
+
+  font-size: 30px;
+}
+
+
+/* =========================================================
+   RTL
+========================================================= */
+
+[dir="rtl"]
+.owner-settings-page {
+  direction: rtl;
+
+  text-align: right;
+}
+
+
+[dir="rtl"]
+.owner-settings-language-options button {
+  text-align: right;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 950px) {
+
+  .owner-settings-overview {
+    grid-template-columns:
+      60px 1fr;
+  }
+
+
+  .owner-settings-role,
+  .owner-settings-status {
+    grid-column: auto;
+  }
+
+
+  .owner-settings-support-grid,
+  .owner-settings-password-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+}
+
+
+@media (max-width: 720px) {
+
+  .owner-settings-page {
+    padding:
+      16px 12px 50px;
+  }
+
+
+  .owner-settings-header {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+
+  .owner-settings-language {
+    align-self: flex-start;
+  }
+
+
+  .owner-settings-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .owner-settings-support-card,
+  .owner-settings-password-card {
+    grid-column: auto;
+  }
+
+
+  .owner-settings-overview {
+    grid-template-columns:
+      55px 1fr;
+  }
+
+
+  .owner-settings-role,
+  .owner-settings-status {
+    grid-column: 1 / -1;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .owner-settings-language-options {
+    grid-template-columns:
+      1fr;
+  }
+
+}

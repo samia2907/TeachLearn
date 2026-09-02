@@ -1,0 +1,1291 @@
+/* =========================================================
+   TECHMINDS OWNER SALES
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+
+.owner-sales-page {
+  width: 100%;
+  min-height: 100vh;
+
+  padding: 28px 34px 70px;
+
+  background:
+    radial-gradient(
+      circle at 5% 0%,
+      rgba(124, 58, 237, 0.08),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 95% 0%,
+      rgba(34, 197, 94, 0.06),
+      transparent 28%
+    ),
+    #f7f8fc;
+
+  color: #172033;
+
+  font-family:
+    "Segoe UI",
+    Tahoma,
+    Arial,
+    sans-serif;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.owner-sales-header {
+  margin-bottom: 17px;
+
+  padding: 23px 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  border: 1px solid #e7eaf2;
+
+  border-radius: 20px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 10px 30px
+    rgba(15, 23, 42, 0.04);
+}
+
+
+.owner-sales-back {
+  margin-bottom: 9px;
+
+  padding: 7px 11px;
+
+  border: 1px solid #ddd6fe;
+
+  border-radius: 9px;
+
+  background: #faf5ff;
+
+  color: #6d28d9;
+
+  font-family: inherit;
+
+  font-size: 11px;
+  font-weight: 850;
+
+  cursor: pointer;
+}
+
+
+.owner-sales-header > div:first-child > small {
+  color: #7c3aed;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  letter-spacing: 0.08em;
+}
+
+
+.owner-sales-header h1 {
+  margin: 4px 0 5px;
+
+  color: #172033;
+
+  font-size: 30px;
+  font-weight: 900;
+}
+
+
+.owner-sales-header p {
+  margin: 0;
+
+  color: #8490a3;
+
+  font-size: 13px;
+}
+
+
+.owner-sales-header-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+}
+
+
+.owner-sales-language {
+  padding: 4px;
+
+  display: flex;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 10px;
+
+  background: #f8fafc;
+}
+
+
+.owner-sales-language button {
+  padding: 7px 9px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: transparent;
+
+  color: #94a3b8;
+
+  font-size: 10px;
+  font-weight: 850;
+
+  cursor: pointer;
+}
+
+
+.owner-sales-language button.active {
+  background: #6d28d9;
+
+  color: #ffffff;
+}
+
+
+.owner-sales-live-badge {
+  min-height: 40px;
+
+  padding: 8px 11px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  border: 1px solid #a7f3d0;
+
+  border-radius: 10px;
+
+  background: #ecfdf5;
+
+  color: #047857;
+
+  font-size: 10px;
+  font-weight: 850;
+}
+
+
+.owner-sales-live-badge > span {
+  color: #22c55e;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.owner-sales-stats {
+  margin-bottom: 17px;
+
+  display: grid;
+
+  grid-template-columns:
+    1.4fr
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+  gap: 11px;
+}
+
+
+.owner-sale-stat,
+.owner-sales-stats > div {
+  min-height: 105px;
+
+  padding: 15px 17px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  border: 1px solid #e7eaf2;
+
+  border-radius: 16px;
+
+  background: #ffffff;
+}
+
+
+.owner-sale-stat.revenue {
+  border-color: #bbf7d0;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #f0fdf4
+    );
+}
+
+
+.owner-sales-stats > div > span {
+  width: 45px;
+  height: 45px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ede9fe,
+      #dbeafe
+    );
+
+  font-size: 21px;
+}
+
+
+.owner-sale-stat.revenue > span {
+  background: #dcfce7;
+}
+
+
+.owner-sales-stats small {
+  display: block;
+
+  color: #94a3b8;
+
+  font-size: 10px;
+  font-weight: 850;
+}
+
+
+.owner-sales-stats strong {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #172033;
+
+  font-size: 24px;
+  font-weight: 900;
+}
+
+
+.owner-sales-stats p {
+  margin: 2px 0 0;
+
+  color: #94a3b8;
+
+  font-size: 8px;
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.owner-sales-error {
+  margin-bottom: 14px;
+
+  padding: 11px 14px;
+
+  border: 1px solid #fecaca;
+
+  border-radius: 11px;
+
+  background: #fef2f2;
+
+  color: #b91c1c;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   PAYMENT NOTE
+========================================================= */
+
+.owner-sales-payment-note {
+  margin-bottom: 17px;
+
+  padding: 15px 17px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  border: 1px solid #bfdbfe;
+
+  border-radius: 15px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #eff6ff,
+      #f8fbff
+    );
+}
+
+
+.owner-sales-payment-note > div:first-child {
+  width: 45px;
+  height: 45px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  font-size: 21px;
+}
+
+
+.owner-sales-payment-note small {
+  color: #2563eb;
+
+  font-size: 8px;
+  font-weight: 900;
+}
+
+
+.owner-sales-payment-note h3 {
+  margin: 2px 0;
+
+  color: #1e3a8a;
+
+  font-size: 13px;
+}
+
+
+.owner-sales-payment-note p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 9px;
+}
+
+
+/* =========================================================
+   PANEL
+========================================================= */
+
+.owner-sales-panel {
+  padding: 22px;
+
+  border: 1px solid #e7eaf2;
+
+  border-radius: 20px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 10px 30px
+    rgba(15, 23, 42, 0.04);
+}
+
+
+.owner-sales-panel-heading {
+  padding-bottom: 16px;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  border-bottom: 1px solid #eef1f5;
+}
+
+
+.owner-sales-panel-heading small {
+  color: #7c3aed;
+
+  font-size: 9px;
+  font-weight: 900;
+}
+
+
+.owner-sales-panel-heading h2 {
+  margin: 3px 0 4px;
+
+  color: #172033;
+
+  font-size: 21px;
+}
+
+
+.owner-sales-panel-heading p {
+  margin: 0;
+
+  color: #94a3b8;
+
+  font-size: 11px;
+}
+
+
+.owner-sales-panel-heading > span {
+  padding: 6px 9px;
+
+  border-radius: 999px;
+
+  background: #f5f3ff;
+
+  color: #6d28d9;
+
+  font-size: 10px;
+  font-weight: 850;
+}
+
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
+
+.owner-sales-toolbar {
+  margin: 16px 0;
+
+  padding: 11px;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(300px, 1fr)
+    170px
+    170px;
+
+  gap: 9px;
+
+  border: 1px solid #e8ebf2;
+
+  border-radius: 13px;
+
+  background: #fafbfe;
+}
+
+
+.owner-sales-search {
+  min-height: 45px;
+
+  padding: 0 11px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  border: 1px solid #dce3ed;
+
+  border-radius: 9px;
+
+  background: #ffffff;
+}
+
+
+.owner-sales-search input {
+  width: 100%;
+
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  font-family: inherit;
+
+  font-size: 13px;
+}
+
+
+.owner-sales-search button {
+  width: 27px;
+  height: 27px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: #f1f5f9;
+
+  cursor: pointer;
+}
+
+
+.owner-sales-toolbar > select {
+  min-height: 45px;
+
+  padding: 0 10px;
+
+  border: 1px solid #dce3ed;
+
+  border-radius: 9px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #475569;
+
+  font-family: inherit;
+
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.owner-sales-table-wrapper {
+  width: 100%;
+
+  overflow-x: auto;
+}
+
+
+.owner-sales-table {
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+
+.owner-sales-table th {
+  padding: 13px 10px;
+
+  border-bottom: 1px solid #e8ebf2;
+
+  color: #94a3b8;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  text-align: start;
+
+  text-transform: uppercase;
+}
+
+
+.owner-sales-table td {
+  padding: 14px 10px;
+
+  border-bottom: 1px solid #f0f2f6;
+
+  color: #475569;
+
+  font-size: 11px;
+}
+
+
+.owner-sales-table tbody tr:hover {
+  background: #fbfbff;
+}
+
+
+/* CUSTOMER */
+
+.owner-sale-customer {
+  min-width: 180px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+
+.owner-sale-customer > div {
+  width: 38px;
+  height: 38px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #f5f3ff;
+
+  font-size: 17px;
+}
+
+
+.owner-sale-customer strong {
+  display: block;
+
+  color: #334155;
+
+  font-size: 11px;
+}
+
+
+.owner-sale-customer small {
+  display: block;
+
+  margin-top: 2px;
+
+  max-width: 170px;
+
+  overflow: hidden;
+
+  color: #94a3b8;
+
+  font-size: 8px;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* PROGRAM */
+
+.owner-sale-program {
+  min-width: 140px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+}
+
+
+.owner-sale-program > span {
+  font-size: 18px;
+}
+
+
+.owner-sale-program strong {
+  color: #475569;
+
+  font-size: 10px;
+}
+
+
+/* LICENSE */
+
+.owner-sale-license {
+  padding: 5px 7px;
+
+  border-radius: 999px;
+
+  font-size: 9px;
+  font-weight: 850;
+
+  white-space: nowrap;
+}
+
+
+.owner-sale-license.student {
+  background: #eff6ff;
+
+  color: #2563eb;
+}
+
+
+.owner-sale-license.teacher {
+  background: #f5f3ff;
+
+  color: #6d28d9;
+}
+
+
+.owner-sale-license.class {
+  background: #ecfeff;
+
+  color: #0e7490;
+}
+
+
+/* AMOUNT */
+
+.owner-sale-amount {
+  color: #172033;
+
+  font-size: 13px;
+  font-weight: 900;
+}
+
+
+/* STATUS */
+
+.owner-sale-status {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+  padding: 5px 7px;
+
+  border-radius: 999px;
+
+  font-size: 9px;
+  font-weight: 850;
+}
+
+
+.owner-sale-status i {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+}
+
+
+.owner-sale-status.paid {
+  background: #ecfdf5;
+
+  color: #047857;
+}
+
+
+.owner-sale-status.paid i {
+  background: #22c55e;
+}
+
+
+.owner-sale-status.pending {
+  background: #fff7ed;
+
+  color: #c2410c;
+}
+
+
+.owner-sale-status.pending i {
+  background: #f59e0b;
+}
+
+
+.owner-sale-status.failed,
+.owner-sale-status.cancelled {
+  background: #fef2f2;
+
+  color: #b91c1c;
+}
+
+
+.owner-sale-status.failed i,
+.owner-sale-status.cancelled i {
+  background: #ef4444;
+}
+
+
+.owner-sale-status.refunded {
+  background: #eff6ff;
+
+  color: #1d4ed8;
+}
+
+
+.owner-sale-status.refunded i {
+  background: #3b82f6;
+}
+
+
+.owner-sale-date {
+  color: #64748b;
+
+  font-size: 9px;
+
+  white-space: nowrap;
+}
+
+
+.owner-sale-view {
+  min-height: 34px;
+
+  padding: 6px 10px;
+
+  border: 1px solid #ddd6fe;
+
+  border-radius: 8px;
+
+  background: #faf5ff;
+
+  color: #6d28d9;
+
+  font-family: inherit;
+
+  font-size: 9px;
+  font-weight: 850;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.owner-sales-empty {
+  min-height: 310px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+
+.owner-sales-empty > div {
+  width: 68px;
+  height: 68px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 19px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ede9fe,
+      #dcfce7
+    );
+
+  font-size: 30px;
+}
+
+
+.owner-sales-empty h3 {
+  margin: 10px 0 5px;
+
+  color: #334155;
+
+  font-size: 17px;
+}
+
+
+.owner-sales-empty p {
+  max-width: 500px;
+
+  margin: 0;
+
+  color: #94a3b8;
+
+  font-size: 11px;
+
+  line-height: 1.7;
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.owner-sale-modal-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 3000;
+
+  padding: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    rgba(15, 23, 42, 0.58);
+
+  backdrop-filter: blur(8px);
+}
+
+
+.owner-sale-modal {
+  width: min(600px, 100%);
+
+  max-height:
+    calc(100vh - 40px);
+
+  overflow-y: auto;
+
+  padding: 22px;
+
+  border-radius: 20px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 35px 90px
+    rgba(15, 23, 42, 0.32);
+}
+
+
+.owner-sale-modal > header {
+  padding-bottom: 16px;
+
+  display: grid;
+
+  grid-template-columns:
+    50px
+    1fr
+    34px;
+
+  align-items: center;
+
+  gap: 10px;
+
+  border-bottom:
+    1px solid #eef1f5;
+}
+
+
+.owner-sale-modal-icon {
+  width: 50px;
+  height: 50px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ede9fe,
+      #dcfce7
+    );
+
+  font-size: 23px;
+}
+
+
+.owner-sale-modal header small {
+  color: #7c3aed;
+
+  font-size: 8px;
+  font-weight: 900;
+}
+
+
+.owner-sale-modal header h2 {
+  margin: 2px 0;
+
+  color: #172033;
+
+  font-size: 18px;
+}
+
+
+.owner-sale-modal header p {
+  margin: 0;
+
+  color: #94a3b8;
+
+  font-size: 8px;
+}
+
+
+.owner-sale-modal header > button {
+  width: 34px;
+  height: 34px;
+
+  border: none;
+
+  border-radius: 9px;
+
+  background: #f1f5f9;
+
+  font-size: 18px;
+
+  cursor: pointer;
+}
+
+
+.owner-sale-modal-status {
+  margin-top: 15px;
+
+  padding: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border: 1px solid #e8ebf2;
+
+  border-radius: 11px;
+
+  background: #fafbfe;
+}
+
+
+.owner-sale-modal-status > strong {
+  color: #172033;
+
+  font-size: 22px;
+}
+
+
+/* DETAILS */
+
+.owner-sale-detail-grid {
+  margin-top: 13px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap: 8px;
+}
+
+
+.owner-sale-detail-grid > div {
+  padding: 11px;
+
+  border: 1px solid #e8ebf2;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+}
+
+
+.owner-sale-detail-grid small {
+  display: block;
+
+  color: #94a3b8;
+
+  font-size: 8px;
+}
+
+
+.owner-sale-detail-grid strong {
+  display: block;
+
+  margin-top: 3px;
+
+  overflow-wrap: anywhere;
+
+  color: #475569;
+
+  font-size: 10px;
+}
+
+
+/* CLASS */
+
+.owner-sale-class-info {
+  margin-top: 12px;
+
+  padding: 11px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  border: 1px solid #bfdbfe;
+
+  border-radius: 10px;
+
+  background: #eff6ff;
+
+  font-size: 20px;
+}
+
+
+.owner-sale-class-info small {
+  display: block;
+
+  color: #2563eb;
+
+  font-size: 7px;
+  font-weight: 900;
+}
+
+
+.owner-sale-class-info strong {
+  display: block;
+
+  color: #1e3a8a;
+
+  font-size: 10px;
+}
+
+
+/* SECURITY */
+
+.owner-sale-security {
+  margin-top: 13px;
+
+  padding: 11px;
+
+  border: 1px solid #a7f3d0;
+
+  border-radius: 10px;
+
+  background: #ecfdf5;
+
+  color: #047857;
+
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.owner-sales-loading {
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+
+  background: #f7f8fc;
+}
+
+
+.owner-sales-loading > div {
+  width: 68px;
+  height: 68px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 19px;
+
+  background: #ede9fe;
+
+  font-size: 30px;
+}
+
+
+/* =========================================================
+   RTL
+========================================================= */
+
+[dir="rtl"]
+.owner-sales-page {
+  direction: rtl;
+
+  text-align: right;
+}
+
+
+[dir="rtl"]
+.owner-sales-table th {
+  text-align: right;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 950px) {
+
+  .owner-sales-stats {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+
+  .owner-sales-toolbar {
+    grid-template-columns:
+      1fr 1fr;
+  }
+
+
+  .owner-sales-search {
+    grid-column:
+      1 / -1;
+  }
+
+}
+
+
+@media (max-width: 650px) {
+
+  .owner-sales-page {
+    padding:
+      16px 12px 50px;
+  }
+
+
+  .owner-sales-header {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+
+  .owner-sales-header-actions {
+    justify-content: space-between;
+  }
+
+
+  .owner-sales-stats {
+    grid-template-columns:
+      1fr 1fr;
+  }
+
+
+  .owner-sales-toolbar {
+    grid-template-columns:
+      1fr;
+  }
+
+
+  .owner-sales-search {
+    grid-column: auto;
+  }
+
+
+  .owner-sale-detail-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+}

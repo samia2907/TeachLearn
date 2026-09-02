@@ -1,0 +1,3239 @@
+/* =========================================================
+   TECHMINDS — STUDENT LESSON DETAILS
+   POWERPOINT STYLE — LARGE STUDENT TEXT
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.student-lesson-details-page {
+  min-height: 100vh;
+
+  padding: 20px 28px 55px;
+
+  font-family:
+    "Segoe UI",
+    Tahoma,
+    Arial,
+    sans-serif;
+
+  color: #172033;
+
+  background:
+    radial-gradient(
+      circle at 5% 0%,
+      rgba(124, 58, 237, 0.08),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 95% 5%,
+      rgba(14, 165, 233, 0.08),
+      transparent 28%
+    ),
+    #f6f8fc;
+}
+
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.lesson-details-top {
+  max-width: 1450px;
+
+  margin: 0 auto 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+
+.lesson-details-top > button {
+  min-height: 40px;
+
+  padding: 9px 14px;
+
+  border: 1px solid #ddd6fe;
+  border-radius: 11px;
+
+  background: white;
+
+  color: #6d28d9;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition: 0.18s ease;
+}
+
+
+.lesson-details-top > button:hover {
+  background: #faf5ff;
+
+  border-color: #c4b5fd;
+
+  transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   LANGUAGE
+========================================================= */
+
+.lesson-details-language {
+  display: flex;
+
+  padding: 4px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 11px;
+
+  background: white;
+}
+
+
+.lesson-details-language button {
+  min-width: 44px;
+
+  padding: 8px 10px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: #94a3b8;
+
+  font-size: 11px;
+  font-weight: 850;
+
+  cursor: pointer;
+}
+
+
+.lesson-details-language button.active {
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #4f46e5
+    );
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.lesson-details-hero {
+  max-width: 1450px;
+
+  margin: 0 auto 11px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 18px;
+
+  min-height: 125px;
+
+  padding: 21px 25px;
+
+  overflow: hidden;
+
+  border-radius: 22px;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      120deg,
+      #7c3aed 0%,
+      #4f46e5 50%,
+      #0ea5e9 100%
+    );
+
+  box-shadow:
+    0 15px 35px
+    rgba(79, 70, 229, 0.16);
+}
+
+
+.lesson-details-icon {
+  width: 76px;
+  height: 76px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 21px;
+
+  background:
+    rgba(255, 255, 255, 0.17);
+
+  font-size: 40px;
+}
+
+
+.lesson-hero-content {
+  min-width: 0;
+
+  flex: 1;
+}
+
+
+.lesson-details-hero span {
+  font-size: 10px;
+
+  font-weight: 850;
+
+  opacity: 0.85;
+}
+
+
+.lesson-details-hero h1 {
+  margin: 4px 0 6px;
+
+  font-size: 27px;
+  font-weight: 900;
+
+  line-height: 1.4;
+}
+
+
+.lesson-details-hero p {
+  max-width: 850px;
+
+  margin: 0;
+
+  font-size: 13px;
+  line-height: 1.8;
+
+  opacity: 0.9;
+}
+
+
+.lesson-completed-hero-badge {
+  flex-shrink: 0;
+
+  padding: 9px 14px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.25);
+
+  border-radius: 999px;
+
+  background:
+    rgba(255, 255, 255, 0.17);
+
+  font-size: 11px;
+  font-weight: 850;
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.lesson-details-stats {
+  max-width: 1450px;
+
+  margin: 0 auto 12px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 9px;
+}
+
+
+.lesson-details-stats > div {
+  padding: 12px;
+
+  border: 1px solid #e9edf4;
+  border-radius: 13px;
+
+  background: white;
+
+  text-align: center;
+
+  box-shadow:
+    0 5px 15px
+    rgba(15, 23, 42, 0.025);
+}
+
+
+.lesson-details-stats span {
+  display: block;
+
+  margin: 4px 0 2px;
+
+  color: #94a3b8;
+
+  font-size: 9px;
+}
+
+
+.lesson-details-stats strong {
+  color: #334155;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   FULL LESSON WRAPPER
+========================================================= */
+
+.full-lesson-container {
+  max-width: 1450px;
+
+  margin: 0 auto;
+}
+
+
+/* =========================================================
+   POWERPOINT SHELL
+========================================================= */
+
+.powerpoint-lesson {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    245px minmax(0, 1fr);
+
+  overflow: hidden;
+
+  border: 1px solid #dfe4ec;
+  border-radius: 21px;
+
+  background: white;
+
+  box-shadow:
+    0 20px 50px
+    rgba(15, 23, 42, 0.075);
+}
+
+
+/* =========================================================
+   POWERPOINT SIDEBAR
+========================================================= */
+
+.powerpoint-sidebar {
+  min-width: 0;
+
+  padding: 14px 10px;
+
+  border-inline-end:
+    1px solid #e5e9f0;
+
+  background: #f7f8fc;
+}
+
+
+.powerpoint-sidebar-title {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding:
+    4px 5px 13px;
+
+  margin-bottom: 10px;
+
+  border-bottom: 1px solid #e5e7eb;
+}
+
+
+.powerpoint-sidebar-title > span {
+  width: 40px;
+  height: 40px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ede9fe,
+      #dbeafe
+    );
+
+  font-size: 20px;
+}
+
+
+.powerpoint-sidebar-title small {
+  display: block;
+
+  color: #8b5cf6;
+
+  font-size: 8px;
+
+  font-weight: 900;
+
+  letter-spacing: 0.7px;
+}
+
+
+.powerpoint-sidebar-title strong {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #334155;
+
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   SLIDE THUMBNAILS
+========================================================= */
+
+.powerpoint-thumbnails {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+
+.powerpoint-thumbnail {
+  width: 100%;
+
+  min-height: 62px;
+
+  display: grid;
+
+  grid-template-columns:
+    20px 31px minmax(0, 1fr);
+
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 8px;
+
+  border: 1px solid transparent;
+  border-radius: 10px;
+
+  background: transparent;
+
+  color: #64748b;
+
+  text-align: start;
+
+  cursor: pointer;
+
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+
+.powerpoint-thumbnail:hover {
+  background: white;
+
+  border-color: #e2e8f0;
+}
+
+
+.powerpoint-thumbnail.active {
+  border-color: #a78bfa;
+
+  background: white;
+
+  color: #5b21b6;
+
+  box-shadow:
+    0 5px 14px
+    rgba(124, 58, 237, 0.08);
+}
+
+
+.thumbnail-number {
+  color: #94a3b8;
+
+  font-size: 9px;
+
+  font-weight: 850;
+}
+
+
+.thumbnail-icon {
+  width: 31px;
+  height: 31px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+
+  background: #eef2f7;
+
+  font-size: 16px;
+}
+
+
+.powerpoint-thumbnail.active
+.thumbnail-icon {
+  background:
+    linear-gradient(
+      135deg,
+      #ede9fe,
+      #dbeafe
+    );
+}
+
+
+.thumbnail-title {
+  min-width: 0;
+
+  overflow: hidden;
+
+  font-size: 11px;
+  font-weight: 750;
+
+  line-height: 1.55;
+
+  display: -webkit-box;
+
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+
+/* =========================================================
+   POWERPOINT MAIN AREA
+========================================================= */
+
+.powerpoint-main {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  background:
+    radial-gradient(
+      circle at 10% 5%,
+      rgba(139, 92, 246, 0.045),
+      transparent 27%
+    ),
+    white;
+}
+
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
+
+.powerpoint-toolbar {
+  min-height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding: 0 20px;
+
+  border-bottom: 1px solid #edf0f5;
+
+  color: #64748b;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+
+.powerpoint-toolbar > div:first-child {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  overflow: hidden;
+
+  white-space: nowrap;
+
+  text-overflow: ellipsis;
+}
+
+
+.powerpoint-brand {
+  color: #7c3aed;
+
+  font-weight: 900;
+}
+
+
+.powerpoint-divider {
+  color: #cbd5e1;
+}
+
+
+.powerpoint-slide-counter {
+  flex-shrink: 0;
+
+  padding: 6px 9px;
+
+  border-radius: 999px;
+
+  background: #f1f5f9;
+
+  color: #64748b;
+
+  font-size: 10px;
+  font-weight: 850;
+}
+
+
+/* =========================================================
+   PROGRESS BAR
+========================================================= */
+
+.powerpoint-progress {
+  height: 5px;
+
+  overflow: hidden;
+
+  background: #eef2f7;
+}
+
+
+.powerpoint-progress > div {
+  height: 100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      #8b5cf6,
+      #6366f1,
+      #3b82f6
+    );
+
+  transition: width 0.3s ease;
+}
+
+
+/* =========================================================
+   SLIDE STAGE
+========================================================= */
+
+.powerpoint-slide {
+  min-height: 560px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 28px 38px;
+}
+
+
+.powerpoint-slide-content {
+  width: 100%;
+
+  max-width: 1050px;
+}
+
+
+/* =========================================================
+   EACH SECTION = ONE POWERPOINT SLIDE
+========================================================= */
+
+.powerpoint-slide
+.full-lesson-section {
+  position: relative;
+
+  width: 100%;
+
+  min-height: 455px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  margin: 0;
+
+  padding: 42px 50px;
+
+  border: none;
+  border-radius: 20px;
+
+  background: transparent;
+
+  box-shadow: none;
+}
+
+
+/* =========================================================
+   SLIDE NUMBER
+========================================================= */
+
+.lesson-section-number {
+  position: absolute;
+
+  top: 21px;
+  inset-inline-end: 26px;
+
+  width: 35px;
+  height: 35px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+
+  background: #eef2f7;
+
+  color: #94a3b8;
+
+  font-size: 11px;
+  font-weight: 900;
+}
+
+
+/* =========================================================
+   SLIDE HEADING
+========================================================= */
+
+.lesson-section-heading {
+  display: flex;
+  align-items: center;
+
+  gap: 16px;
+
+  margin-bottom: 26px;
+}
+
+
+.lesson-section-icon {
+  width: 68px;
+  height: 68px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 19px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ede9fe,
+      #dbeafe
+    );
+
+  font-size: 34px;
+}
+
+
+.lesson-section-heading h2 {
+  margin: 0;
+
+  padding-inline-end: 45px;
+
+  color: #172033;
+
+  font-size: 30px;
+  font-weight: 900;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   OBJECTIVES
+========================================================= */
+
+.lesson-objective-list {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+
+  margin: 0;
+
+  padding: 0;
+
+  list-style: none;
+}
+
+
+.lesson-objective-list li {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 11px;
+
+  padding: 16px;
+
+  border: 1px solid #e9e5ff;
+  border-radius: 13px;
+
+  background: white;
+
+  color: #475569;
+
+  font-size: 16px;
+  line-height: 2;
+
+  box-shadow:
+    0 4px 12px
+    rgba(15, 23, 42, 0.025);
+}
+
+
+.lesson-objective-list li > span {
+  width: 27px;
+  height: 27px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #ede9fe;
+
+  color: #7c3aed;
+
+  font-size: 11px;
+  font-weight: 900;
+}
+
+
+.objectives-section {
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #fbf8ff
+    ) !important;
+}
+
+
+/* =========================================================
+   SUMMARY
+========================================================= */
+
+.summary-section {
+  background:
+    linear-gradient(
+      135deg,
+      #fffdf5,
+      #ffffff
+    ) !important;
+}
+
+
+.summary-section
+.lesson-objective-list li > span {
+  background: #fef3c7;
+
+  color: #b45309;
+}
+
+
+/* =========================================================
+   THINKING QUESTION
+========================================================= */
+
+.thinking-section {
+  background:
+    linear-gradient(
+      135deg,
+      #f7fbff,
+      #ffffff
+    ) !important;
+}
+
+
+.thinking-question {
+  padding: 26px;
+
+  border: 1px solid #bfdbfe;
+  border-radius: 16px;
+
+  background: white;
+
+  color: #1e3a8a;
+
+  font-size: 22px;
+  font-weight: 750;
+
+  line-height: 2;
+}
+
+
+.thinking-note {
+  margin: 12px 0 0;
+
+  color: #64748b;
+
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+
+/* =========================================================
+   CONTENT SLIDE
+========================================================= */
+
+.lesson-paragraphs {
+  max-width: 950px;
+
+  color: #475569;
+
+  font-size: 18px;
+  line-height: 2.2;
+}
+
+
+.lesson-paragraphs p {
+  margin: 0 0 16px;
+}
+
+
+.lesson-paragraphs p:last-child {
+  margin-bottom: 0;
+}
+
+
+/* =========================================================
+   EXAMPLES
+========================================================= */
+
+.lesson-examples-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+
+.lesson-example-card {
+  padding: 17px;
+
+  border: 1px solid #e9edf3;
+  border-radius: 14px;
+
+  background: white;
+
+  box-shadow:
+    0 5px 13px
+    rgba(15, 23, 42, 0.03);
+
+  transition: 0.18s ease;
+}
+
+
+.lesson-example-card:hover {
+  transform: translateY(-2px);
+
+  border-color: #c4b5fd;
+}
+
+
+.lesson-example-card > span {
+  display: block;
+
+  margin-bottom: 8px;
+
+  font-size: 32px;
+}
+
+
+.lesson-example-card h3 {
+  margin: 0 0 6px;
+
+  color: #334155;
+
+  font-size: 15px;
+  font-weight: 850;
+}
+
+
+.lesson-example-card p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+
+/* =========================================================
+   QUIZ
+========================================================= */
+
+.quiz-section {
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #faf8ff
+    ) !important;
+}
+
+
+.lesson-question-title {
+  margin: 0 0 18px;
+
+  color: #334155;
+
+  font-size: 20px;
+  line-height: 2;
+}
+
+
+.lesson-options {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+
+.lesson-option {
+  width: 100%;
+
+  min-height: 60px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+
+  padding: 14px 16px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+
+  background: white;
+
+  color: #475569;
+
+  font-family: inherit;
+  font-size: 16px;
+
+  text-align: start;
+
+  cursor: pointer;
+
+  transition: 0.16s ease;
+}
+
+
+.lesson-option:hover {
+  border-color: #c4b5fd;
+
+  background: #faf5ff;
+}
+
+
+.lesson-option.selected {
+  border-color: #8b5cf6;
+
+  background: #f5f3ff;
+}
+
+
+.lesson-option.correct {
+  border-color: #6ee7b7;
+
+  background: #ecfdf5;
+}
+
+
+.lesson-option.wrong {
+  border-color: #fca5a5;
+
+  background: #fef2f2;
+}
+
+
+.option-letter {
+  width: 36px;
+  height: 36px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #f1f5f9;
+
+  color: #64748b;
+
+  font-size: 13px;
+  font-weight: 900;
+}
+
+
+.lesson-option.selected
+.option-letter {
+  background: #7c3aed;
+
+  color: white;
+}
+
+
+.lesson-option.correct
+.option-letter {
+  background: #10b981;
+
+  color: white;
+}
+
+
+.lesson-option.wrong
+.option-letter {
+  background: #ef4444;
+
+  color: white;
+}
+
+
+/* =========================================================
+   CHECK ANSWER
+========================================================= */
+
+.check-answer-button {
+  width: fit-content;
+
+  margin-top: 15px;
+
+  padding: 12px 19px;
+
+  border: none;
+  border-radius: 11px;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #4f46e5
+    );
+
+  font-size: 13px;
+  font-weight: 850;
+
+  cursor: pointer;
+}
+
+
+.check-answer-button:disabled {
+  opacity: 0.4;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   QUIZ RESULT
+========================================================= */
+
+.quiz-result {
+  margin-top: 14px;
+
+  padding: 15px;
+
+  border-radius: 12px;
+
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+
+.quiz-result strong {
+  display: block;
+
+  margin-bottom: 5px;
+
+  font-size: 15px;
+}
+
+
+.quiz-result p {
+  margin: 0;
+
+  line-height: 1.8;
+}
+
+
+.correct-result {
+  border: 1px solid #a7f3d0;
+
+  background: #ecfdf5;
+
+  color: #047857;
+}
+
+
+.wrong-result {
+  border: 1px solid #fecaca;
+
+  background: #fef2f2;
+
+  color: #b91c1c;
+}
+
+
+.wrong-result button {
+  margin-top: 9px;
+
+  padding: 9px 13px;
+
+  border: none;
+  border-radius: 9px;
+
+  background: white;
+
+  color: #b91c1c;
+
+  font-size: 11px;
+  font-weight: 850;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   TASK
+========================================================= */
+
+.task-section {
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #f2fdff
+    ) !important;
+}
+
+
+.task-introduction {
+  margin: 0 0 16px;
+
+  color: #475569;
+
+  font-size: 16px;
+  line-height: 2;
+}
+
+
+.task-steps {
+  display: flex;
+  flex-direction: column;
+
+  gap: 9px;
+}
+
+
+.task-step {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 11px;
+
+  padding: 13px 15px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+
+  background: white;
+}
+
+
+.task-step > span {
+  width: 31px;
+  height: 31px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #06b6d4,
+      #3b82f6
+    );
+
+  font-size: 11px;
+  font-weight: 900;
+}
+
+
+.task-step p {
+  margin: 2px 0 0;
+
+  color: #475569;
+
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+
+/* =========================================================
+   TASK ANSWER
+========================================================= */
+
+.task-answer-area {
+  margin-top: 16px;
+}
+
+
+.task-answer-area label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #334155;
+
+  font-size: 14px;
+  font-weight: 850;
+}
+
+
+.task-answer-area textarea,
+.reflection-section textarea {
+  width: 100%;
+
+  padding: 14px 15px;
+
+  border: 1px solid #dbe2ea;
+  border-radius: 11px;
+
+  outline: none;
+
+  background: white;
+
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.8;
+
+  resize: vertical;
+}
+
+
+.task-answer-area textarea:focus,
+.reflection-section textarea:focus {
+  border-color: #8b5cf6;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(139, 92, 246, 0.08);
+}
+
+
+/* =========================================================
+   REFLECTION
+========================================================= */
+
+.reflection-section {
+  background:
+    linear-gradient(
+      135deg,
+      #fbf8ff,
+      #ffffff
+    ) !important;
+}
+
+
+.reflection-question {
+  margin: 0 0 14px;
+
+  color: #475569;
+
+  font-size: 17px;
+  line-height: 2;
+}
+
+
+/* =========================================================
+   POWERPOINT NAVIGATION
+========================================================= */
+
+.powerpoint-navigation {
+  min-height: 70px;
+
+  display: grid;
+
+  grid-template-columns:
+    155px minmax(0, 1fr) 155px;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 11px 17px;
+
+  border-top: 1px solid #edf0f5;
+
+  background: white;
+}
+
+
+.powerpoint-nav-button {
+  min-height: 43px;
+
+  padding: 10px 15px;
+
+  border-radius: 10px;
+
+  font-family: inherit;
+
+  font-size: 12px;
+  font-weight: 850;
+
+  cursor: pointer;
+
+  transition: 0.16s ease;
+}
+
+
+.powerpoint-nav-button.secondary {
+  border: 1px solid #e2e8f0;
+
+  background: white;
+
+  color: #64748b;
+}
+
+
+.powerpoint-nav-button.primary {
+  border: none;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #4f46e5,
+      #3b82f6
+    );
+}
+
+
+.powerpoint-nav-button.finish {
+  border: none;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #10b981,
+      #06b6d4
+    );
+}
+
+
+.powerpoint-nav-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+
+.powerpoint-nav-button:disabled {
+  opacity: 0.35;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   DOTS
+========================================================= */
+
+.powerpoint-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-wrap: wrap;
+
+  gap: 6px;
+}
+
+
+.powerpoint-dot {
+  width: 8px;
+  height: 8px;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 999px;
+
+  background: #cbd5e1;
+
+  cursor: pointer;
+
+  transition: 0.18s ease;
+}
+
+
+.powerpoint-dot.active {
+  width: 26px;
+
+  background: #7c3aed;
+}
+
+
+/* =========================================================
+   RESOURCE
+========================================================= */
+
+.lesson-resource-box {
+  max-width: 1450px;
+
+  margin: 14px auto 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding: 16px 18px;
+
+  border: 1px solid #bae6fd;
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ecfeff,
+      #eff6ff
+    );
+}
+
+
+.lesson-resource-box > div {
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+}
+
+
+.lesson-resource-box > div > span {
+  width: 46px;
+  height: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: white;
+
+  font-size: 23px;
+}
+
+
+.lesson-resource-box small {
+  color: #0891b2;
+
+  font-size: 9px;
+  font-weight: 850;
+}
+
+
+.lesson-resource-box h3 {
+  margin: 2px 0;
+
+  font-size: 14px;
+}
+
+
+.lesson-resource-box p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 11px;
+}
+
+
+.lesson-resource-box a {
+  flex-shrink: 0;
+
+  padding: 11px 15px;
+
+  border-radius: 10px;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #06b6d4,
+      #3b82f6
+    );
+
+  font-size: 11px;
+  font-weight: 850;
+
+  text-decoration: none;
+}
+
+
+/* =========================================================
+   FINAL COMPLETION
+========================================================= */
+
+.final-lesson-completion {
+  max-width: 1450px;
+
+  margin: 15px auto 0;
+
+  padding: 28px;
+
+  border: 1px solid #ddd6fe;
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #faf5ff,
+      #eff6ff
+    );
+
+  text-align: center;
+}
+
+
+.final-trophy {
+  width: 66px;
+  height: 66px;
+
+  margin: 0 auto 9px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 19px;
+
+  background: white;
+
+  font-size: 34px;
+}
+
+
+.final-lesson-completion small {
+  color: #7c3aed;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  letter-spacing: 1px;
+}
+
+
+.final-lesson-completion h2 {
+  margin: 5px 0;
+
+  font-size: 21px;
+}
+
+
+.final-lesson-completion p {
+  margin: 0 0 14px;
+
+  color: #64748b;
+
+  font-size: 13px;
+}
+
+
+.complete-full-lesson-button {
+  min-width: 240px;
+
+  min-height: 44px;
+
+  padding: 11px 18px;
+
+  border: none;
+  border-radius: 11px;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #4f46e5,
+      #3b82f6
+    );
+
+  font-size: 12px;
+  font-weight: 900;
+
+  cursor: pointer;
+}
+
+
+.complete-full-lesson-button:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   COMPLETED
+========================================================= */
+
+.completed-full-lesson > div {
+  font-size: 48px;
+}
+
+
+.completed-full-lesson h2 {
+  color: #047857;
+}
+
+
+.completed-full-lesson strong {
+  display: block;
+
+  margin: 8px 0 14px;
+
+  color: #b45309;
+
+  font-size: 20px;
+}
+
+
+.completed-full-lesson button {
+  padding: 10px 15px;
+
+  border: 1px solid #c4b5fd;
+  border-radius: 9px;
+
+  background: white;
+
+  color: #6d28d9;
+
+  font-size: 11px;
+  font-weight: 850;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   OLD / CUSTOM LESSON
+========================================================= */
+
+.lesson-details-content {
+  max-width: 1100px;
+
+  margin: 0 auto;
+
+  padding: 26px;
+
+  border: 1px solid #e8ecf2;
+  border-radius: 20px;
+
+  background: white;
+
+  box-shadow:
+    0 10px 30px
+    rgba(15, 23, 42, 0.045);
+}
+
+
+.lesson-content-heading {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  margin-bottom: 18px;
+
+  padding-bottom: 15px;
+
+  border-bottom: 1px solid #f1f5f9;
+}
+
+
+.lesson-content-heading > span {
+  width: 50px;
+  height: 50px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ede9fe,
+      #dbeafe
+    );
+
+  font-size: 25px;
+}
+
+
+.lesson-content-heading small {
+  color: #8b5cf6;
+
+  font-size: 9px;
+  font-weight: 850;
+}
+
+
+.lesson-content-heading h2 {
+  margin: 2px 0 0;
+
+  font-size: 19px;
+}
+
+
+.lesson-description-box,
+.lesson-instructions-box {
+  margin-bottom: 14px;
+
+  padding: 18px;
+
+  border-radius: 14px;
+}
+
+
+.lesson-description-box {
+  border: 1px solid #eef2f7;
+
+  background: #f8fafc;
+}
+
+
+.lesson-instructions-box {
+  border: 1px solid #ddd6fe;
+
+  background:
+    linear-gradient(
+      135deg,
+      #faf5ff,
+      #eff6ff
+    );
+}
+
+
+.lesson-description-box h3,
+.lesson-instructions-box h3 {
+  margin: 0 0 8px;
+
+  font-size: 15px;
+}
+
+
+.lesson-description-box p,
+.lesson-instructions-box p {
+  margin: 0;
+
+  white-space: pre-wrap;
+
+  color: #475569;
+
+  font-size: 15px;
+  line-height: 2;
+}
+
+
+/* =========================================================
+   ERRORS / SUCCESS
+========================================================= */
+
+.lesson-completion-error {
+  margin: 11px auto;
+
+  padding: 12px 14px;
+
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+
+  background: #fef2f2;
+
+  color: #b91c1c;
+
+  font-size: 12px;
+  font-weight: 750;
+}
+
+
+.lesson-completion-success {
+  margin: 11px auto;
+
+  padding: 12px 14px;
+
+  border: 1px solid #a7f3d0;
+  border-radius: 10px;
+
+  background: #ecfdf5;
+
+  color: #047857;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   LOADING / ERROR PAGE
+========================================================= */
+
+.lesson-details-loading,
+.lesson-details-error-page {
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  background: #f7f8fc;
+}
+
+
+.lesson-details-loading {
+  font-size: 50px;
+}
+
+
+.lesson-details-error-page > div {
+  font-size: 50px;
+}
+
+
+.lesson-details-error-page h2 {
+  font-size: 19px;
+}
+
+
+.lesson-details-error-page button {
+  padding: 10px 15px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #7c3aed;
+
+  color: white;
+
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   RTL
+========================================================= */
+
+[dir="rtl"]
+.student-lesson-details-page {
+  direction: rtl;
+
+  text-align: right;
+}
+
+
+/* =========================================================
+   MEDIUM DESKTOP
+========================================================= */
+
+@media (max-width: 1050px) {
+
+  .student-lesson-details-page {
+    padding: 16px;
+  }
+
+
+  .powerpoint-lesson {
+    grid-template-columns:
+      195px minmax(0, 1fr);
+  }
+
+
+  .powerpoint-thumbnail {
+    grid-template-columns:
+      18px 27px minmax(0, 1fr);
+  }
+
+
+  .thumbnail-title {
+    font-size: 10px;
+  }
+
+
+  .powerpoint-slide {
+    padding: 22px;
+  }
+
+
+  .powerpoint-slide
+  .full-lesson-section {
+    min-height: 430px;
+
+    padding: 34px;
+  }
+
+
+  .lesson-section-heading h2 {
+    font-size: 26px;
+  }
+
+
+  .lesson-paragraphs {
+    font-size: 16px;
+  }
+
+
+  .lesson-objective-list li {
+    font-size: 14px;
+  }
+
+
+  .thinking-question {
+    font-size: 19px;
+  }
+
+
+  .lesson-option {
+    font-size: 14px;
+  }
+
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 800px) {
+
+  .lesson-details-hero {
+    padding: 18px;
+  }
+
+
+  .lesson-details-icon {
+    width: 62px;
+    height: 62px;
+
+    font-size: 32px;
+  }
+
+
+  .lesson-details-hero h1 {
+    font-size: 22px;
+  }
+
+
+  .powerpoint-sidebar {
+    display: none;
+  }
+
+
+  .powerpoint-lesson {
+    display: block;
+  }
+
+
+  .powerpoint-slide {
+    min-height: 500px;
+
+    padding: 18px;
+  }
+
+
+  .powerpoint-slide
+  .full-lesson-section {
+    min-height: 460px;
+  }
+
+
+  .lesson-objective-list {
+    grid-template-columns: 1fr;
+  }
+
+
+  .lesson-examples-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+
+  .powerpoint-navigation {
+    grid-template-columns:
+      125px minmax(0, 1fr) 125px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+  .student-lesson-details-page {
+    padding: 10px;
+  }
+
+
+  .lesson-details-top {
+    margin-bottom: 9px;
+  }
+
+
+  .lesson-details-hero {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    border-radius: 17px;
+  }
+
+
+  .lesson-details-hero h1 {
+    font-size: 21px;
+  }
+
+
+  .lesson-details-hero p {
+    font-size: 12px;
+  }
+
+
+  .lesson-completed-hero-badge {
+    margin-inline-start: 0;
+  }
+
+
+  .lesson-details-stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+
+  .powerpoint-lesson {
+    border-radius: 16px;
+  }
+
+
+  .powerpoint-toolbar {
+    min-height: 47px;
+
+    padding: 0 12px;
+
+    font-size: 9px;
+  }
+
+
+  .powerpoint-slide {
+    min-height: 500px;
+
+    padding: 10px;
+  }
+
+
+  .powerpoint-slide
+  .full-lesson-section {
+    min-height: 475px;
+
+    padding: 27px 16px;
+  }
+
+
+  .lesson-section-number {
+    top: 14px;
+    inset-inline-end: 14px;
+
+    width: 30px;
+    height: 30px;
+  }
+
+
+  .lesson-section-icon {
+    width: 52px;
+    height: 52px;
+
+    font-size: 26px;
+  }
+
+
+  .lesson-section-heading {
+    gap: 11px;
+
+    margin-bottom: 18px;
+  }
+
+
+  .lesson-section-heading h2 {
+    padding-inline-end: 35px;
+
+    font-size: 21px;
+
+    line-height: 1.5;
+  }
+
+
+  .lesson-objective-list {
+    grid-template-columns: 1fr;
+
+    gap: 8px;
+  }
+
+
+  .lesson-objective-list li {
+    padding: 11px;
+
+    font-size: 12px;
+
+    line-height: 1.8;
+  }
+
+
+  .thinking-question {
+    padding: 17px;
+
+    font-size: 16px;
+
+    line-height: 1.9;
+  }
+
+
+  .thinking-note {
+    font-size: 11px;
+  }
+
+
+  .lesson-paragraphs {
+    font-size: 13px;
+
+    line-height: 2;
+  }
+
+
+  .lesson-examples-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .lesson-example-card h3 {
+    font-size: 13px;
+  }
+
+
+  .lesson-example-card p {
+    font-size: 11px;
+  }
+
+
+  .lesson-question-title {
+    font-size: 16px;
+  }
+
+
+  .lesson-option {
+    min-height: 52px;
+
+    padding: 11px;
+
+    font-size: 12px;
+  }
+
+
+  .task-introduction {
+    font-size: 13px;
+  }
+
+
+  .task-step p {
+    font-size: 12px;
+  }
+
+
+  .task-answer-area label {
+    font-size: 12px;
+  }
+
+
+  .task-answer-area textarea,
+  .reflection-section textarea {
+    font-size: 13px;
+  }
+
+
+  .reflection-question {
+    font-size: 14px;
+  }
+
+
+  .powerpoint-navigation {
+    display: grid;
+
+    grid-template-columns:
+      1fr 1fr;
+
+    gap: 7px;
+
+    padding: 8px 10px;
+  }
+
+
+  .powerpoint-dots {
+    grid-column: 1 / -1;
+    grid-row: 1;
+
+    margin-bottom: 2px;
+  }
+
+
+  .powerpoint-nav-button {
+    grid-row: 2;
+
+    width: 100%;
+
+    font-size: 11px;
+  }
+
+
+  .lesson-resource-box {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+
+  .lesson-resource-box a {
+    text-align: center;
+  }
+
+
+  .complete-full-lesson-button {
+    width: 100%;
+
+    min-width: 0;
+  }
+/* =========================================================
+   POWERPOINT COMPLETION SLIDE
+========================================================= */
+
+.powerpoint-completion-slide {
+  min-height: 455px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 35px;
+
+  text-align: center;
+
+  border-radius: 20px;
+
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(139, 92, 246, 0.11),
+      transparent 38%
+    ),
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #faf8ff
+    );
+}
+
+
+.completion-confetti {
+  width: 82px;
+  height: 82px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 13px;
+
+  border-radius: 25px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ede9fe,
+      #dbeafe
+    );
+
+  font-size: 43px;
+
+  box-shadow:
+    0 15px 35px
+    rgba(99, 102, 241, 0.12);
+}
+
+
+.completion-label {
+  color: #7c3aed;
+
+  font-size: 11px;
+
+  font-weight: 900;
+
+  letter-spacing: 1.2px;
+}
+
+
+.powerpoint-completion-slide h1 {
+  margin:
+    7px 0;
+
+  color: #172033;
+
+  font-size: 34px;
+
+  font-weight: 900;
+}
+
+
+.completion-student-message {
+  max-width: 600px;
+
+  margin:
+    0 0 20px;
+
+  color: #64748b;
+
+  font-size: 16px;
+
+  line-height: 1.9;
+}
+
+
+/* XP REWARD */
+
+.completion-reward {
+  min-width: 260px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+
+  margin-bottom: 13px;
+
+  padding: 17px 25px;
+
+  border:
+    1px solid #fde68a;
+
+  border-radius: 17px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fffbeb,
+      #fff7ed
+    );
+}
+
+
+.reward-star {
+  font-size: 34px;
+}
+
+
+.completion-reward small {
+  display: block;
+
+  color: #b45309;
+
+  font-size: 9px;
+
+  font-weight: 900;
+
+  letter-spacing: 1px;
+}
+
+
+.completion-reward strong {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #b45309;
+
+  font-size: 27px;
+
+  font-weight: 900;
+}
+
+
+/* TOTAL XP */
+
+.completion-total-xp {
+  min-width: 260px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 25px;
+
+  margin-bottom: 22px;
+
+  padding: 12px 18px;
+
+  border:
+    1px solid #ddd6fe;
+
+  border-radius: 13px;
+
+  background: white;
+
+  color: #64748b;
+
+  font-size: 13px;
+}
+
+
+.completion-total-xp strong {
+  color: #7c3aed;
+
+  font-size: 18px;
+}
+
+
+/* BUTTONS */
+
+.completion-actions {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-wrap: wrap;
+
+  gap: 10px;
+}
+
+
+.completion-actions button {
+  min-height: 44px;
+
+  padding: 10px 18px;
+
+  border-radius: 11px;
+
+  font-family: inherit;
+
+  font-size: 12px;
+
+  font-weight: 850;
+
+  cursor: pointer;
+}
+
+
+.completion-back-button {
+  border: none;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #4f46e5,
+      #3b82f6
+    );
+
+  box-shadow:
+    0 9px 20px
+    rgba(99, 102, 241, 0.18);
+}
+
+
+.completion-review-button {
+  border:
+    1px solid #ddd6fe;
+
+  background: white;
+
+  color: #6d28d9;
+}
+
+
+@media (max-width: 600px) {
+
+  .powerpoint-completion-slide {
+    min-height: 475px;
+
+    padding: 25px 15px;
+  }
+
+
+  .powerpoint-completion-slide h1 {
+    font-size: 27px;
+  }
+
+
+  .completion-student-message {
+    font-size: 14px;
+  }
+
+
+  .completion-reward,
+  .completion-total-xp {
+    width: 100%;
+
+    min-width: 0;
+  }
+
+
+  .completion-actions {
+    width: 100%;
+
+    flex-direction: column;
+  }
+
+
+  .completion-actions button {
+    width: 100%;
+  }
+
+}
+
+/* =========================================================
+   REQUIRED STUDENT ANSWERS
+========================================================= */
+
+.lesson-answer-required {
+  padding: 12px 18px;
+
+  border-top: 1px solid #fde68a;
+  border-bottom: 1px solid #fde68a;
+
+  background: #fffbeb;
+
+  color: #92400e;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  line-height: 1.7;
+
+  text-align: center;
+}
+
+
+/* LOCKED SLIDES */
+
+.powerpoint-thumbnail.locked {
+  opacity: 0.38;
+
+  cursor: not-allowed;
+}
+
+
+.powerpoint-thumbnail.locked:hover {
+  border-color: transparent;
+
+  background: transparent;
+
+  transform: none;
+}
+
+
+.powerpoint-thumbnail:disabled {
+  cursor: not-allowed;
+}
+
+
+/* LOCKED DOT */
+
+.powerpoint-dot.locked {
+  opacity: 0.25;
+
+  cursor: not-allowed;
+}
+
+
+/* DISABLED NEXT */
+
+.powerpoint-nav-button.primary:disabled,
+.powerpoint-nav-button.finish:disabled {
+  opacity: 0.38;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+
+
+/* =========================================================
+   COMPLETION POWERPOINT SLIDE
+========================================================= */
+
+.powerpoint-completion-slide {
+  min-height: 455px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 35px;
+
+  text-align: center;
+
+  border-radius: 20px;
+
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(139, 92, 246, 0.11),
+      transparent 38%
+    ),
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #faf8ff
+    );
+}
+
+
+.completion-confetti {
+  width: 82px;
+  height: 82px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 13px;
+
+  border-radius: 25px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ede9fe,
+      #dbeafe
+    );
+
+  font-size: 43px;
+
+  box-shadow:
+    0 15px 35px
+    rgba(
+      99,
+      102,
+      241,
+      0.12
+    );
+}
+
+
+.completion-label {
+  color: #7c3aed;
+
+  font-size: 11px;
+
+  font-weight: 900;
+
+  letter-spacing: 1.2px;
+}
+
+
+.powerpoint-completion-slide h1 {
+  margin: 7px 0;
+
+  color: #172033;
+
+  font-size: 34px;
+
+  font-weight: 900;
+}
+
+
+.completion-student-message {
+  max-width: 600px;
+
+  margin: 0 0 20px;
+
+  color: #64748b;
+
+  font-size: 16px;
+
+  line-height: 1.9;
+}
+
+
+/* XP */
+
+.completion-reward {
+  min-width: 260px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+
+  margin-bottom: 13px;
+
+  padding: 17px 25px;
+
+  border: 1px solid #fde68a;
+
+  border-radius: 17px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fffbeb,
+      #fff7ed
+    );
+}
+
+
+.reward-star {
+  font-size: 34px;
+}
+
+
+.completion-reward small {
+  display: block;
+
+  color: #b45309;
+
+  font-size: 9px;
+
+  font-weight: 900;
+
+  letter-spacing: 1px;
+}
+
+
+.completion-reward strong {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #b45309;
+
+  font-size: 27px;
+
+  font-weight: 900;
+}
+
+
+/* TOTAL XP */
+
+.completion-total-xp {
+  min-width: 260px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 25px;
+
+  margin-bottom: 22px;
+
+  padding: 12px 18px;
+
+  border: 1px solid #ddd6fe;
+
+  border-radius: 13px;
+
+  background: white;
+
+  color: #64748b;
+
+  font-size: 13px;
+}
+
+
+.completion-total-xp strong {
+  color: #7c3aed;
+
+  font-size: 18px;
+}
+
+
+/* COMPLETION ACTIONS */
+
+.completion-actions {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-wrap: wrap;
+
+  gap: 10px;
+}
+
+
+.completion-actions button {
+  min-height: 44px;
+
+  padding: 10px 18px;
+
+  border-radius: 11px;
+
+  font-family: inherit;
+
+  font-size: 12px;
+
+  font-weight: 850;
+
+  cursor: pointer;
+}
+
+
+.completion-back-button {
+  border: none;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #4f46e5,
+      #3b82f6
+    );
+}
+
+
+.completion-review-button {
+  border: 1px solid #ddd6fe;
+
+  background: white;
+
+  color: #6d28d9;
+}
+
+
+@media (max-width: 600px) {
+
+  .lesson-answer-required {
+    font-size: 12px;
+  }
+
+
+  .powerpoint-completion-slide {
+    min-height: 475px;
+
+    padding: 25px 15px;
+  }
+
+
+  .powerpoint-completion-slide h1 {
+    font-size: 27px;
+  }
+
+
+  .completion-student-message {
+    font-size: 14px;
+  }
+
+
+  .completion-reward,
+  .completion-total-xp {
+    width: 100%;
+
+    min-width: 0;
+  }
+
+
+  .completion-actions {
+    width: 100%;
+
+    flex-direction: column;
+  }
+
+
+  .completion-actions button {
+    width: 100%;
+  }
+
+}
+/* =====================================================
+   PORTFOLIO
+===================================================== */
+
+.lesson-portfolio-action {
+  width: 100%;
+
+  margin-top: 20px;
+
+  display: flex;
+
+  justify-content: center;
+}
+
+
+.add-to-portfolio-button {
+  min-width: 230px;
+
+  padding: 13px 20px;
+
+  border: none;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #3b82f6
+    );
+
+  color: white;
+
+  font-family: inherit;
+
+  font-size: 13px;
+
+  font-weight: 850;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 8px 22px
+    rgba(
+      124,
+      58,
+      237,
+      0.20
+    );
+
+  transition: 0.18s ease;
+}
+
+
+.add-to-portfolio-button:hover {
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    0 11px 28px
+    rgba(
+      124,
+      58,
+      237,
+      0.26
+    );
+}
+
+
+.add-to-portfolio-button:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+
+
+.lesson-portfolio-saved {
+  padding: 12px 18px;
+
+  border:
+    1px solid #bbf7d0;
+
+  border-radius: 13px;
+
+  background: #ecfdf5;
+
+  color: #047857;
+
+  font-size: 13px;
+
+  font-weight: 850;
+}
+
+
+@media (max-width: 650px) {
+
+  .add-to-portfolio-button {
+    width: 100%;
+
+    min-width: 0;
+  }
+}
+/* =====================================================
+   FIX LESSON TEXTAREA / ANSWER INPUT
+===================================================== */
+
+.powerpoint-slide textarea,
+.task-answer-area textarea,
+.reflection-section textarea,
+.thinking-section textarea {
+  width: 100% !important;
+  min-height: 140px !important;
+
+  padding: 16px 18px !important;
+
+  border: 2px solid #dbe4f0 !important;
+  border-radius: 14px !important;
+
+  background: #ffffff !important;
+
+  /* مهم جدًا */
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+
+  caret-color: #7c3aed !important;
+
+  font-family: inherit !important;
+  font-size: 17px !important;
+  font-weight: 500 !important;
+  line-height: 1.8 !important;
+
+  opacity: 1 !important;
+
+  pointer-events: auto !important;
+  user-select: text !important;
+
+  outline: none !important;
+
+  resize: vertical !important;
+}
+
+
+/* عندما يضغط الطالب داخل المربع */
+
+.powerpoint-slide textarea:focus,
+.task-answer-area textarea:focus,
+.reflection-section textarea:focus,
+.thinking-section textarea:focus {
+  border-color: #7c3aed !important;
+
+  box-shadow:
+    0 0 0 4px
+    rgba(124, 58, 237, 0.12) !important;
+
+  background: #ffffff !important;
+}
+
+
+/* Placeholder */
+
+.powerpoint-slide textarea::placeholder,
+.task-answer-area textarea::placeholder,
+.reflection-section textarea::placeholder,
+.thinking-section textarea::placeholder {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+
+  opacity: 1 !important;
+}
+
+
+/* Arabic */
+
+[dir="rtl"] .powerpoint-slide textarea,
+[dir="rtl"] .task-answer-area textarea,
+[dir="rtl"] .reflection-section textarea,
+[dir="rtl"] .thinking-section textarea {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+
+/* English */
+
+[dir="ltr"] .powerpoint-slide textarea,
+[dir="ltr"] .task-answer-area textarea,
+[dir="ltr"] .reflection-section textarea,
+[dir="ltr"] .thinking-section textarea {
+  direction: ltr !important;
+  text-align: left !important;
+}
+}
