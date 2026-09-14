@@ -29,6 +29,9 @@ import {
 } from "../context/LanguageContext";
 
 import "./ProgramsMarketplace.css";
+import { programLicenseForRole } from "../firebase/paddleConfig";
+import { httpsCallable } from "firebase/functions";
+import { functions } from "../firebase/firebase";
 
 
 function ProgramsMarketplace() {
@@ -89,11 +92,14 @@ function ProgramsMarketplace() {
 
   const text = (
     english,
-    arabic
+    arabic,
+    hebrew = english
   ) =>
     language === "ar"
       ? arabic
-      : english;
+      : language === "he"
+        ? hebrew
+        : english;
 
 
   const localized =
@@ -345,6 +351,7 @@ function ProgramsMarketplace() {
   ===================================================== */
 
   useEffect(() => {
+    let active = true;
     const checkAccess =
       async () => {
         if (
@@ -365,6 +372,11 @@ function ProgramsMarketplace() {
             ) => {
               try {
                 let personalAccessId;
+
+                if (userProfile.role === "owner") {
+                  result[program.id] = true;
+                  return;
+                }
 
 
                 if (
@@ -395,11 +407,11 @@ function ProgramsMarketplace() {
                       "programAccess",
                       personalAccessId
                     )
-                  );
+                  ).catch(() => null);
 
 
                 if (
-                  personalSnapshot.exists() &&
+                  personalSnapshot?.exists() &&
                   personalSnapshot.data()
                     .status ===
                     "active"
@@ -408,6 +420,12 @@ function ProgramsMarketplace() {
                     program.id
                   ] = true;
 
+                  return;
+                }
+
+                if (userProfile.role === "teacher") {
+                  const response = await httpsCallable(functions, "getPurchasedProgram")({ programId: program.id, accessOnly: true });
+                  result[program.id] = response.data?.access?.status === "active";
                   return;
                 }
 
@@ -464,11 +482,19 @@ function ProgramsMarketplace() {
         );
 
 
-        setAccessMap(result);
+        if (active) setAccessMap(result);
       };
 
 
     checkAccess();
+    // Recheck when returning from Paddle or another tab; checkout also waits for the entitlement.
+    window.addEventListener("focus", checkAccess);
+    const refresh = window.setInterval(checkAccess, 10000);
+    return () => {
+      active = false;
+      window.clearInterval(refresh);
+      window.removeEventListener("focus", checkAccess);
+    };
 
   }, [
     userProfile,
@@ -553,10 +579,17 @@ function ProgramsMarketplace() {
         setMessage(
           text(
             "Owner accounts can preview programs but cannot purchase them.",
-            "حساب المالك مخصص لمعاينة البرامج ولا يقوم بالشراء."
+            "حساب المالك مخصص لمعاينة البرامج ولا يقوم بالشراء.",
+            "חשבונות בעלים יכולים לצפות בתוכניות אך אינם יכולים לרכוש אותן."
           )
         );
 
+        return;
+      }
+
+      licenseType = programLicenseForRole(userProfile.role, licenseType);
+      if (!licenseType || !/^pri_[a-z0-9]{26}$/.test(program.paddlePriceIds?.[licenseType] || "")) {
+        setMessage(text("This program is not available for purchase yet.", "هذا البرنامج غير متاح للشراء بعد.", "התוכנית עדיין אינה זמינה לרכישה."));
         return;
       }
 
@@ -571,7 +604,8 @@ function ProgramsMarketplace() {
         setMessage(
           text(
             "You already have access to this program.",
-            "لديك وصول لهذا البرنامج بالفعل."
+            "لديك وصول لهذا البرنامج بالفعل.",
+            "כבר יש לך גישה לתוכנית הזו."
           )
         );
 
@@ -587,7 +621,8 @@ function ProgramsMarketplace() {
           setMessage(
             text(
               "Please select a class first.",
-              "اختاري صفًا أولًا."
+              "اختاري صفًا أولًا.",
+              "בחרו כיתה תחילה."
             )
           );
 
@@ -627,7 +662,8 @@ function ProgramsMarketplace() {
           setMessage(
             text(
               "This class already has access to the program.",
-              "هذا الصف لديه وصول للبرنامج بالفعل."
+              "هذا الصف لديه وصول للبرنامج بالفعل.",
+              "לכיתה הזו כבר יש גישה לתוכנית."
             )
           );
 
@@ -691,7 +727,8 @@ function ProgramsMarketplace() {
         setMessage(
           text(
             "Could not start the purchase.",
-            "تعذر بدء عملية الشراء."
+            "تعذر بدء عملية الشراء.",
+            "לא ניתן להתחיל את הרכישה."
           )
         );
 
@@ -732,8 +769,9 @@ function ProgramsMarketplace() {
 
         <p>
           {text(
-            "Loading TechMinds programs...",
-            "جارٍ تحميل برامج TechMinds..."
+            "Loading TeachLearn programs...",
+            "جارٍ تحميل برامج TeachLearn...",
+            "תוכניות TeachLearn נטענות..."
           )}
         </p>
       </div>
@@ -775,12 +813,14 @@ function ProgramsMarketplace() {
           >
             {language === "ar"
               ? "↩ رجوع"
-              : "← Back"}
+              : language === "he"
+                ? "→ חזרה"
+                : "← Back"}
           </button>
 
 
           <small>
-            TECHMINDS MARKETPLACE
+            TEACHLEARN MARKETPLACE
           </small>
 
 
@@ -788,7 +828,8 @@ function ProgramsMarketplace() {
             🚀{" "}
             {text(
               "Learning Programs",
-              "البرامج التعليمية"
+              "البرامج التعليمية",
+              "תוכניות למידה"
             )}
           </h1>
 
@@ -796,7 +837,8 @@ function ProgramsMarketplace() {
           <p>
             {text(
               "Choose a complete interactive learning program.",
-              "اختاري برنامجًا تعليميًا تفاعليًا متكاملًا."
+              "اختاري برنامجًا تعليميًا تفاعليًا متكاملًا.",
+              "בחרו תוכנית למידה אינטראקטיבית מלאה."
             )}
           </p>
 
@@ -834,6 +876,21 @@ function ProgramsMarketplace() {
             عربي
           </button>
 
+
+          <button
+            type="button"
+            className={
+              language === "he"
+                ? "active"
+                : ""
+            }
+            onClick={() =>
+              setLanguage("he")
+            }
+          >
+            עברית
+          </button>
+
         </div>
 
       </header>
@@ -864,7 +921,8 @@ function ProgramsMarketplace() {
           placeholder={
             text(
               "Search programs...",
-              "ابحثي عن برنامج..."
+              "ابحثي عن برنامج...",
+              "חיפוש תוכניות..."
             )
           }
         />
@@ -885,7 +943,8 @@ function ProgramsMarketplace() {
           <h2>
             {text(
               "No published programs yet",
-              "لا توجد برامج منشورة حاليًا"
+              "لا توجد برامج منشورة حاليًا",
+              "עדיין אין תוכניות שפורסמו"
             )}
           </h2>
 
@@ -950,7 +1009,8 @@ function ProgramsMarketplace() {
                         ✓{" "}
                         {text(
                           "Published",
-                          "منشور"
+                          "منشور",
+                          "פורסם"
                         )}
                       </span>
 
@@ -972,8 +1032,9 @@ function ProgramsMarketplace() {
                       program.description
                     ) ||
                       text(
-                        "Interactive TechMinds learning program.",
-                        "برنامج تعليمي تفاعلي من TechMinds."
+                        "Interactive TeachLearn learning program.",
+                        "برنامج تعليمي تفاعلي من TeachLearn.",
+                        "תוכנית למידה אינטראקטיבית של TeachLearn."
                       )}
 
                   </p>
@@ -987,7 +1048,8 @@ function ProgramsMarketplace() {
                         0}{" "}
                       {text(
                         "Lessons",
-                        "دروس"
+                        "دروس",
+                        "שיעורים"
                       )}
                     </span>
 
@@ -1020,7 +1082,8 @@ function ProgramsMarketplace() {
                         🏆{" "}
                         {text(
                           "FINAL PROJECT",
-                          "المشروع النهائي"
+                          "المشروع النهائي",
+                          "פרויקט גמר"
                         )}
                       </small>
 
@@ -1041,13 +1104,15 @@ function ProgramsMarketplace() {
                     "student" && (
 
                     <div className="marketplace-purchase-area">
+                      <small>{text("One-time purchase", "شراء لمرة واحدة", "רכישה חד-פעמית")}</small>
 
                       <div className="marketplace-price">
 
                         <small>
                           {text(
                             "Student Access",
-                            "وصول الطالب"
+                            "وصول الطالب",
+                            "גישה לתלמיד"
                           )}
                         </small>
 
@@ -1073,7 +1138,8 @@ function ProgramsMarketplace() {
                           ✅{" "}
                           {text(
                             "Open Program",
-                            "فتح البرنامج"
+                            "فتح البرنامج",
+                            "פתיחת התוכנית"
                           )}
                         </button>
 
@@ -1097,11 +1163,13 @@ function ProgramsMarketplace() {
                           `${program.id}-student`
                             ? text(
                                 "Preparing...",
-                                "جارٍ التجهيز..."
+                                "جارٍ التجهيز...",
+                                "מתכוננים..."
                               )
                             : `🔒 ${text(
                                 "Buy Program",
-                                "شراء البرنامج"
+                                "شراء البرنامج",
+                                "רכישת תוכנית"
                               )}`}
                         </button>
 
@@ -1118,6 +1186,7 @@ function ProgramsMarketplace() {
                     "teacher" && (
 
                     <div className="marketplace-teacher-options">
+                      <small>{text("One-time purchase", "شراء لمرة واحدة", "רכישה חד-פעמית")}</small>
 
                       <div className="marketplace-license-box">
 
@@ -1127,7 +1196,8 @@ function ProgramsMarketplace() {
                             👩‍🏫{" "}
                             {text(
                               "Teacher Access",
-                              "وصول المعلّم"
+                              "وصول المعلّم",
+                              "גישה למורה"
                             )}
                           </small>
 
@@ -1153,7 +1223,8 @@ function ProgramsMarketplace() {
                             ✅{" "}
                             {text(
                               "Open Program",
-                              "فتح البرنامج"
+                              "فتح البرنامج",
+                              "פתיחת התוכנית"
                             )}
                           </button>
 
@@ -1175,8 +1246,9 @@ function ProgramsMarketplace() {
                           >
                             🔒{" "}
                             {text(
-                              "Buy for Me",
-                              "شراء للمعلّم"
+                              "Buy Program",
+                              "شراء البرنامج",
+                              "רכישת תוכנית"
                             )}
                           </button>
 
@@ -1185,7 +1257,7 @@ function ProgramsMarketplace() {
                       </div>
 
 
-                      <div className="marketplace-license-box class-license">
+                      {program.paddlePriceIds?.class && <div className="marketplace-license-box class-license">
 
                         <div className="marketplace-price">
 
@@ -1193,7 +1265,8 @@ function ProgramsMarketplace() {
                             👥{" "}
                             {text(
                               "Class License",
-                              "ترخيص صف"
+                              "ترخيص صف",
+                              "רישיון כיתה"
                             )}
                           </small>
 
@@ -1220,7 +1293,8 @@ function ProgramsMarketplace() {
                             +{" "}
                             {text(
                               "Create Class First",
-                              "أنشئ صفًا أولًا"
+                              "أنشئ صفًا أولًا",
+                              "יצירת כיתה תחילה"
                             )}
                           </button>
 
@@ -1284,14 +1358,15 @@ function ProgramsMarketplace() {
                               👥{" "}
                               {text(
                                 "Buy for Class",
-                                "شراء للصف"
+                                "شراء للصف",
+                                "רכישה עבור הכיתה"
                               )}
                             </button>
                           </>
 
                         )}
 
-                      </div>
+                      </div>}
 
                     </div>
 
@@ -1304,12 +1379,14 @@ function ProgramsMarketplace() {
                     "owner" && (
 
                     <div className="marketplace-owner-preview">
+                      <button type="button" className="marketplace-open-button" onClick={() => openProgram(program.id)}>{text("Open Program", "فتح البرنامج", "פתיחת התוכנית")}</button>
 
                       👑{" "}
 
                       {text(
                         "Owner Preview",
-                        "معاينة المالك"
+                        "معاينة المالك",
+                        "תצוגה מקדימה לבעלים"
                       )}
 
                     </div>

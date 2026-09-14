@@ -41,13 +41,48 @@ function TeacherAttendance() {
   } = useLanguage();
 
 
+  const hebrewLabels = {
+    "Could not load classes.": "לא ניתן לטעון את הכיתות.",
+    "Could not load students.": "לא ניתן לטעון את התלמידים.",
+    "Could not load attendance history.": "לא ניתן לטעון את היסטוריית הנוכחות.",
+    "Could not load attendance.": "לא ניתן לטעון את הנוכחות.",
+    "Please select a class.": "בחרו כיתה.",
+    "Please select a date.": "בחרו תאריך.",
+    "Class not found.": "הכיתה לא נמצאה.",
+    "Loading attendance...": "הנוכחות נטענת...",
+    Attendance: "נוכחות",
+    "Record attendance and review previous attendance sessions.": "רשמו נוכחות ועיינו ברישומי נוכחות קודמים.",
+    "Record Attendance": "רישום נוכחות",
+    "Attendance History": "היסטוריית נוכחות",
+    Class: "כיתה",
+    "Select class": "בחירת כיתה",
+    Date: "תאריך",
+    "Mark All Present": "סימון כולם כנוכחים",
+    "Select a class": "בחירת כיתה",
+    "Choose a class to start recording attendance.": "בחרו כיתה כדי להתחיל לרשום נוכחות.",
+    Students: "תלמידים",
+    Present: "נוכח",
+    Absent: "נעדר",
+    Late: "מאחר",
+    Excused: "מאושר",
+    "Save Attendance": "שמירת נוכחות",
+    "Saving attendance...": "הנוכחות נשמרת...",
+    "No students in this class.": "אין תלמידים בכיתה הזו.",
+    "No attendance history yet.": "עדיין אין היסטוריית נוכחות.",
+    "Select a session to view details.": "בחרו מפגש כדי לצפות בפרטים.",
+    "Attendance saved successfully.": "הנוכחות נשמרה בהצלחה.",
+  };
+
   const text = (
     english,
-    arabic
+    arabic,
+    hebrew = hebrewLabels[english] || english
   ) =>
     language === "ar"
       ? arabic
-      : english;
+      : language === "he"
+        ? hebrew
+        : english;
 
 
   /* =========================================
@@ -1282,7 +1317,9 @@ function TeacherAttendance() {
             {language ===
             "ar"
               ? "↩ لوحة التحكم"
-              : "← Dashboard"}
+              : language === "he"
+                ? "→ לוח הבקרה"
+                : "← Dashboard"}
 
           </button>
 
@@ -1346,6 +1383,21 @@ function TeacherAttendance() {
             }
           >
             عربي
+          </button>
+
+
+          <button
+            type="button"
+            className={
+              language === "he"
+                ? "active"
+                : ""
+            }
+            onClick={() =>
+              setLanguage("he")
+            }
+          >
+            עברית
           </button>
 
         </div>

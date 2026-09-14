@@ -4,14 +4,18 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "content:check": "node functions/scripts/importCatalog.js",
+    "content:import": "node functions/scripts/importCatalog.js --commit",
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "@paddle/paddle-js": "^1.6.5",
     "firebase": "^12.18.0",
+    "monaco-editor": "^0.56.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.3"
@@ -20,6 +24,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
+    "firebase-tools": "15.28.2",
     "oxlint": "^1.79.0",
     "vite": "^8.2.2"
   }

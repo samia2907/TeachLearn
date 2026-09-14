@@ -5,9 +5,11 @@ import {
 import {
   doc,
   getDoc,
-  serverTimestamp,
-  updateDoc,
 } from "firebase/firestore";
+
+import {
+  httpsCallable,
+} from "firebase/functions";
 
 import {
   useNavigate,
@@ -16,6 +18,7 @@ import {
 import {
   auth,
   db,
+  functions,
 } from "../firebase/firebase";
 
 import {
@@ -23,6 +26,8 @@ import {
 } from "../context/LanguageContext";
 
 import "./StudentJoinClass.css";
+
+import { hebrewText } from "../data/hebrewText";
 
 
 function StudentJoinClass() {
@@ -67,7 +72,9 @@ function StudentJoinClass() {
   ) =>
     language === "ar"
       ? ar
-      : en;
+      : language === "he"
+        ? hebrewText(en)
+        : en;
 
 
   /* ======================
@@ -347,49 +354,8 @@ function StudentJoinClass() {
         }
 
 
-        const studentRef =
-          doc(
-            db,
-            "users",
-            user.uid
-          );
-
-
-        /*
-          Update ONLY student's profile.
-          We will calculate class student
-          count from actual students.
-        */
-
-        await updateDoc(
-          studentRef,
-          {
-            classId:
-              foundClass.id,
-
-            classCode:
-              foundClass.classCode,
-
-            className:
-              foundClass.name,
-
-            teacherId:
-              foundClass.teacherId,
-
-            teacherName:
-              foundClass.teacherName ||
-              "",
-
-            grade:
-              foundClass.grade,
-
-            learningTrack:
-              foundClass.learningTrack,
-
-            joinedClassAt:
-              serverTimestamp(),
-          }
-        );
+        const joinClass = httpsCallable(functions, "joinClass");
+        await joinClass({ classCode: foundClass.classCode });
 
 
         navigate(

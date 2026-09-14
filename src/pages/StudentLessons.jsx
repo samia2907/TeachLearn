@@ -27,6 +27,8 @@ import {
 
 import "./StudentLessons.css";
 
+import { hebrewText } from "../data/hebrewText";
+
 
 function StudentLessons() {
   const navigate =
@@ -68,6 +70,8 @@ const [
   ) =>
     language === "ar"
       ? arabic
+      : language === "he"
+        ? hebrewText(english)
       : english;
 
 
@@ -76,6 +80,11 @@ const [
   ============================ */
 
   const activityTypes = {
+    mission: {
+      icon: "🤖",
+      en: "Mission",
+      ar: "مهمة",
+    },
     lesson: {
       icon: "📚",
       en: "Lesson",
@@ -432,7 +441,9 @@ const [
           >
             {language === "ar"
               ? "↩ رجوع للرئيسية"
-              : "← Back to Dashboard"}
+              : language === "he"
+                ? "→ חזרה ללוח הבקרה"
+                : "← Back to Dashboard"}
           </button>
 
 

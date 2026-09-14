@@ -33,6 +33,8 @@ import {
 
 import "./OwnerSettings.css";
 
+import { hebrewText } from "../data/hebrewText";
+
 
 function OwnerSettings() {
   const navigate =
@@ -136,6 +138,8 @@ function OwnerSettings() {
   ) =>
     language === "ar"
       ? arabic
+      : language === "he"
+        ? hebrewText(english)
       : english;
 
 
@@ -738,7 +742,9 @@ function OwnerSettings() {
           >
             {language === "ar"
               ? "↩ العودة للرئيسية"
-              : "← Back to Dashboard"}
+              : language === "he"
+                ? "→ חזרה ללוח הבקרה"
+                : "← Back to Dashboard"}
           </button>
 
 
@@ -799,6 +805,14 @@ function OwnerSettings() {
             }
           >
             العربية
+          </button>
+
+          <button
+            type="button"
+            className={language === "he" ? "active" : ""}
+            onClick={() => setLanguage("he")}
+          >
+            עברית
           </button>
 
         </div>
@@ -1066,8 +1080,8 @@ function OwnerSettings() {
 
               <p>
                 {text(
-                  "Basic public information used across TechMinds.",
-                  "المعلومات الأساسية المستخدمة في منصة TechMinds."
+                  "Basic public information used across TeachLearn.",
+                  "المعلومات الأساسية المستخدمة في منصة TeachLearn."
                 )}
               </p>
 
@@ -1103,7 +1117,7 @@ function OwnerSettings() {
                       event.target.value,
                   })
                 }
-                placeholder="TechMinds"
+                placeholder="TeachLearn"
               />
 
             </label>

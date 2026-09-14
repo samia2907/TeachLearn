@@ -25,6 +25,9 @@ import {
 } from "../context/LanguageContext";
 
 import "./OwnerLessonBuilder.css";
+import CodingConfigFields from "../components/code/CodingConfigFields";
+
+import { hebrewText } from "../data/hebrewText";
 
 
 function OwnerLessonBuilder() {
@@ -94,6 +97,8 @@ function OwnerLessonBuilder() {
   ) =>
     language === "ar"
       ? arabic
+      : language === "he"
+        ? hebrewText(english)
       : english;
 
 
@@ -201,6 +206,51 @@ function OwnerLessonBuilder() {
         "اجعلي الطالب يتأمل فيما تعلمه.",
     },
   ];
+
+
+  const slideColorPresets = {
+    content: {
+      themeColor: "#6d28d9",
+      accentColor: "#2563eb",
+      surfaceColor: "#f5f3ff",
+    },
+    question: {
+      themeColor: "#7c3aed",
+      accentColor: "#ec4899",
+      surfaceColor: "#fdf4ff",
+    },
+    multipleChoice: {
+      themeColor: "#059669",
+      accentColor: "#22c55e",
+      surfaceColor: "#ecfdf5",
+    },
+    task: {
+      themeColor: "#ea580c",
+      accentColor: "#f59e0b",
+      surfaceColor: "#fff7ed",
+    },
+    challenge: {
+      themeColor: "#e11d48",
+      accentColor: "#f97316",
+      surfaceColor: "#fff1f2",
+    },
+    summary: {
+      themeColor: "#0891b2",
+      accentColor: "#0ea5e9",
+      surfaceColor: "#ecfeff",
+    },
+    reflection: {
+      themeColor: "#9333ea",
+      accentColor: "#c026d3",
+      surfaceColor: "#faf5ff",
+    },
+  };
+
+
+  const getSlideColors =
+    (kind) =>
+      slideColorPresets[kind] ||
+      slideColorPresets.content;
 
 
   /* =====================================================
@@ -454,11 +504,45 @@ function OwnerLessonBuilder() {
 
   const createSlide =
     (kind) => {
+      const colors =
+        getSlideColors(kind);
+
+
       const common = {
         id:
           makeId(),
 
         title: {
+          en: "",
+          ar: "",
+        },
+
+        themeColor:
+          colors.themeColor,
+
+        accentColor:
+          colors.accentColor,
+
+        surfaceColor:
+          colors.surfaceColor,
+
+        emoji:
+          "",
+
+        visualImage:
+          "",
+
+        visualAlt: {
+          en: "",
+          ar: "",
+        },
+
+        infoBox: {
+          en: "",
+          ar: "",
+        },
+
+        challengeBox: {
           en: "",
           ar: "",
         },
@@ -1187,6 +1271,10 @@ function OwnerLessonBuilder() {
               عربي
             </button>
 
+            <button type="button" className={language === "he" ? "active" : ""} onClick={() => setLanguage("he")}>
+              עברית
+            </button>
+
           </div>
 
 
@@ -1472,7 +1560,7 @@ function OwnerLessonBuilder() {
 
 
               <small>
-                TECHMINDS
+                TEACHLEARN
               </small>
 
 
@@ -1558,9 +1646,443 @@ function OwnerLessonBuilder() {
               </div>
 
 
+              {/* SLIDE COLORS */}
+
+              <section className="owner-builder-color-panel">
+
+                <div className="owner-builder-color-panel-heading">
+
+                  <div>
+                    <small>
+                      {text(
+                        "SLIDE STYLE",
+                        "تصميم الشريحة"
+                      )}
+                    </small>
+
+                    <h3>
+                      🎨{" "}
+                      {text(
+                        "Slide Colors",
+                        "ألوان الشريحة"
+                      )}
+                    </h3>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateSelectedSlide(
+                        getSlideColors(
+                          selectedKind
+                        )
+                      )
+                    }
+                  >
+                    ↺{" "}
+                    {text(
+                      "Recommended",
+                      "الألوان المقترحة"
+                    )}
+                  </button>
+
+                </div>
+
+
+                <div className="owner-builder-color-fields">
+
+                  <label>
+                    <span>
+                      {text(
+                        "Main color",
+                        "اللون الأساسي"
+                      )}
+                    </span>
+
+                    <div>
+                      <input
+                        type="color"
+                        value={
+                          selectedSlide.themeColor ||
+                          getSlideColors(
+                            selectedKind
+                          ).themeColor
+                        }
+                        onChange={(event) =>
+                          updateSelectedSlide({
+                            themeColor:
+                              event.target.value,
+                          })
+                        }
+                      />
+
+                      <code>
+                        {selectedSlide.themeColor ||
+                          getSlideColors(
+                            selectedKind
+                          ).themeColor}
+                      </code>
+                    </div>
+                  </label>
+
+
+                  <label>
+                    <span>
+                      {text(
+                        "Accent color",
+                        "اللون المساعد"
+                      )}
+                    </span>
+
+                    <div>
+                      <input
+                        type="color"
+                        value={
+                          selectedSlide.accentColor ||
+                          getSlideColors(
+                            selectedKind
+                          ).accentColor
+                        }
+                        onChange={(event) =>
+                          updateSelectedSlide({
+                            accentColor:
+                              event.target.value,
+                          })
+                        }
+                      />
+
+                      <code>
+                        {selectedSlide.accentColor ||
+                          getSlideColors(
+                            selectedKind
+                          ).accentColor}
+                      </code>
+                    </div>
+                  </label>
+
+
+                  <label>
+                    <span>
+                      {text(
+                        "Background",
+                        "لون الخلفية"
+                      )}
+                    </span>
+
+                    <div>
+                      <input
+                        type="color"
+                        value={
+                          selectedSlide.surfaceColor ||
+                          getSlideColors(
+                            selectedKind
+                          ).surfaceColor
+                        }
+                        onChange={(event) =>
+                          updateSelectedSlide({
+                            surfaceColor:
+                              event.target.value,
+                          })
+                        }
+                      />
+
+                      <code>
+                        {selectedSlide.surfaceColor ||
+                          getSlideColors(
+                            selectedKind
+                          ).surfaceColor}
+                      </code>
+                    </div>
+                  </label>
+
+                </div>
+
+              </section>
+
+
+              {/* VISUAL ELEMENTS */}
+
+              <section className="owner-builder-visual-panel">
+
+                <div className="owner-builder-visual-panel-heading">
+
+                  <div>
+                    <small>
+                      {text(
+                        "VISUAL ELEMENTS",
+                        "العناصر البصرية"
+                      )}
+                    </small>
+
+                    <h3>
+                      ✨{" "}
+                      {text(
+                        "Make the slide more engaging",
+                        "اجعلي الشريحة أكثر تشويقًا"
+                      )}
+                    </h3>
+                  </div>
+
+                </div>
+
+
+                <div className="owner-builder-visual-grid">
+
+                  <label>
+                    <span>
+                      {text(
+                        "Large emoji / icon",
+                        "أيقونة أو إيموجي كبير"
+                      )}
+                    </span>
+
+                    <input
+                      type="text"
+                      value={
+                        selectedSlide.emoji ||
+                        ""
+                      }
+                      onChange={(event) =>
+                        updateSelectedSlide({
+                          emoji:
+                            event.target.value,
+                        })
+                      }
+                      placeholder="🤖  💡  🚀  🧠"
+                      maxLength="6"
+                    />
+                  </label>
+
+
+                  <label className="owner-builder-visual-full">
+                    <span>
+                      {text(
+                        "Slide image path or URL",
+                        "مسار صورة الشريحة أو الرابط"
+                      )}
+                    </span>
+
+                    <input
+                      type="text"
+                      value={
+                        selectedSlide.visualImage ||
+                        ""
+                      }
+                      onChange={(event) =>
+                        updateSelectedSlide({
+                          visualImage:
+                            event.target.value,
+                        })
+                      }
+                      placeholder="/lesson-images/computer-parts.png"
+                    />
+
+                    <small>
+                      {text(
+                        "For local images, place the file in public/lesson-images/ and use a path like /lesson-images/example.png",
+                        "للصور المحلية، ضعي الصورة داخل public/lesson-images/ واستخدمي مسارًا مثل /lesson-images/example.png"
+                      )}
+                    </small>
+                  </label>
+
+
+                  <label>
+                    <span>
+                      {text(
+                        "Image description — English",
+                        "وصف الصورة — English"
+                      )}
+                    </span>
+
+                    <input
+                      type="text"
+                      value={
+                        selectedSlide.visualAlt?.en ||
+                        ""
+                      }
+                      onChange={(event) =>
+                        updateSelectedSlide({
+                          visualAlt: {
+                            ...(
+                              selectedSlide.visualAlt ||
+                              {}
+                            ),
+                            en:
+                              event.target.value,
+                          },
+                        })
+                      }
+                      placeholder="Students exploring computer parts"
+                    />
+                  </label>
+
+
+                  <label>
+                    <span>
+                      {text(
+                        "Image description — Arabic",
+                        "وصف الصورة — عربي"
+                      )}
+                    </span>
+
+                    <input
+                      type="text"
+                      dir="rtl"
+                      value={
+                        selectedSlide.visualAlt?.ar ||
+                        ""
+                      }
+                      onChange={(event) =>
+                        updateSelectedSlide({
+                          visualAlt: {
+                            ...(
+                              selectedSlide.visualAlt ||
+                              {}
+                            ),
+                            ar:
+                              event.target.value,
+                          },
+                        })
+                      }
+                      placeholder="طلاب يستكشفون أجزاء الحاسوب"
+                    />
+                  </label>
+
+
+                  <label className="owner-builder-visual-full">
+                    <span>
+                      💡{" "}
+                      {text(
+                        "Important information box — English",
+                        "مربع معلومة مهمة — English"
+                      )}
+                    </span>
+
+                    <textarea
+                      rows="2"
+                      value={
+                        selectedSlide.infoBox?.en ||
+                        ""
+                      }
+                      onChange={(event) =>
+                        updateSelectedSlide({
+                          infoBox: {
+                            ...(
+                              selectedSlide.infoBox ||
+                              {}
+                            ),
+                            en:
+                              event.target.value,
+                          },
+                        })
+                      }
+                      placeholder="Remember: RAM stores data temporarily while the computer is running."
+                    />
+
+                    <textarea
+                      rows="2"
+                      dir="rtl"
+                      value={
+                        selectedSlide.infoBox?.ar ||
+                        ""
+                      }
+                      onChange={(event) =>
+                        updateSelectedSlide({
+                          infoBox: {
+                            ...(
+                              selectedSlide.infoBox ||
+                              {}
+                            ),
+                            ar:
+                              event.target.value,
+                          },
+                        })
+                      }
+                      placeholder="تذكّر: الذاكرة RAM تحفظ البيانات مؤقتًا أثناء تشغيل الحاسوب."
+                    />
+                  </label>
+
+
+                  <label className="owner-builder-visual-full">
+                    <span>
+                      🔥{" "}
+                      {text(
+                        "Challenge box — English",
+                        "مربع تحدّي — English"
+                      )}
+                    </span>
+
+                    <textarea
+                      rows="2"
+                      value={
+                        selectedSlide.challengeBox?.en ||
+                        ""
+                      }
+                      onChange={(event) =>
+                        updateSelectedSlide({
+                          challengeBox: {
+                            ...(
+                              selectedSlide.challengeBox ||
+                              {}
+                            ),
+                            en:
+                              event.target.value,
+                          },
+                        })
+                      }
+                      placeholder="Challenge: Can you name three devices that contain a CPU?"
+                    />
+
+                    <textarea
+                      rows="2"
+                      dir="rtl"
+                      value={
+                        selectedSlide.challengeBox?.ar ||
+                        ""
+                      }
+                      onChange={(event) =>
+                        updateSelectedSlide({
+                          challengeBox: {
+                            ...(
+                              selectedSlide.challengeBox ||
+                              {}
+                            ),
+                            ar:
+                              event.target.value,
+                          },
+                        })
+                      }
+                      placeholder="تحدّي: هل تستطيع ذكر ثلاثة أجهزة تحتوي على CPU؟"
+                    />
+                  </label>
+
+                </div>
+
+              </section>
+
+
               {/* POWERPOINT CANVAS */}
 
-              <div className={`owner-builder-canvas slide-${selectedKind}`}>
+              <div
+                className={`owner-builder-canvas slide-${selectedKind}`}
+                style={{
+                  "--builder-slide-theme":
+                    selectedSlide.themeColor ||
+                    getSlideColors(
+                      selectedKind
+                    ).themeColor,
+                  "--builder-slide-accent":
+                    selectedSlide.accentColor ||
+                    getSlideColors(
+                      selectedKind
+                    ).accentColor,
+                  "--builder-slide-surface":
+                    selectedSlide.surfaceColor ||
+                    getSlideColors(
+                      selectedKind
+                    ).surfaceColor,
+                }}
+              >
 
                 <div className="owner-builder-canvas-top">
 
@@ -1576,6 +2098,40 @@ function OwnerLessonBuilder() {
                   </small>
 
                 </div>
+
+
+                {(selectedSlide.emoji ||
+                  selectedSlide.visualImage) && (
+
+                  <div className="owner-builder-live-visual">
+
+                    {selectedSlide.emoji && (
+                      <div className="owner-builder-live-emoji">
+                        {selectedSlide.emoji}
+                      </div>
+                    )}
+
+                    {selectedSlide.visualImage && (
+                      <img
+                        src={selectedSlide.visualImage}
+                        alt={
+                          localized(
+                            selectedSlide.visualAlt
+                          ) ||
+                          localized(
+                            selectedSlide.title
+                          ) ||
+                          text(
+                            "Slide visual",
+                            "صورة الشريحة"
+                          )
+                        }
+                      />
+                    )}
+
+                  </div>
+
+                )}
 
 
                 {/* TITLE */}
@@ -1765,6 +2321,10 @@ function OwnerLessonBuilder() {
                 )}
 
 
+                {(selectedKind === "task" || selectedKind === "challenge") && (
+                  <CodingConfigFields value={selectedSlide.codingConfig} onChange={codingConfig => updateSelectedSlide({ codingConfig })} />
+                )}
+
                 {/* TASK / CHALLENGE */}
 
                 {(
@@ -1828,6 +2388,54 @@ function OwnerLessonBuilder() {
                       placeholder="اشرحي ماذا يجب على الطالب أن يفعل..."
                     />
 
+                  </div>
+
+                )}
+
+
+                {localized(
+                  selectedSlide.infoBox
+                ) && (
+
+                  <div className="owner-builder-info-box">
+                    <span>💡</span>
+                    <div>
+                      <strong>
+                        {text(
+                          "Important",
+                          "معلومة مهمة"
+                        )}
+                      </strong>
+                      <p>
+                        {localized(
+                          selectedSlide.infoBox
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                )}
+
+
+                {localized(
+                  selectedSlide.challengeBox
+                ) && (
+
+                  <div className="owner-builder-challenge-box">
+                    <span>🔥</span>
+                    <div>
+                      <strong>
+                        {text(
+                          "Challenge",
+                          "تحدّي"
+                        )}
+                      </strong>
+                      <p>
+                        {localized(
+                          selectedSlide.challengeBox
+                        )}
+                      </p>
+                    </div>
                   </div>
 
                 )}
@@ -2180,7 +2788,32 @@ function OwnerLessonBuilder() {
         >
 
           <div
-            className="owner-builder-preview-modal"
+            className={`owner-builder-preview-modal ${
+              lesson.coverImage
+                ? "has-lesson-cover"
+                : ""
+            }`}
+            style={{
+              "--preview-cover":
+                lesson.coverImage
+                  ? `url("${lesson.coverImage}")`
+                  : "none",
+              "--preview-theme":
+                selectedSlide.themeColor ||
+                getSlideColors(
+                  selectedKind
+                ).themeColor,
+              "--preview-accent":
+                selectedSlide.accentColor ||
+                getSlideColors(
+                  selectedKind
+                ).accentColor,
+              "--preview-surface":
+                selectedSlide.surfaceColor ||
+                getSlideColors(
+                  selectedKind
+                ).surfaceColor,
+            }}
             onClick={(event) =>
               event.stopPropagation()
             }
@@ -2220,11 +2853,145 @@ function OwnerLessonBuilder() {
             </header>
 
 
-            <div className={`owner-builder-preview-slide preview-${selectedKind}`}>
+            <section className="owner-builder-preview-hero">
+
+              <div className="owner-builder-preview-hero-overlay" />
+
+              <div className="owner-builder-preview-hero-content">
+
+                <div>
+
+                  <small>
+                    {text(
+                      "INTERACTIVE LESSON",
+                      "درس تفاعلي"
+                    )}
+                  </small>
+
+                  <h1>
+                    {localized(
+                      lesson.title
+                    )}
+                  </h1>
+
+                  {localized(
+                    lesson.description
+                  ) && (
+
+                    <p>
+                      {localized(
+                        lesson.description
+                      )}
+                    </p>
+
+                  )}
+
+                  <div className="owner-builder-preview-hero-meta">
+
+                    <span>
+                      ⏱️{" "}
+                      {lesson.minutes ||
+                        90}{" "}
+                      {text(
+                        "min",
+                        "دقيقة"
+                      )}
+                    </span>
+
+                    <span>
+                      ⭐{" "}
+                      {lesson.xp ||
+                        0} XP
+                    </span>
+
+                    <span>
+                      🖼️{" "}
+                      {slides.length}{" "}
+                      {text(
+                        "slides",
+                        "شرائح"
+                      )}
+                    </span>
+
+                  </div>
+
+                </div>
+
+
+                {lesson.coverImage && (
+
+                  <img
+                    src={
+                      lesson.coverImage
+                    }
+                    alt={
+                      localized(
+                        lesson.imageAlt
+                      ) ||
+                      localized(
+                        lesson.title
+                      )
+                    }
+                  />
+
+                )}
+
+              </div>
+
+            </section>
+
+
+            <div
+              className={`owner-builder-preview-slide preview-${selectedKind}`}
+              style={{
+                "--preview-theme":
+                  selectedSlide.themeColor ||
+                  getSlideColors(
+                    selectedKind
+                  ).themeColor,
+                "--preview-accent":
+                  selectedSlide.accentColor ||
+                  getSlideColors(
+                    selectedKind
+                  ).accentColor,
+                "--preview-surface":
+                  selectedSlide.surfaceColor ||
+                  getSlideColors(
+                    selectedKind
+                  ).surfaceColor,
+              }}
+            >
 
               <div className="preview-slide-icon">
                 {selectedType.icon}
               </div>
+
+
+              {selectedSlide.emoji && (
+                <div className="preview-big-emoji">
+                  {selectedSlide.emoji}
+                </div>
+              )}
+
+
+              {selectedSlide.visualImage && (
+                <img
+                  className="preview-slide-image"
+                  src={selectedSlide.visualImage}
+                  alt={
+                    localized(
+                      selectedSlide.visualAlt
+                    ) ||
+                    localized(
+                      selectedSlide.title
+                    ) ||
+                    text(
+                      "Slide visual",
+                      "صورة الشريحة"
+                    )
+                  }
+                />
+              )}
 
 
               <small>
@@ -2288,6 +3055,54 @@ function OwnerLessonBuilder() {
                   {localized(
                     selectedSlide.task
                   )}
+                </div>
+
+              )}
+
+
+              {localized(
+                selectedSlide.infoBox
+              ) && (
+
+                <div className="preview-info-box">
+                  <span>💡</span>
+                  <div>
+                    <strong>
+                      {text(
+                        "Important",
+                        "معلومة مهمة"
+                      )}
+                    </strong>
+                    <p>
+                      {localized(
+                        selectedSlide.infoBox
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+              )}
+
+
+              {localized(
+                selectedSlide.challengeBox
+              ) && (
+
+                <div className="preview-challenge-box">
+                  <span>🔥</span>
+                  <div>
+                    <strong>
+                      {text(
+                        "Challenge",
+                        "تحدّي"
+                      )}
+                    </strong>
+                    <p>
+                      {localized(
+                        selectedSlide.challengeBox
+                      )}
+                    </p>
+                  </div>
                 </div>
 
               )}
@@ -2370,6 +3185,7 @@ function OwnerLessonBuilder() {
                   )
                 }
               >
+                {language === "ar" ? "→" : "←"}{" "}
                 {text(
                   "Previous",
                   "السابق"
@@ -2409,7 +3225,8 @@ function OwnerLessonBuilder() {
                 {text(
                   "Next",
                   "التالي"
-                )}
+                )}{" "}
+                {language === "ar" ? "←" : "→"}
               </button>
 
             </footer>

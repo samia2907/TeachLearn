@@ -89,6 +89,11 @@ function ProgramLearning() {
     setSelectedLessonId,
   ] = useState("");
 
+  const [
+    upgradeRequired,
+    setUpgradeRequired,
+  ] = useState(false);
+
 
   /* =====================================================
      TRANSLATION
@@ -97,12 +102,15 @@ function ProgramLearning() {
   const text =
     (
       english,
-      arabic
+        arabic,
+        hebrew = english
     ) =>
       language ===
       "ar"
         ? arabic
-        : english;
+          : language === "he"
+            ? hebrew
+            : english;
 
 
   const localized =
@@ -152,7 +160,8 @@ function ProgramLearning() {
           setError(
             text(
               "Program ID is missing.",
-              "معرّف البرنامج غير موجود."
+              "معرّف البرنامج غير موجود.",
+              "מזהה התוכנית חסר."
             )
           );
 
@@ -170,6 +179,7 @@ function ProgramLearning() {
           );
 
           setError("");
+          setUpgradeRequired(false);
 
 
           const getPurchasedProgram =
@@ -274,11 +284,27 @@ function ProgramLearning() {
             code ===
             "functions/permission-denied"
           ) {
+            const requiresUpgrade =
+              String(loadError?.message || "")
+                .toLowerCase()
+                .includes("upgrade");
+
+            setUpgradeRequired(
+              requiresUpgrade
+            );
+
             setError(
-              text(
-                "You do not have access to this program.",
-                "لا يوجد لديك وصول إلى هذا البرنامج."
-              )
+              requiresUpgrade
+                ? text(
+                    "Purchase this program to get access.",
+                    "اشترِ هذا البرنامج للحصول على الوصول.",
+                    "רכשו את התוכנית כדי לקבל גישה."
+                  )
+                : text(
+                    "You do not have access to this program.",
+                    "لا يوجد لديك وصول إلى هذا البرنامج.",
+                    "אין לך גישה לתוכנית הזו."
+                  )
             );
 
           } else if (
@@ -288,7 +314,8 @@ function ProgramLearning() {
             setError(
               text(
                 "Please sign in again.",
-                "يرجى تسجيل الدخول من جديد."
+                "يرجى تسجيل الدخول من جديد.",
+                "יש להתחבר מחדש."
               )
             );
 
@@ -299,7 +326,8 @@ function ProgramLearning() {
             setError(
               text(
                 "This program could not be found.",
-                "لم يتم العثور على هذا البرنامج."
+                "لم يتم العثور على هذا البرنامج.",
+                "לא ניתן למצוא את התוכנית הזו."
               )
             );
 
@@ -307,7 +335,8 @@ function ProgramLearning() {
             setError(
               text(
                 "Could not load the program. Please try again.",
-                "تعذر تحميل البرنامج. حاول مرة أخرى."
+                "تعذر تحميل البرنامج. حاول مرة أخرى.",
+                "לא ניתן לטעון את התוכנית. נסו שוב."
               )
             );
           }
@@ -380,7 +409,8 @@ function ProgramLearning() {
       lesson?.name ||
       text(
         "Lesson",
-        "درس"
+        "درس",
+        "שיעור"
       );
 
 
@@ -533,7 +563,8 @@ function ProgramLearning() {
         <p>
           {text(
             "Opening your program...",
-            "جارٍ فتح البرنامج..."
+            "جارٍ فتح البرنامج...",
+            "התוכנית נפתחת..."
           )}
         </p>
 
@@ -564,7 +595,8 @@ function ProgramLearning() {
           <h1>
             {text(
               "Program unavailable",
-              "البرنامج غير متاح"
+              "البرنامج غير متاح",
+              "התוכנית אינה זמינה"
             )}
           </h1>
 
@@ -573,7 +605,8 @@ function ProgramLearning() {
             {error ||
               text(
                 "You do not currently have access to this program.",
-                "لا يوجد لديك وصول إلى هذا البرنامج حاليًا."
+                "لا يوجد لديك وصول إلى هذا البرنامج حاليًا.",
+                "אין לך כרגע גישה לתוכנית הזו."
               )}
           </p>
 
@@ -586,9 +619,23 @@ function ProgramLearning() {
           >
             {text(
               "Back to Programs",
-              "العودة إلى البرامج"
+              "العودة إلى البرامج",
+              "חזרה לתוכניות"
             )}
           </button>
+
+          {(!access || upgradeRequired) && (
+            <button
+              type="button"
+              onClick={() => navigate("/programs")}
+            >
+              {text(
+                "Buy Program",
+                "شراء البرنامج",
+                "רכישת תוכנית"
+              )}
+            </button>
+          )}
 
         </div>
 
@@ -607,7 +654,8 @@ function ProgramLearning() {
     ) ||
     text(
       "Learning Program",
-      "برنامج تعليمي"
+      "برنامج تعليمي",
+      "תוכנית למידה"
     );
 
 
@@ -663,7 +711,8 @@ function ProgramLearning() {
 
             {text(
               "Programs",
-              "البرامج"
+              "البرامج",
+              "תוכניות"
             )}
           </button>
 
@@ -678,14 +727,15 @@ function ProgramLearning() {
             <div>
 
               <strong>
-                TechMinds
+                TeachLearn
               </strong>
 
 
               <span>
                 {text(
                   "Learning Program",
-                  "برنامج تعليمي"
+                  "برنامج تعليمي",
+                  "תוכנית למידה"
                 )}
               </span>
 
@@ -735,6 +785,24 @@ function ProgramLearning() {
               عربي
             </button>
 
+
+            <button
+              type="button"
+              className={
+                language ===
+                "he"
+                  ? "active"
+                  : ""
+              }
+              onClick={() =>
+                setLanguage(
+                  "he"
+                )
+              }
+            >
+              עברית
+            </button>
+
           </div>
 
 
@@ -749,14 +817,16 @@ function ProgramLearning() {
               "class"
                 ? text(
                     "Class Access",
-                    "ترخيص صف"
+                    "ترخيص صف",
+                    "גישה כיתתית"
                   )
                 : access
                     .licenseType ===
                   "teacher"
                 ? text(
                     "Teacher Access",
-                    "وصول معلّم"
+                    "وصول معلّم",
+                    "גישה למורה"
                   )
                 : access
                     .licenseType ===
@@ -767,7 +837,8 @@ function ProgramLearning() {
                   )
                 : text(
                     "Owner Preview",
-                    "معاينة المالك"
+                    "معاينة المالك",
+                    "תצוגה מקדימה לבעלים"
                   )}
 
             </span>
@@ -796,7 +867,7 @@ function ProgramLearning() {
         <div className="program-learning-hero-content">
 
           <small>
-            TECHMINDS PROGRAM
+            TEACHLEARN PROGRAM
           </small>
 
 
@@ -809,8 +880,9 @@ function ProgramLearning() {
 
             {programDescription ||
               text(
-                "An interactive TechMinds learning journey.",
-                "رحلة تعليمية تفاعلية من TechMinds."
+                "An interactive TeachLearn learning journey.",
+                "رحلة تعليمية تفاعلية من TeachLearn.",
+                "מסע למידה אינטראקטיבי של TeachLearn."
               )}
 
           </p>
@@ -824,7 +896,8 @@ function ProgramLearning() {
 
               {text(
                 "Lessons",
-                "دروس"
+                "دروس",
+                "שיעורים"
               )}
             </span>
 
@@ -888,7 +961,8 @@ function ProgramLearning() {
             <small>
               {text(
                 "PROGRAM CONTENT",
-                "محتوى البرنامج"
+                "محتوى البرنامج",
+                "תוכן התוכנית"
               )}
             </small>
 
@@ -896,7 +970,8 @@ function ProgramLearning() {
             <h2>
               {text(
                 "Lessons",
-                "الدروس"
+                "الدروس",
+                "שיעורים"
               )}
             </h2>
 
@@ -904,7 +979,8 @@ function ProgramLearning() {
             <p>
               {text(
                 "Choose a lesson to view its content.",
-                "اختر درسًا لعرض محتواه."
+                "اختر درسًا لعرض محتواه.",
+                "בחרו שיעור כדי לצפות בתוכן שלו."
               )}
             </p>
 
@@ -924,7 +1000,8 @@ function ProgramLearning() {
               <strong>
                 {text(
                   "No published lessons yet",
-                  "لا توجد دروس منشورة بعد"
+                  "لا توجد دروس منشورة بعد",
+                  "עדיין אין שיעורים שפורסמו"
                 )}
               </strong>
 
@@ -963,6 +1040,17 @@ function ProgramLearning() {
                           ? "program-lesson-item active"
                           : "program-lesson-item"
                       }
+                      style={{
+                        "--lesson-theme":
+                          lesson.themeColor ||
+                          "#7c3aed",
+                        "--lesson-accent":
+                          lesson.accentColor ||
+                          "#4f46e5",
+                        "--lesson-surface":
+                          lesson.surfaceColor ||
+                          "#f5f3ff",
+                      }}
                       onClick={() =>
                         setSelectedLessonId(
                           lesson.id
@@ -970,9 +1058,24 @@ function ProgramLearning() {
                       }
                     >
 
-                      <div className="program-lesson-number">
-                        {index +
-                          1}
+                      <div className={`program-lesson-number ${
+                        lesson.coverImage
+                          ? "has-cover"
+                          : ""
+                      }`}>
+                        {lesson.coverImage && (
+                          <img
+                            src={lesson.coverImage}
+                            alt={localized(
+                              lesson.imageAlt
+                            )}
+                          />
+                        )}
+
+                        <span>
+                          {index +
+                            1}
+                        </span>
                       </div>
 
 
@@ -997,7 +1100,8 @@ function ProgramLearning() {
 
                           {text(
                             "slides",
-                            "شرائح"
+                            "شرائح",
+                            "שקופיות"
                           )}
 
                         </span>
@@ -1032,7 +1136,8 @@ function ProgramLearning() {
 
                 {text(
                   "FINAL PROJECT",
-                  "المشروع النهائي"
+                  "المشروع النهائي",
+                  "פרויקט גמר"
                 )}
               </small>
 
@@ -1069,7 +1174,8 @@ function ProgramLearning() {
 
   {text(
     "Start Lesson",
-    "ابدأ الدرس"
+    "ابدأ الدرس",
+    "התחלת שיעור"
   )}
 </button>
               <div>
@@ -1080,7 +1186,8 @@ function ProgramLearning() {
               <h2>
                 {text(
                   "Choose your first lesson",
-                  "اختر الدرس الأول"
+                  "اختر الدرس الأول",
+                  "בחרו את השיעור הראשון"
                 )}
               </h2>
 
@@ -1088,7 +1195,8 @@ function ProgramLearning() {
               <p>
                 {text(
                   "Your program lessons will appear here.",
-                  "سيظهر محتوى الدرس هنا."
+                  "سيظهر محتوى الدرس هنا.",
+                  "שיעורי התוכנית יופיעו כאן."
                 )}
               </p>
 
@@ -1098,13 +1206,37 @@ function ProgramLearning() {
 
             <>
 
-              <div className="program-current-lesson">
+              <div
+                className="program-current-lesson"
+                style={{
+                  "--lesson-theme":
+                    selectedLesson.themeColor ||
+                    "#7c3aed",
+                  "--lesson-accent":
+                    selectedLesson.accentColor ||
+                    "#4f46e5",
+                  "--lesson-surface":
+                    selectedLesson.surfaceColor ||
+                    "#f5f3ff",
+                }}
+              >
 
-                <div className="program-current-lesson-icon">
+                <div className={`program-current-lesson-icon ${
+                  selectedLesson.coverImage
+                    ? "has-cover"
+                    : ""
+                }`}>
 
-                  {getLessonIcon(
-                    selectedLesson
-                  )}
+                  {selectedLesson.coverImage ? (
+                    <img
+                      src={selectedLesson.coverImage}
+                      alt={localized(
+                        selectedLesson.imageAlt
+                      )}
+                    />
+                  ) : getLessonIcon(
+                      selectedLesson
+                    )}
 
                 </div>
 
@@ -1114,7 +1246,8 @@ function ProgramLearning() {
                   <small>
                     {text(
                       "CURRENT LESSON",
-                      "الدرس الحالي"
+                      "الدرس الحالي",
+                      "השיעור הנוכחי"
                     )}
                   </small>
 
@@ -1148,7 +1281,8 @@ function ProgramLearning() {
 
                       {text(
                         "slides",
-                        "شرائح"
+                        "شرائح",
+                        "שקופיות"
                       )}
                     </span>
 
@@ -1166,7 +1300,8 @@ function ProgramLearning() {
 
                         {text(
                           "min",
-                          "دقيقة"
+                          "دقيقة",
+                          "דקות"
                         )}
                       </span>
 
@@ -1196,7 +1331,8 @@ function ProgramLearning() {
                   <h3>
                     {text(
                       "This lesson has no content yet.",
-                      "لا يوجد محتوى في هذا الدرس بعد."
+                        "لا يوجد محتوى في هذا الدرس بعد.",
+                        "עדיין אין תוכן בשיעור הזה."
                     )}
                   </h3>
 
@@ -1224,6 +1360,10 @@ function ProgramLearning() {
                             1
                           }`,
                           `الشريحة ${
+                            index +
+                            1
+                          }`,
+                          `שקופית ${
                             index +
                             1
                           }`
@@ -1278,7 +1418,8 @@ function ProgramLearning() {
                               {section.type ||
                                 text(
                                   "content",
-                                  "محتوى"
+                                  "محتوى",
+                                  "תוכן"
                                 )}
                             </small>
 
@@ -1365,7 +1506,8 @@ function ProgramLearning() {
                   <small>
                     {text(
                       "INTERACTIVE MODE",
-                      "الوضع التفاعلي"
+                      "الوضع التفاعلي",
+                      "מצב אינטראקטיבי"
                     )}
                   </small>
 
@@ -1375,7 +1517,8 @@ function ProgramLearning() {
 
                     {text(
                       "Lesson Player",
-                      "مشغّل الدرس"
+                      "مشغّل الدرس",
+                      "נגן השיעור"
                     )}
                   </h3>
 
@@ -1383,7 +1526,8 @@ function ProgramLearning() {
                   <p>
                     {text(
                       "The next step is connecting these slides to lesson progress, answers, challenges and completion.",
-                      "الخطوة التالية هي ربط هذه الشرائح بالتقدم والإجابات والتحديات وإكمال الدرس."
+                      "الخطوة التالية هي ربط هذه الشرائح بالتقدم والإجابات والتحديات وإكمال الدرس.",
+                      "השלב הבא הוא לחבר את השקופיות להתקדמות, לתשובות, לאתגרים ולהשלמת השיעור."
                     )}
                   </p>
 

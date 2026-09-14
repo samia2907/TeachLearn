@@ -27,6 +27,8 @@ import {
 
 import "./OwnerCustomers.css";
 
+import { hebrewText } from "../data/hebrewText";
+
 
 function OwnerCustomers() {
   const navigate =
@@ -90,6 +92,8 @@ function OwnerCustomers() {
   ) =>
     language === "ar"
       ? arabic
+      : language === "he"
+        ? hebrewText(english)
       : english;
 
 
@@ -544,12 +548,14 @@ function OwnerCustomers() {
           >
             {language === "ar"
               ? "↩ العودة للرئيسية"
-              : "← Back to Dashboard"}
+              : language === "he"
+                ? "→ חזרה ללוח הבקרה"
+                : "← Back to Dashboard"}
           </button>
 
 
           <small>
-            TECHMINDS ADMINISTRATION
+            TEACHLEARN ADMINISTRATION
           </small>
 
 
@@ -564,8 +570,8 @@ function OwnerCustomers() {
 
           <p>
             {text(
-              "Manage students and teachers registered on TechMinds.",
-              "أديري الطلاب والمعلمين المسجلين في TechMinds."
+              "Manage students and teachers registered on TeachLearn.",
+              "أديري الطلاب والمعلمين المسجلين في TeachLearn."
             )}
           </p>
 
@@ -607,6 +613,10 @@ function OwnerCustomers() {
               }
             >
               عربي
+            </button>
+
+            <button type="button" className={language === "he" ? "active" : ""} onClick={() => setLanguage("he")}>
+              עברית
             </button>
 
           </div>
@@ -783,8 +793,8 @@ function OwnerCustomers() {
 
             <h2>
               {text(
-                "TechMinds Users",
-                "مستخدمو TechMinds"
+                "TeachLearn Users",
+                "مستخدمو TeachLearn"
               )}
             </h2>
 
@@ -1246,7 +1256,7 @@ function OwnerCustomers() {
               <div>
 
                 <small>
-                  TECHMINDS CUSTOMER
+                  TEACHLEARN CUSTOMER
                 </small>
 
 

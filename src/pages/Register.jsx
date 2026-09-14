@@ -17,7 +17,6 @@ import {
   getDoc,
   serverTimestamp,
   setDoc,
-  writeBatch,
 } from "firebase/firestore";
 
 import {
@@ -33,6 +32,10 @@ import {
 import {
   useLanguage,
 } from "../context/LanguageContext";
+
+import {
+  isStrongPassword,
+} from "../utils/passwordPolicy";
 
 import "./Register.css";
 
@@ -72,9 +75,6 @@ function Register() {
     useState("");
 
   const [email, setEmail] =
-    useState("");
-
-  const [username, setUsername] =
     useState("");
 
   const [password, setPassword] =
@@ -203,24 +203,6 @@ function Register() {
     }
   };
 
-  const normalizeUsername = (
-    value
-  ) => {
-    return value
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, "");
-  };
-
-  const normalizeStudentCode = (
-    value
-  ) => {
-    return value
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, "");
-  };
-
   const normalizePhoneNumber = (
     value
   ) => {
@@ -269,69 +251,6 @@ function Register() {
 
     return null;
   };
-
-  /* ===========================
-     STUDENT CODE
-  =========================== */
-
-  const generateStudentCode = () => {
-    const characters =
-      "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-
-    let code = "";
-
-    for (
-      let i = 0;
-      i < 6;
-      i++
-    ) {
-      code +=
-        characters[
-          Math.floor(
-            Math.random() *
-              characters.length
-          )
-        ];
-    }
-
-    return `TL-${code}`;
-  };
-
-  const generateUniqueStudentCode =
-    async () => {
-      for (
-        let attempt = 0;
-        attempt < 10;
-        attempt++
-      ) {
-        const newCode =
-          generateStudentCode();
-
-        const normalizedCode =
-          normalizeStudentCode(
-            newCode
-          );
-
-        const codeSnapshot =
-          await getDoc(
-            doc(
-              db,
-              "studentLoginIndex",
-              `c_${normalizedCode}`
-            )
-          );
-
-        if (
-          !codeSnapshot.exists()
-        ) {
-          return newCode;
-        }
-      }
-
-      throw new Error(
-        "student-code-generation-failed"
-      );
-    };
 
   const goBack = () => {
     setRole(null);
@@ -784,93 +703,15 @@ function Register() {
 
   const registerStudent =
     async () => {
-      const normalizedUsername =
-        normalizeUsername(
-          username
-        );
-
-      /*
-        Arabic / Hebrew / English letters,
-        numbers and _ . -
-      */
-
-      const usernameRegex =
-        /^[\p{L}\p{N}._-]{3,24}$/u;
-
-      if (
-        !usernameRegex.test(
-          normalizedUsername
-        )
-      ) {
-        throw new Error(
-          "invalid-username"
-        );
-      }
-
-      /*
-        Check username
-      */
-
-      const usernameIndexRef =
-        doc(
-          db,
-          "studentLoginIndex",
-          `u_${normalizedUsername}`
-        );
-
-      const usernameSnapshot =
-        await getDoc(
-          usernameIndexRef
-        );
-
-      if (
-        usernameSnapshot.exists()
-      ) {
-        throw new Error(
-          "username-taken"
-        );
-      }
-
-      /*
-        Generate unique student code
-      */
-
-      const studentCode =
-        await generateUniqueStudentCode();
-
-      const normalizedCode =
-        normalizeStudentCode(
-          studentCode
-        );
-
-      /*
-        Internal Firebase email.
-        Student does NOT use this email.
-      */
-
-      const internalAuthEmail =
-        `${normalizedCode.replace(
-          "-",
-          ""
-        )}@student.teachlearn.app`;
-
-      /*
-        Create Firebase Auth account
-      */
+      const cleanEmail =
+        email.trim().toLowerCase();
 
       const result =
         await createUserWithEmailAndPassword(
           auth,
-          internalAuthEmail,
+          cleanEmail,
           password
         );
-
-      /*
-        Save profile + login indexes
-      */
-
-      const batch =
-        writeBatch(db);
 
       const userRef =
         doc(
@@ -879,7 +720,7 @@ function Register() {
           result.user.uid
         );
 
-      batch.set(
+      await setDoc(
         userRef,
         {
           uid:
@@ -891,16 +732,14 @@ function Register() {
           role:
             "student",
 
-          username:
-            username.trim(),
+          studentAccountType:
+            "independent",
 
-          usernameNormalized:
-            normalizedUsername,
-
-          studentCode,
+          email:
+            cleanEmail,
 
           authEmail:
-            internalAuthEmail,
+            cleanEmail,
 
           classId:
             null,
@@ -939,51 +778,6 @@ function Register() {
             serverTimestamp(),
         }
       );
-
-      /*
-        Username index
-      */
-
-      batch.set(
-        usernameIndexRef,
-        {
-          uid:
-            result.user.uid,
-
-          authEmail:
-            internalAuthEmail,
-
-          type:
-            "username",
-        }
-      );
-
-      /*
-        Student code index
-      */
-
-      const codeIndexRef =
-        doc(
-          db,
-          "studentLoginIndex",
-          `c_${normalizedCode}`
-        );
-
-      batch.set(
-        codeIndexRef,
-        {
-          uid:
-            result.user.uid,
-
-          authEmail:
-            internalAuthEmail,
-
-          type:
-            "studentCode",
-        }
-      );
-
-      await batch.commit();
 
       navigate("/plans");
     };
@@ -1038,16 +832,26 @@ function Register() {
         return;
       }
 
-      if (
-        password.length < 6
-      ) {
+      if (!email.trim()) {
         setError(
           text(
-            "Password must contain at least 6 characters.",
+            "Please enter your email address.",
+            "أدخل بريدك الإلكتروني.",
+            "יש להזין כתובת אימייל."
+          )
+        );
 
-            "يجب أن تحتوي كلمة المرور على 6 أحرف على الأقل.",
+        return;
+      }
 
-            "הסיסמה חייבת להכיל לפחות 6 תווים."
+      if (!isStrongPassword(password)) {
+        setError(
+          text(
+            "Use at least 8 characters with uppercase, lowercase, a number, and a special symbol.",
+
+            "استخدم 8 أحرف على الأقل، تشمل حرفًا كبيرًا وصغيرًا ورقمًا ورمزًا خاصًا.",
+
+            "יש להשתמש ב-8 תווים לפחות, כולל אות גדולה, אות קטנה, מספר וסימן מיוחד."
           )
         );
 
@@ -1105,6 +909,12 @@ function Register() {
     const errorKey =
       err.code ||
       err.message;
+
+    const visibleErrorCode =
+      typeof errorKey === "string" &&
+      /^[a-z0-9/_-]+$/i.test(errorKey)
+        ? errorKey
+        : "unknown-error";
 
     switch (errorKey) {
       case "auth/email-already-in-use":
@@ -1187,6 +997,58 @@ function Register() {
             "رقم الهاتف غير صحيح.",
 
             "מספר הטלפון אינו תקין."
+          )
+        );
+        break;
+
+      case "auth/operation-not-allowed":
+        setError(
+          text(
+            "Phone sign-in is not enabled for this Firebase project. Enable the Phone provider in Firebase Authentication, or use email/Google.",
+            "تسجيل الدخول بالهاتف غير مفعّل في مشروع Firebase. فعّل مزوّد الهاتف من Firebase Authentication أو استخدم البريد/Google.",
+            "התחברות באמצעות טלפון אינה מופעלת בפרויקט Firebase. יש להפעיל את ספק הטלפון או להשתמש באימייל/Google."
+          )
+        );
+        break;
+
+      case "auth/unauthorized-domain":
+      case "auth/app-not-authorized":
+        setError(
+          text(
+            "This website domain is not authorized for phone authentication.",
+            "نطاق هذا الموقع غير مصرح له باستخدام تسجيل الدخول بالهاتف.",
+            "דומיין האתר אינו מורשה לאימות באמצעות טלפון."
+          )
+        );
+        break;
+
+      case "auth/billing-not-enabled":
+        setError(
+          text(
+            "Phone authentication requires billing to be enabled for this Firebase project.",
+            "تسجيل الدخول بالهاتف يحتاج إلى تفعيل الفوترة في مشروع Firebase.",
+            "אימות באמצעות טלפון מחייב הפעלת חיוב בפרויקט Firebase."
+          )
+        );
+        break;
+
+      case "auth/invalid-app-credential":
+      case "auth/missing-app-credential":
+        setError(
+          text(
+            "reCAPTCHA could not verify this request. Refresh the page and try again.",
+            "تعذر على reCAPTCHA التحقق من الطلب. حدّث الصفحة وحاول مرة أخرى.",
+            "reCAPTCHA לא הצליח לאמת את הבקשה. יש לרענן את הדף ולנסות שוב."
+          )
+        );
+        break;
+
+      case "auth/network-request-failed":
+        setError(
+          text(
+            "Network error while contacting Firebase. Check your connection and try again.",
+            "حدث خطأ في الاتصال مع Firebase. تحقق من الإنترنت وحاول مرة أخرى.",
+            "אירעה שגיאת רשת מול Firebase. יש לבדוק את החיבור ולנסות שוב."
           )
         );
         break;
@@ -1296,11 +1158,11 @@ function Register() {
 
         setError(
           text(
-            "Account creation failed. Please try again.",
+            `Account creation failed (${visibleErrorCode}). Please try again.`,
 
-            "حدث خطأ أثناء إنشاء الحساب. حاول مرة أخرى.",
+            `حدث خطأ أثناء إنشاء الحساب (${visibleErrorCode}). حاول مرة أخرى.`,
 
-            "יצירת החשבון נכשלה. נסו שוב."
+            `יצירת החשבון נכשלה (${visibleErrorCode}). נסו שוב.`
           )
         );
     }
@@ -1915,11 +1777,11 @@ function Register() {
                       type="password"
 
                       placeholder={text(
-                        "At least 6 characters",
+                        "8+ characters: Aa, 1, !",
 
-                        "6 أحرف على الأقل",
+                        "8+ أحرف: Aa، 1، !",
 
-                        "לפחות 6 תווים"
+                        "8+ תווים: Aa, 1, !"
                       )}
 
                       value={password}
@@ -2093,12 +1955,14 @@ function Register() {
 
                 {showPhoneRegister && (
                   <div
+                    className="phone-register-box"
                     style={
                       phoneBoxStyle
                     }
                   >
                     <button
                       type="button"
+                      className="phone-register-back"
 
                       onClick={() => {
                         clearMessages();
@@ -2370,31 +2234,29 @@ function Register() {
               <>
                 <label>
                   {text(
-                    "Username",
+                    "Email",
 
-                    "اسم المستخدم",
+                    "البريد الإلكتروني",
 
-                    "שם משתמש"
+                    "אימייל"
                   )}
                 </label>
 
                 <input
-                  type="text"
+                  type="email"
 
                   placeholder={text(
-                    "Example: adam23",
+                    "student@example.com",
 
-                    "مثال: adam23",
+                    "student@example.com",
 
-                    "לדוגמה: adam23"
+                    "student@example.com"
                   )}
 
-                  value={
-                    username
-                  }
+                  value={email}
 
                   onChange={(e) =>
-                    setUsername(
+                    setEmail(
                       e.target.value
                     )
                   }
@@ -2406,11 +2268,11 @@ function Register() {
                   🎓{" "}
 
                   {text(
-                    "After registration, you will receive your own student code. You can later log in using your username or student code.",
+                    "This creates an independent student account. You will sign in with this email and your password.",
 
-                    "بعد إنشاء الحساب ستحصل على رمز طالب خاص بك. يمكنك تسجيل الدخول لاحقًا باسم المستخدم أو رمز الطالب.",
+                    "هذا ينشئ حساب طالب مستقل. ستسجّل الدخول بهذا البريد الإلكتروني وكلمة المرور.",
 
-                    "לאחר ההרשמה תקבלו קוד תלמיד אישי. תוכלו להתחבר בהמשך באמצעות שם המשתמש או קוד התלמיד."
+                    "זה יוצר חשבון תלמיד עצמאי. ההתחברות תהיה באמצעות האימייל והסיסמה."
                   )}
                 </div>
 
@@ -2422,11 +2284,11 @@ function Register() {
                   type="password"
 
                   placeholder={text(
-                    "At least 6 characters",
+                    "8+ characters: Aa, 1, !",
 
-                    "6 أحرف على الأقل",
+                    "8+ أحرف: Aa، 1، !",
 
-                    "לפחות 6 תווים"
+                    "8+ תווים: Aa, 1, !"
                   )}
 
                   value={

@@ -25,6 +25,8 @@ import {
 
 import "./Plans.css";
 
+import { hebrewText } from "../data/hebrewText";
+
 function Plans() {
   const navigate =
     useNavigate();
@@ -72,13 +74,62 @@ function Plans() {
      TRANSLATION
   ============================== */
 
+  const hebrewLabels = {
+    "User profile was not found.": "פרופיל המשתמש לא נמצא.",
+    "Could not load your account.": "לא ניתן לטעון את החשבון שלך.",
+    "Your school-plan request was saved. We will add the school contact form next.": "הבקשה שלך לתוכנית בית ספר נשמרה. נוסיף את טופס הקשר לבית הספר בשלב הבא.",
+    "Could not save the school request.": "לא ניתן לשמור את הבקשה לבית הספר.",
+    "Loading your plans...": "התוכניות שלך נטענות...",
+    "Choose Your Learning Journey": "בחרו את מסע הלמידה שלכם",
+    "Choose Your Teacher Plan": "בחרו את תוכנית המורה שלכם",
+    "Choose what you want to learn, then select the plan that fits you.": "בחרו מה תרצו ללמוד ולאחר מכן בחרו את התוכנית המתאימה לכם.",
+    "Choose the tools and student capacity that fit your teaching.": "בחרו את הכלים ואת מספר התלמידים המתאימים להוראה שלכם.",
+    "Choose a Learning Program": "בחירת תוכנית למידה",
+    "You can change or add programs later.": "ניתן לשנות או להוסיף תוכניות בהמשך.",
+    "Choose Your Plan": "בחירת התוכנית שלכם",
+    "You can upgrade or change your plan later.": "ניתן לשדרג או לשנות את התוכנית בהמשך.",
+    Monthly: "חודשי",
+    Yearly: "שנתי",
+    " Save": " חיסכון",
+    Free: "חינם",
+    "One Program": "תוכנית אחת",
+    "All Programs": "כל התוכניות",
+    "Teacher Starter": "תוכנית התחלה למורה",
+    "Teacher Pro": "Teacher Pro",
+    "School Plan": "תוכנית בית ספר",
+    "Choose Plan": "בחירת תוכנית",
+    "Continue Free": "המשך בחינם",
+    "Continue to Payment": "המשך לתשלום",
+    "Request School Plan": "בקשת תוכנית בית ספר",
+    "Current Plan": "התוכנית הנוכחית",
+    "Level assessment": "הערכת רמה",
+    "Starter activities": "פעילויות התחלה",
+    "Limited challenges": "אתגרים מוגבלים",
+    "Basic student profile": "פרופיל תלמיד בסיסי",
+    "Full access to one learning program.": "גישה מלאה לתוכנית למידה אחת.",
+    "One full learning track": "מסלול למידה מלא אחד",
+    "All track challenges": "כל אתגרי המסלול",
+    "Progress tracking": "מעקב אחר התקדמות",
+    "Reading, writing, math and weekly progress tracking.": "קריאה, כתיבה, חשבון ומעקב שבועי אחר ההתקדמות.",
+    "Kindergarten & Grade 1": "גן ילדים וכיתה א׳",
+    "Tech Explorer": "חוקר טכנולוגיה",
+    "AI, coding, cyber, computers and digital creativity.": "בינה מלאכותית, תכנות, סייבר, מחשבים ויצירתיות דיגיטלית.",
+    "Gifted Challenge": "אתגר למצטיינים",
+    "AI Explorer": "חוקר בינה מלאכותית",
+    "Code Creator": "יוצר קוד",
+    "Digital Creator": "יוצר דיגיטלי",
+  };
+
   const text = (
     english,
-    arabic
+    arabic,
+    hebrew = hebrewLabels[english] || english
   ) => {
     return language === "ar"
       ? arabic
-      : english;
+      : language === "he"
+        ? hebrew
+        : english;
   };
 
   /* ==============================
@@ -359,10 +410,10 @@ function Plans() {
         0,
 
       descriptionEn:
-        "Explore TechMinds before choosing a complete program.",
+        "Explore TeachLearn before choosing a complete program.",
 
       descriptionAr:
-        "جرّب TechMinds قبل الاشتراك بمسار كامل.",
+        "جرّب TeachLearn قبل الاشتراك بمسار كامل.",
 
       featuresEn: [
         "Level assessment",
@@ -1007,6 +1058,20 @@ function Plans() {
           العربية
         </button>
 
+        <button
+          type="button"
+          className={
+            language === "he"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setLanguage("he")
+          }
+        >
+          עברית
+        </button>
+
       </div>
 
       {/* =====================
@@ -1342,7 +1407,9 @@ function Plans() {
 
                     {(language === "ar"
                       ? plan.featuresAr
-                      : plan.featuresEn
+                      : language === "he"
+                        ? plan.featuresEn.map(hebrewText)
+                        : plan.featuresEn
                     ).map(
                       (
                         feature,

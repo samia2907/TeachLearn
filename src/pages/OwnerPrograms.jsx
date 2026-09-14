@@ -31,6 +31,8 @@ import {
 
 import "./OwnerPrograms.css";
 
+import { hebrewText } from "../data/hebrewText";
+
 
 const emptyForm = {
   titleEn: "",
@@ -51,6 +53,9 @@ const emptyForm = {
   studentPrice: "",
   teacherPrice: "",
   classPrice: "",
+  studentPaddlePriceId: "",
+  teacherPaddlePriceId: "",
+  classPaddlePriceId: "",
 
   finalProjectEn: "",
   finalProjectAr: "",
@@ -133,6 +138,8 @@ function OwnerPrograms() {
   ) =>
     language === "ar"
       ? arabic
+      : language === "he"
+        ? hebrewText(english)
       : english;
 
 
@@ -427,6 +434,9 @@ function OwnerPrograms() {
 
 
       setForm({
+        studentPaddlePriceId: program.paddlePriceIds?.student || "",
+        teacherPaddlePriceId: program.paddlePriceIds?.teacher || "",
+        classPaddlePriceId: program.paddlePriceIds?.class || "",
         titleEn:
           program.title?.en ||
           "",
@@ -591,6 +601,14 @@ function OwnerPrograms() {
           0
         );
 
+      const paddlePriceIds = Object.fromEntries(
+        ["student", "teacher", "class"].map((license) => [license, form[`${license}PaddlePriceId`].trim()])
+      );
+      if (Object.values(paddlePriceIds).some((id) => id && !/^pri_[a-z0-9]{26}$/.test(id))) {
+        setError(text("Enter valid Paddle Price IDs (pri_ followed by 26 lowercase letters or digits), or leave them blank.", "أدخل معرّفات أسعار Paddle صحيحة أو اترك الحقول فارغة."));
+        return;
+      }
+
       const teacherPrice =
         Number(
           form.teacherPrice ||
@@ -605,6 +623,7 @@ function OwnerPrograms() {
 
 
       if (
+        ![studentPrice, teacherPrice, classPrice].every(Number.isFinite) ||
         studentPrice < 0 ||
         teacherPrice < 0 ||
         classPrice < 0
@@ -640,6 +659,7 @@ function OwnerPrograms() {
 
 
         const programData = {
+          paddlePriceIds,
           title: {
             en:
               form.titleEn.trim(),
@@ -712,7 +732,7 @@ function OwnerPrograms() {
             "commercial",
 
           createdBy:
-            user.uid,
+            editingProgram?.createdBy || user.uid,
 
           createdByRole:
             "owner",
@@ -985,12 +1005,14 @@ function OwnerPrograms() {
           >
             {language === "ar"
               ? "↩ العودة للرئيسية"
-              : "← Back to Dashboard"}
+              : language === "he"
+                ? "→ חזרה ללוח הבקרה"
+                : "← Back to Dashboard"}
           </button>
 
 
           <small>
-            TECHMINDS MARKETPLACE
+            TEACHLEARN MARKETPLACE
           </small>
 
 
@@ -1050,6 +1072,10 @@ function OwnerPrograms() {
               }
             >
               عربي
+            </button>
+
+            <button type="button" className={language === "he" ? "active" : ""} onClick={() => setLanguage("he")}>
+              עברית
             </button>
 
           </div>
@@ -1695,7 +1721,7 @@ function OwnerPrograms() {
                 <div>
 
                   <small>
-                    TECHMINDS
+                    TEACHLEARN
                   </small>
 
                   <h2>
@@ -1712,8 +1738,8 @@ function OwnerPrograms() {
 
                   <p>
                     {text(
-                      "Create a commercial learning program for the TechMinds marketplace.",
-                      "أنشئي برنامجًا تعليميًا تجاريًا لمتجر TechMinds."
+                      "Create a commercial learning program for the TeachLearn marketplace.",
+                      "أنشئي برنامجًا تعليميًا تجاريًا لمتجر TeachLearn."
                     )}
                   </p>
 
@@ -2272,6 +2298,24 @@ function OwnerPrograms() {
 
 
               {/* FINAL PROJECT */}
+              <section className="program-form-section">
+                <h3>{text("Paddle prices · one-time program purchase", "أسعار Paddle · شراء البرنامج لمرة واحدة")}</h3>
+                <p>{text("Use one-time prices from the same Paddle environment as checkout. Blank fields disable purchase for that license. Match the display prices above to Paddle amounts and currency.", "استخدم أسعار دفع لمرة واحدة من نفس بيئة Paddle. الحقل الفارغ يعطّل شراء هذا الترخيص. طابق الأسعار المعروضة أعلاه مع المبالغ والعملة في Paddle.")}</p>
+                <div className="program-form-grid">
+                  {[
+                    ["student", "Student Paddle Price ID", "معرّف سعر الطالب في Paddle"],
+                    ["teacher", "Teacher Paddle Price ID", "معرّف سعر المعلّم في Paddle"],
+                    ["class", "Class Paddle Price ID (optional)", "معرّف سعر الصف في Paddle (اختياري)"],
+                  ].map(([license, en, ar]) => (
+                    <div className="program-form-group" key={license}>
+                      <label htmlFor={`paddle-${license}`}>{text(en, ar)}</label>
+                      <input id={`paddle-${license}`} dir="ltr" placeholder="pri_..." autoComplete="off" spellCheck={false}
+                        value={form[`${license}PaddlePriceId`]}
+                        onChange={(event) => setForm((current) => ({ ...current, [`${license}PaddlePriceId`]: event.target.value }))} />
+                    </div>
+                  ))}
+                </div>
+              </section>
 
               <div className="program-form-section">
 

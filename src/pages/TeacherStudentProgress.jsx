@@ -30,6 +30,8 @@ import {
 
 import "./TeacherStudentProgress.css";
 
+import { hebrewText } from "../data/hebrewText";
+
 
 function TeacherStudentProgress() {
   const navigate =
@@ -102,6 +104,8 @@ function TeacherStudentProgress() {
   ) =>
     language === "ar"
       ? arabic
+      : language === "he"
+        ? hebrewText(english)
       : english;
 
 

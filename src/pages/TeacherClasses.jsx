@@ -99,13 +99,64 @@ function TeacherClasses() {
      TRANSLATION
   ================================== */
 
+  const hebrewLabels = {
+    "Loading your classes...": "הכיתות שלך נטענות...",
+    "Back to Dashboard": "חזרה ללוח הבקרה",
+    "My Classes": "הכיתות שלי",
+    "Create and manage your learning classes.": "יצירה וניהול של כיתות הלמידה שלך.",
+    "Create Class": "יצירת כיתה",
+    "Class code copied!": "קוד הכיתה הועתק!",
+    "Active": "פעילה",
+    "Grade": "כיתה",
+    "Students": "תלמידים",
+    "Class Code": "קוד כיתה",
+    "Copy code": "העתקת קוד",
+    "Open Class": "פתיחת כיתה",
+    "No classes yet": "עדיין אין כיתות",
+    "Create your first class and start your TeachLearn learning journey.": "צרו את הכיתה הראשונה שלכם והתחילו את מסע הלמידה שלכם ב-TeachLearn.",
+    "Create Your First Class": "יצירת הכיתה הראשונה",
+    "Create New Class": "יצירת כיתה חדשה",
+    "Choose the class details and learning program.": "בחרו את פרטי הכיתה ותוכנית הלמידה.",
+    "Class Name": "שם הכיתה",
+    "Example: Future Makers": "לדוגמה: יוצרי העתיד",
+    "Grade level": "שכבת גיל",
+    "Choose grade": "בחירת כיתה",
+    Kindergarten: "גן ילדים",
+    "Grade 1": "כיתה א׳",
+    "Grade 2": "כיתה ב׳",
+    "Grade 3": "כיתה ג׳",
+    "Grade 4": "כיתה ד׳",
+    "Grade 5": "כיתה ה׳",
+    "Grade 6": "כיתה ו׳",
+    "Grade 7": "כיתה ז׳",
+    "Grade 8": "כיתה ח׳",
+    "Grade 9": "כיתה ט׳",
+    "Learning Program": "תוכנית למידה",
+    "Cancel": "ביטול",
+    "Creating Class...": "הכיתה נוצרת...",
+    "Create Class 🚀": "יצירת כיתה 🚀",
+    "Please complete all fields.": "יש למלא את כל השדות.",
+    "Class name already exists.": "שם הכיתה כבר קיים.",
+    "Could not create the class.": "לא ניתן ליצור את הכיתה.",
+    "First Grade Companion": "מלווה לכיתה א׳",
+    "Reading, writing, math and progress tracking.": "קריאה, כתיבה, חשבון ומעקב אחר התקדמות.",
+    "Tech Explorer": "חוקר טכנולוגיה",
+    "AI, coding, cyber and digital skills.": "בינה מלאכותית, תכנות, סייבר ומיומנויות דיגיטליות.",
+    "Gifted Challenge": "אתגר למצטיינים",
+    "Logic, puzzles and advanced problem solving.": "לוגיקה, חידות ופתרון בעיות מתקדם.",
+    "AI Explorer": "חוקר בינה מלאכותית",
+  };
+
   const text = (
     english,
-    arabic
+    arabic,
+    hebrew = hebrewLabels[english] || english
   ) =>
     language === "ar"
       ? arabic
-      : english;
+      : language === "he"
+        ? hebrew
+        : english;
 
 
   /* ==================================
@@ -565,6 +616,8 @@ function TeacherClasses() {
 
         /* ============================
            CLASS CODE INDEX
+           Only store the four fields permitted by classCodes rules.
+           Display details belong to the class document above.
         ============================ */
 
         batch.set(
@@ -581,13 +634,6 @@ function TeacherClasses() {
 
             teacherId:
               currentUser.uid,
-
-            teacherName:
-              teacher?.name ||
-              "",
-
-            status:
-              "active",
 
             createdAt:
               serverTimestamp(),
@@ -764,7 +810,9 @@ function TeacherClasses() {
           >
             {language === "ar"
               ? "↩ رجوع للرئيسية"
-              : "← Back to Dashboard"}
+              : language === "he"
+                ? "→ חזרה ללוח הבקרה"
+                : "← Back to Dashboard"}
           </button>
 
 
@@ -824,6 +872,21 @@ function TeacherClasses() {
               }
             >
               عربي
+            </button>
+
+
+            <button
+              type="button"
+              className={
+                language === "he"
+                  ? "active"
+                  : ""
+              }
+              onClick={() =>
+                setLanguage("he")
+              }
+            >
+              עברית
             </button>
 
           </div>
@@ -896,8 +959,8 @@ function TeacherClasses() {
 
           <p>
             {text(
-              "Create your first class and start your TechMinds learning journey.",
-              "أنشئ صفك الأول وابدأ رحلتك التعليمية في TechMinds."
+              "Create your first class and start your TeachLearn learning journey.",
+              "أنشئ صفك الأول وابدأ رحلتك التعليمية في TeachLearn."
             )}
           </p>
 
@@ -1084,7 +1147,7 @@ function TeacherClasses() {
                     )}
 
                     <span>
-                      {language === "ar"
+                      {language === "ar" || language === "he"
                         ? "←"
                         : "→"}
                     </span>

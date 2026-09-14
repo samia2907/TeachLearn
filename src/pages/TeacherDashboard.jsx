@@ -34,6 +34,8 @@ import useSubscription
 
 import "./TeacherDashboard.css";
 
+import { hebrewText } from "../data/hebrewText";
+
 
 function TeacherDashboard() {
   const navigate =
@@ -63,7 +65,7 @@ function TeacherDashboard() {
     if (
       language === "he"
     ) {
-      return hebrew;
+      return hebrew || hebrewText(english);
     }
 
     return english;

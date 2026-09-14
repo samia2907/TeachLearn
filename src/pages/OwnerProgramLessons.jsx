@@ -34,6 +34,8 @@ import {
 
 import "./OwnerProgramLessons.css";
 
+import { hebrewText } from "../data/hebrewText";
+
 
 const emptyLessonForm = {
   titleEn: "",
@@ -41,6 +43,10 @@ const emptyLessonForm = {
 
   descriptionEn: "",
   descriptionAr: "",
+
+  coverImage: "",
+  imageAltEn: "",
+  imageAltAr: "",
 
   minutes: "90",
   xp: "100",
@@ -137,6 +143,8 @@ function OwnerProgramLessons() {
   ) =>
     language === "ar"
       ? arabic
+      : language === "he"
+        ? hebrewText(english)
       : english;
 
 
@@ -541,6 +549,18 @@ function OwnerProgramLessons() {
           lesson.description?.ar ||
           "",
 
+        coverImage:
+          lesson.coverImage ||
+          "",
+
+        imageAltEn:
+          lesson.imageAlt?.en ||
+          "",
+
+        imageAltAr:
+          lesson.imageAlt?.ar ||
+          "",
+
         minutes:
           String(
             lesson.minutes ||
@@ -701,6 +721,17 @@ function OwnerProgramLessons() {
 
             ar:
               form.descriptionAr.trim(),
+          },
+
+          coverImage:
+            form.coverImage.trim(),
+
+          imageAlt: {
+            en:
+              form.imageAltEn.trim(),
+
+            ar:
+              form.imageAltAr.trim(),
           },
 
           minutes,
@@ -1314,6 +1345,10 @@ function OwnerProgramLessons() {
               عربي
             </button>
 
+            <button type="button" className={language === "he" ? "active" : ""} onClick={() => setLanguage("he")}>
+              עברית
+            </button>
+
           </div>
 
 
@@ -1775,6 +1810,27 @@ function OwnerProgramLessons() {
                     </div>
 
 
+                    {/* COVER IMAGE */}
+
+                    {lesson.coverImage && (
+                      <div className="owner-lesson-cover-wrap">
+                        <img
+                          src={lesson.coverImage}
+                          alt={
+                            localized(lesson.imageAlt) ||
+                            localized(lesson.title) ||
+                            text(
+                              "Lesson cover",
+                              "صورة الدرس"
+                            )
+                          }
+                          className="owner-lesson-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
+
+
                     {/* INFO */}
 
                     <div className="owner-lesson-info">
@@ -2213,6 +2269,85 @@ function OwnerProgramLessons() {
                       )
                     }
                     placeholder="يتعرف الطلاب على كيفية عمل الذكاء الاصطناعي من خلال أمثلة وتحديات."
+                  />
+
+                </label>
+
+
+                <label className="owner-lesson-form-full">
+
+                  {text(
+                    "Cover Image Path",
+                    "مسار صورة الغلاف"
+                  )}
+
+                  <input
+                    type="text"
+                    value={
+                      form.coverImage
+                    }
+                    onChange={(event) =>
+                      updateField(
+                        "coverImage",
+                        event.target.value
+                      )
+                    }
+                    placeholder="/lesson-covers/inside-a-computer.png"
+                  />
+
+                  <small className="owner-lesson-form-hint">
+                    {text(
+                      "Use a file from public/lesson-covers/, for example /lesson-covers/inside-a-computer.png",
+                      "استخدمي صورة من public/lesson-covers/، مثل /lesson-covers/inside-a-computer.png"
+                    )}
+                  </small>
+
+                </label>
+
+
+                <label>
+
+                  {text(
+                    "Image Alt — English",
+                    "وصف الصورة — English"
+                  )}
+
+                  <input
+                    type="text"
+                    value={
+                      form.imageAltEn
+                    }
+                    onChange={(event) =>
+                      updateField(
+                        "imageAltEn",
+                        event.target.value
+                      )
+                    }
+                    placeholder="Children exploring computer components"
+                  />
+
+                </label>
+
+
+                <label>
+
+                  {text(
+                    "Image Alt — Arabic",
+                    "وصف الصورة — عربي"
+                  )}
+
+                  <input
+                    type="text"
+                    value={
+                      form.imageAltAr
+                    }
+                    onChange={(event) =>
+                      updateField(
+                        "imageAltAr",
+                        event.target.value
+                      )
+                    }
+                    placeholder="أطفال يستكشفون مكونات الحاسوب"
                   />
 
                 </label>

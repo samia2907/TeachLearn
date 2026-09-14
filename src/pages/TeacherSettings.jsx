@@ -30,6 +30,8 @@ import {
   useLanguage,
 } from "../context/LanguageContext";
 
+import { hebrewText } from "../data/hebrewText";
+
 import "./TeacherSettings.css";
 
 
@@ -51,6 +53,8 @@ function TeacherSettings() {
   ) =>
     language === "ar"
       ? arabic
+      : language === "he"
+        ? hebrewText(english)
       : english;
 
 
@@ -553,7 +557,9 @@ function TeacherSettings() {
             {language ===
             "ar"
               ? "↩ لوحة التحكم"
-              : "← Dashboard"}
+              : language === "he"
+                ? "→ לוח הבקרה"
+                : "← Dashboard"}
 
           </button>
 
@@ -581,45 +587,6 @@ function TeacherSettings() {
 
         </div>
 
-
-        <div className="settings-language">
-
-          <button
-            type="button"
-            className={
-              language ===
-              "en"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setLanguage(
-                "en"
-              )
-            }
-          >
-            EN
-          </button>
-
-
-          <button
-            type="button"
-            className={
-              language ===
-              "ar"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setLanguage(
-                "ar"
-              )
-            }
-          >
-            عربي
-          </button>
-
-        </div>
 
       </header>
 
@@ -755,8 +722,8 @@ function TeacherSettings() {
               <p>
 
                 {text(
-                  "Update the name displayed in TechMinds.",
-                  "عدّلي الاسم الذي يظهر في TechMinds."
+                  "Update the name displayed in TeachLearn.",
+                  "عدّلي الاسم الذي يظهر في TeachLearn."
                 )}
 
               </p>
@@ -886,8 +853,8 @@ function TeacherSettings() {
               <p>
 
                 {text(
-                  "Choose the language used across TechMinds.",
-                  "اختاري اللغة المستخدمة في TechMinds."
+                  "Choose the language used across TeachLearn.",
+                  "اختاري اللغة المستخدمة في TeachLearn."
                 )}
 
               </p>
@@ -958,7 +925,7 @@ function TeacherSettings() {
             >
 
               <span className="language-option-icon">
-                🇵🇸
+                🌐
               </span>
 
               <div>
@@ -982,6 +949,36 @@ function TeacherSettings() {
 
               </span>
 
+            </button>
+
+            <button
+              type="button"
+              className={
+                language === "he"
+                  ? "selected"
+                  : ""
+              }
+              onClick={() =>
+                setLanguage("he")
+              }
+            >
+              <span className="language-option-icon">
+                🇮🇱
+              </span>
+
+              <div>
+                <strong>
+                  עברית
+                </strong>
+
+                <small>
+                  ממשק בעברית
+                </small>
+              </div>
+
+              <span className="language-check">
+                {language === "he" ? "✓" : ""}
+              </span>
             </button>
 
           </div>
@@ -1301,8 +1298,8 @@ function TeacherSettings() {
 
       <p>
         {text(
-          "Having a technical problem? Contact the TechMinds support team.",
-          "هل تواجه مشكلة تقنية؟ تواصل مع فريق دعم TechMinds."
+          "Having a technical problem? Contact the TeachLearn support team.",
+          "هل تواجه مشكلة تقنية؟ تواصل مع فريق دعم TeachLearn."
         )}
       </p>
 

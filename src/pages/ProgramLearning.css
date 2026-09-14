@@ -550,6 +550,10 @@
 
 
 .program-lesson-item {
+  --lesson-theme: #7c3aed;
+  --lesson-accent: #4f46e5;
+  --lesson-surface: #f5f3ff;
+
   width:
     100%;
 
@@ -563,7 +567,7 @@
     grid;
 
   grid-template-columns:
-    36px
+    62px
     minmax(
       0,
       1fr
@@ -604,29 +608,32 @@
 
 .program-lesson-item:hover {
   background:
-    #f8fafc;
+    var(--lesson-surface);
 }
 
 
 .program-lesson-item.active {
   border-color:
-    #ddd6fe;
+    var(--lesson-accent);
 
   background:
     linear-gradient(
       135deg,
-      #faf5ff,
-      #f5f3ff
+      var(--lesson-surface),
+      #ffffff
     );
 }
 
 
 .program-lesson-number {
+  position:
+    relative;
+
   width:
-    34px;
+    60px;
 
   height:
-    34px;
+    44px;
 
   display:
     flex;
@@ -639,6 +646,9 @@
 
   border-radius:
     10px;
+
+  overflow:
+    hidden;
 
   background:
     #f1f5f9;
@@ -654,10 +664,40 @@
 }
 
 
+.program-lesson-number img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+
+.program-lesson-number span {
+  position: relative;
+  z-index: 1;
+}
+
+
+.program-lesson-number.has-cover span {
+  position: absolute;
+  inset-inline-start: 4px;
+  bottom: 4px;
+  min-width: 19px;
+  height: 19px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #ffffff;
+  border-radius: 6px;
+  background: var(--lesson-theme);
+  color: #ffffff;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.2);
+}
+
+
 .program-lesson-item.active
 .program-lesson-number {
   background:
-    #7c3aed;
+    var(--lesson-theme);
 
   color:
     #ffffff;
@@ -711,7 +751,7 @@
 
 .program-lesson-arrow {
   color:
-    #a78bfa;
+    var(--lesson-theme);
 
   font-size:
     13px;
@@ -793,6 +833,10 @@
 /* CURRENT LESSON */
 
 .program-current-lesson {
+  --lesson-theme: #7c3aed;
+  --lesson-accent: #4f46e5;
+  --lesson-surface: #f5f3ff;
+
   padding:
     18px;
 
@@ -806,7 +850,7 @@
     14px;
 
   border:
-    1px solid #e7e3fa;
+    1px solid var(--lesson-accent);
 
   border-radius:
     16px;
@@ -814,7 +858,7 @@
   background:
     linear-gradient(
       135deg,
-      #faf8ff,
+      var(--lesson-surface),
       #ffffff
     );
 }
@@ -854,9 +898,27 @@
 }
 
 
+.program-current-lesson-icon.has-cover {
+  width: clamp(140px, 24vw, 210px);
+  height: 118px;
+  overflow: hidden;
+  border: 3px solid #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+}
+
+
+.program-current-lesson-icon.has-cover img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+
 .program-current-lesson small {
   color:
-    #7c3aed;
+    var(--lesson-theme);
 
   font-size:
     8px;
@@ -1524,6 +1586,18 @@
   .program-learning-hero-content h1 {
     font-size:
       22px;
+  }
+
+
+  .program-current-lesson {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+
+  .program-current-lesson-icon.has-cover {
+    width: 100%;
+    height: 180px;
   }
 
 

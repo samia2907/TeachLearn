@@ -1,4 +1,7 @@
+import mission01 from './missions/mission01';
+
 const lessonTemplates = [
+  mission01,
   {
     id: "tech-ai-intro-01",
 
@@ -10,473 +13,272 @@ const lessonTemplates = [
 
     activityType: "ai",
 
-    estimatedMinutes: 45,
+    estimatedMinutes: 90,
 
-    xpReward: 100,
+    xpReward: 180,
 
     title: {
-      en: "Introduction to Artificial Intelligence",
-      ar: "مقدمة إلى الذكاء الاصطناعي",
+      en: "AI Detective — Can You Outsmart Artificial Intelligence?",
+      ar: "محقق الذكاء الاصطناعي — هل تستطيع التفوق على AI؟",
     },
 
     summary: {
-      en: "Discover what artificial intelligence is and where we use it in everyday life.",
-      ar: "اكتشف ما هو الذكاء الاصطناعي وأين نستخدمه في حياتنا اليومية.",
+      en: "Investigate how AI works, test its answers, improve prompts, and design your own AI solution.",
+      ar: "حقق في طريقة عمل الذكاء الاصطناعي، اختبر إجاباته، حسّن الأوامر، وصمّم حل AI خاصًا بك.",
     },
 
     sections: [
+
       /* =================================
-         OBJECTIVES
+         1 — MISSION
       ================================= */
 
       {
-        id: "objectives",
-
-        type: "objectives",
-
-        title: {
-          en: "What will I learn?",
-          ar: "ماذا سأتعلم؟",
-        },
-
-        icon: "🎯",
-
-        items: {
-          en: [
-            "Understand what artificial intelligence means.",
-            "Recognize examples of AI in everyday life.",
-            "Understand that AI learns from data and examples.",
-            "Distinguish between a regular program and an AI system.",
-          ],
-
-          ar: [
-            "أفهم معنى الذكاء الاصطناعي.",
-            "أتعرف على أمثلة للذكاء الاصطناعي في حياتي اليومية.",
-            "أفهم أن أنظمة الذكاء الاصطناعي تتعلم من البيانات والأمثلة.",
-            "أميز بين البرنامج العادي والنظام الذي يستخدم الذكاء الاصطناعي.",
-          ],
-        },
-      },
-
-
-      /* =================================
-         OPENING QUESTION
-      ================================= */
-
-      {
-        id: "opening-question",
+        id: "ai-mission",
 
         type: "question",
 
+        icon: "🕵️",
+
         title: {
-          en: "Think about it",
-          ar: "فكّر",
+          en: "Your Mission",
+          ar: "مهمتك",
         },
 
-        icon: "💭",
-
         text: {
-          en: "How does YouTube know which videos you might like? How can a phone recognize your face?",
+          en: "A mysterious technology can recognize faces, recommend videos, create pictures and answer questions. But is everything it does really intelligent? Your mission is to investigate AI and discover what it can — and cannot — do.",
 
-          ar: "كيف يعرف YouTube أي فيديوهات قد تعجبك؟ وكيف يستطيع الهاتف التعرّف على وجهك؟",
+          ar: "هناك تقنية غامضة تستطيع التعرّف على الوجوه، اقتراح الفيديوهات، إنشاء الصور والإجابة عن الأسئلة. لكن هل كل ما تفعله يُعتبر ذكاءً فعلًا؟ مهمتك اليوم أن تحقق في عالم AI وتكتشف ما يستطيع فعله وما لا يستطيع.",
         },
 
         note: {
-          en: "There is no wrong answer. Think before continuing.",
+          en: "Do not look for one correct answer. Think like an investigator and justify your ideas.",
 
-          ar: "لا توجد إجابة خاطئة هنا. فكّر قليلًا قبل المتابعة.",
+          ar: "لا تبحث عن إجابة واحدة صحيحة. فكّر كمحقق وحاول تبرير أفكارك.",
         },
       },
 
-
       /* =================================
-         WHAT IS AI
+         2 — OBJECTIVES
       ================================= */
 
       {
-        id: "what-is-ai",
+        id: "ai-objectives",
 
-        type: "content",
+        type: "objectives",
+
+        icon: "🎯",
 
         title: {
-          en: "What is Artificial Intelligence?",
-          ar: "ما هو الذكاء الاصطناعي؟",
+          en: "Mission Goals",
+          ar: "أهداف المهمة",
         },
 
-        icon: "🤖",
-
-        paragraphs: {
+        items: {
           en: [
-            "Artificial Intelligence, or AI, is technology that allows computers to perform tasks that normally require human intelligence.",
-
-            "These tasks can include recognizing images, understanding language, making recommendations, finding patterns and solving problems.",
-
-            "AI does not think exactly like a human. It works using programs, data and mathematical models.",
+            "Recognize situations where AI may be used.",
+            "Distinguish between fixed programs and AI systems.",
+            "Understand the basic idea of learning from examples and data.",
+            "Discover that AI can make mistakes.",
+            "Experiment with prompts and improve AI results.",
+            "Design an AI solution for a real problem.",
           ],
 
           ar: [
-            "الذكاء الاصطناعي، أو AI، هو تقنية تمكّن الحاسوب من تنفيذ مهام تحتاج عادةً إلى نوع من الذكاء البشري.",
-
-            "من هذه المهام: التعرّف على الصور، فهم اللغة، اقتراح محتوى مناسب، اكتشاف الأنماط وحل المشكلات.",
-
-            "الذكاء الاصطناعي لا يفكر تمامًا مثل الإنسان، بل يعمل باستخدام البرامج والبيانات والنماذج الرياضية.",
+            "أتعرف على مواقف يمكن أن يُستخدم فيها الذكاء الاصطناعي.",
+            "أميز بين برنامج يعمل بقواعد ثابتة ونظام AI.",
+            "أفهم الفكرة الأساسية للتعلم من البيانات والأمثلة.",
+            "أكتشف أن الذكاء الاصطناعي قد يخطئ.",
+            "أجرب كتابة Prompts وأحسن نتائج الذكاء الاصطناعي.",
+            "أصمم حل AI لمشكلة حقيقية.",
           ],
         },
       },
 
-
       /* =================================
-         EXAMPLES
+         3 — AI OR NOT?
       ================================= */
 
       {
-        id: "examples",
+        id: "ai-or-not",
 
-        type: "examples",
+        type: "task",
+
+        icon: "🔍",
 
         title: {
-          en: "AI around us",
-          ar: "الذكاء الاصطناعي حولنا",
+          en: "Investigation 1 — AI or Not?",
+          ar: "التحقيق الأول — AI أم لا؟",
         },
 
-        icon: "🌍",
+        introduction: {
+          en: "Not every smart-looking technology uses artificial intelligence. Decide which systems probably use AI and explain your reasoning.",
 
-        items: [
-          {
-            icon: "📱",
+          ar: "ليس كل جهاز أو برنامج يبدو ذكيًا يستخدم الذكاء الاصطناعي. قرر أي الأنظمة التالية قد تستخدم AI واشرح سبب قرارك.",
+        },
 
-            title: {
-              en: "Face Recognition",
-              ar: "التعرّف على الوجه",
-            },
+        steps: {
+          en: [
+            "A calculator adds 27 + 48.",
+            "YouTube recommends a new video.",
+            "A phone unlocks after recognizing a face.",
+            "A traffic light changes every 30 seconds.",
+            "An email system detects spam.",
+            "A timer rings after exactly 10 minutes.",
+            "For each example, decide: AI, probably not AI, or not enough information.",
+            "Explain WHY. The explanation is more important than the label.",
+          ],
 
-            text: {
-              en: "Some phones can recognize the owner's face.",
+          ar: [
+            "آلة حاسبة تحسب 27 + 48.",
+            "YouTube يقترح فيديو جديدًا.",
+            "هاتف يفتح بعد التعرّف على الوجه.",
+            "إشارة مرور تتغير كل 30 ثانية.",
+            "نظام بريد إلكتروني يكتشف الرسائل المزعجة.",
+            "مؤقت يرن بعد 10 دقائق بالضبط.",
+            "لكل مثال قرر: AI، على الأغلب ليس AI، أو لا توجد معلومات كافية.",
+            "اشرح لماذا. التبرير أهم من الاختيار نفسه.",
+          ],
+        },
 
-              ar: "بعض الهواتف تستطيع التعرّف على وجه صاحب الجهاز.",
-            },
-          },
+        answerPrompt: {
+          en: "Choose two examples and explain your reasoning:",
 
-          {
-            icon: "🎬",
-
-            title: {
-              en: "YouTube & Netflix",
-              ar: "YouTube وNetflix",
-            },
-
-            text: {
-              en: "They recommend videos and movies based on what you watch.",
-
-              ar: "يقترحان فيديوهات وأفلامًا بناءً على ما تشاهده.",
-            },
-          },
-
-          {
-            icon: "🗣️",
-
-            title: {
-              en: "Voice Assistants",
-              ar: "المساعدات الصوتية",
-            },
-
-            text: {
-              en: "Systems such as Siri can understand spoken commands.",
-
-              ar: "أنظمة مثل Siri تستطيع فهم الأوامر الصوتية.",
-            },
-          },
-
-          {
-            icon: "🤖",
-
-            title: {
-              en: "ChatGPT",
-              ar: "ChatGPT",
-            },
-
-            text: {
-              en: "AI can understand questions and generate text and ideas.",
-
-              ar: "يمكن للذكاء الاصطناعي فهم الأسئلة وتوليد النصوص والأفكار.",
-            },
-          },
-
-          {
-            icon: "🚗",
-
-            title: {
-              en: "Smart Cars",
-              ar: "السيارات الذكية",
-            },
-
-            text: {
-              en: "Cars can use cameras and AI to identify roads and objects.",
-
-              ar: "يمكن للسيارات استخدام الكاميرات والذكاء الاصطناعي للتعرّف على الطريق والأجسام.",
-            },
-          },
-
-          {
-            icon: "🎮",
-
-            title: {
-              en: "Games",
-              ar: "الألعاب",
-            },
-
-            text: {
-              en: "Game characters can react differently depending on the player's actions.",
-
-              ar: "يمكن لشخصيات الألعاب أن تتصرف بطرق مختلفة حسب تصرفات اللاعب.",
-            },
-          },
-        ],
+          ar: "اختر مثالين واشرح سبب قرارك:",
+        },
       },
 
-
       /* =================================
-         HOW AI LEARNS
+         4 — MINI DISCOVERY
       ================================= */
 
       {
-        id: "how-ai-learns",
+        id: "what-ai-is",
 
         type: "content",
-
-        title: {
-          en: "How does AI learn?",
-          ar: "كيف يتعلم الذكاء الاصطناعي؟",
-        },
 
         icon: "🧠",
 
+        title: {
+          en: "What Did We Discover?",
+          ar: "ماذا اكتشفنا؟",
+        },
+
         paragraphs: {
           en: [
-            "Imagine we want a computer to recognize cats.",
-
-            "We can show it many examples of pictures containing cats and pictures that do not contain cats.",
-
-            "The system searches for patterns in those examples. After enough training, it can try to identify a cat in a new picture.",
-
-            "This process is called training.",
+            "Artificial Intelligence is a broad term for computer systems that perform tasks such as recognizing patterns, understanding language, making predictions or generating content.",
+            "A normal program can follow fixed instructions written by a programmer. Many AI systems behave differently: they use models that were trained using examples or data.",
+            "This does not mean AI thinks exactly like a human. It can produce impressive results while still making mistakes.",
           ],
 
           ar: [
-            "تخيّل أننا نريد تعليم الحاسوب كيف يتعرّف على القطط.",
-
-            "يمكن أن نعرض عليه عددًا كبيرًا من صور القطط، بالإضافة إلى صور لا تحتوي على قطط.",
-
-            "يبحث النظام عن أنماط مشتركة في هذه الأمثلة. وبعد التدريب يستطيع محاولة تحديد ما إذا كانت صورة جديدة تحتوي على قطة.",
-
-            "تسمى هذه العملية التدريب.",
+            "الذكاء الاصطناعي هو اسم واسع لأنظمة حاسوبية تستطيع تنفيذ مهام مثل اكتشاف الأنماط، فهم اللغة، التنبؤ أو إنشاء محتوى.",
+            "البرنامج العادي يمكن أن يتبع تعليمات ثابتة كتبها المبرمج. أما الكثير من أنظمة AI فتعتمد على نماذج تم تدريبها باستخدام أمثلة أو بيانات.",
+            "هذا لا يعني أن AI يفكر تمامًا كالإنسان. قد يعطي نتائج مدهشة، لكنه يستطيع أيضًا ارتكاب أخطاء.",
           ],
         },
       },
 
-
       /* =================================
-         QUICK CHALLENGE
+         5 — HOW AI LEARNS
       ================================= */
 
       {
-        id: "quick-challenge",
+        id: "ai-learning-mystery",
 
-        type: "multipleChoice",
+        type: "question",
+
+        icon: "🐱",
 
         title: {
-          en: "Quick Challenge",
-          ar: "تحدٍ سريع",
+          en: "The Cat Mystery",
+          ar: "لغز القطة",
         },
+
+        text: {
+          en: "Imagine a computer has never seen a cat. You show it 5,000 pictures labeled 'cat' and 'not cat'. Later you show it a completely new picture. How could it possibly guess whether the new picture contains a cat?",
+
+          ar: "تخيّل أن حاسوبًا لم يرَ قطة من قبل. عرضنا عليه 5000 صورة مكتوب عليها «قطة» أو «ليست قطة». بعد ذلك أعطيناه صورة جديدة تمامًا. كيف يمكن أن يحاول معرفة إن كانت الصورة تحتوي على قطة؟",
+        },
+
+        note: {
+          en: "Think about patterns the system may discover from many examples.",
+
+          ar: "فكّر بالأنماط التي قد يكتشفها النظام من عدد كبير من الأمثلة.",
+        },
+      },
+
+      {
+        id: "ai-training",
+
+        type: "content",
+
+        icon: "📊",
+
+        title: {
+          en: "Training From Examples",
+          ar: "التدريب من الأمثلة",
+        },
+
+        paragraphs: {
+          en: [
+            "Many AI systems are trained using large collections of examples.",
+            "During training, a model adjusts itself to find useful patterns in the data.",
+            "After training, it can try to make a prediction about something it has not seen before.",
+            "The quality and variety of the training data matter. Poor or unbalanced examples can lead to poor results.",
+          ],
+
+          ar: [
+            "يتم تدريب الكثير من أنظمة AI باستخدام مجموعات كبيرة من الأمثلة.",
+            "خلال التدريب يحاول النموذج اكتشاف أنماط مفيدة في البيانات.",
+            "بعد التدريب يستطيع محاولة التنبؤ بشيء جديد لم يره سابقًا.",
+            "جودة البيانات وتنوعها مهمان جدًا. إذا كانت الأمثلة ضعيفة أو غير متوازنة فقد تكون النتائج ضعيفة أيضًا.",
+          ],
+        },
+      },
+
+      /* =================================
+         6 — DATA CHALLENGE
+      ================================= */
+
+      {
+        id: "biased-data-challenge",
+
+        type: "multipleChoice",
 
         icon: "🧩",
 
-        question: {
-          en: "Which example is most likely using artificial intelligence?",
+        title: {
+          en: "Data Detective",
+          ar: "محقق البيانات",
+        },
 
-          ar: "أي مثال من التالي يستخدم على الأغلب الذكاء الاصطناعي؟",
+        question: {
+          en: "You train an AI to recognize dogs, but almost all training pictures show only white dogs. What problem might happen?",
+
+          ar: "درّبت نظام AI للتعرّف على الكلاب، لكن معظم صور التدريب تحتوي فقط على كلاب بيضاء. ما المشكلة التي قد تحدث؟",
         },
 
         options: [
           {
             id: "a",
-
             text: {
-              en: "A normal light switch",
-              ar: "مفتاح إضاءة عادي",
+              en: "It may struggle with dogs that look different from the training examples.",
+              ar: "قد يواجه صعوبة مع كلاب تختلف عن أمثلة التدريب.",
             },
           },
-
           {
             id: "b",
-
             text: {
-              en: "YouTube recommending a video",
-              ar: "YouTube يقترح عليك فيديو",
+              en: "It will automatically become perfect.",
+              ar: "سيصبح النظام مثاليًا تلقائيًا.",
             },
           },
-
           {
             id: "c",
-
             text: {
-              en: "A basic calculator",
-              ar: "آلة حاسبة عادية",
-            },
-          },
-        ],
-
-        correctAnswer: "b",
-
-        explanation: {
-          en: "Correct! Recommendation systems analyze information about what users watch and use AI to predict what they may like.",
-
-          ar: "صحيح! أنظمة الاقتراح تحلل معلومات حول ما يشاهده المستخدم وتحاول توقع المحتوى الذي قد يعجبه.",
-        },
-      },
-
-
-      /* =================================
-         PRACTICAL AI ACTIVITY
-      ================================= */
-
-      {
-        id: "ai-experiment",
-
-        type: "task",
-
-        title: {
-          en: "Try AI yourself",
-          ar: "جرّب الذكاء الاصطناعي بنفسك",
-        },
-
-        icon: "🚀",
-
-        introduction: {
-          en: "Now you will use an AI tool to solve a real problem.",
-
-          ar: "الآن ستستخدم أداة ذكاء اصطناعي لحل مشكلة حقيقية.",
-        },
-
-        steps: {
-          en: [
-            "Open an AI assistant such as ChatGPT.",
-            "Write: Suggest a robot that could help students at school.",
-            "Read the ideas you receive.",
-            "Choose the idea you like the most.",
-            "Think of one improvement you would add to the robot.",
-          ],
-
-          ar: [
-            "افتح أداة ذكاء اصطناعي مثل ChatGPT.",
-            "اكتب: اقترح روبوتًا يساعد الطلاب في المدرسة.",
-            "اقرأ الأفكار التي حصلت عليها.",
-            "اختر الفكرة التي أعجبتك أكثر.",
-            "فكّر في تحسين واحد يمكنك إضافته إلى الروبوت.",
-          ],
-        },
-
-        answerPrompt: {
-          en: "Write your robot idea here:",
-
-          ar: "اكتب هنا فكرة الروبوت التي اخترتها:",
-        },
-      },
-
-
-      /* =================================
-         CREATIVE CHALLENGE
-      ================================= */
-
-      {
-        id: "creative-challenge",
-
-        type: "task",
-
-        title: {
-          en: "Invent your own AI",
-          ar: "اخترع نظام AI خاصًا بك",
-        },
-
-        icon: "💡",
-
-        introduction: {
-          en: "Imagine you could build one AI system to solve a problem in your school.",
-
-          ar: "تخيّل أنك تستطيع بناء نظام ذكاء اصطناعي واحد لحل مشكلة في مدرستك.",
-        },
-
-        steps: {
-          en: [
-            "Choose a problem.",
-            "Give your AI system a name.",
-            "Explain what it does.",
-            "Explain who it helps.",
-          ],
-
-          ar: [
-            "اختر مشكلة.",
-            "أعطِ نظام الذكاء الاصطناعي اسمًا.",
-            "اشرح ماذا يفعل.",
-            "اشرح لمن يساعد.",
-          ],
-        },
-
-        answerPrompt: {
-          en: "Describe your idea:",
-
-          ar: "صف فكرتك:",
-        },
-      },
-
-
-      /* =================================
-         CHECK UNDERSTANDING
-      ================================= */
-
-      {
-        id: "check-understanding",
-
-        type: "multipleChoice",
-
-        title: {
-          en: "Check your understanding",
-          ar: "افحص فهمك",
-        },
-
-        icon: "✅",
-
-        question: {
-          en: "What does AI usually need in order to learn patterns?",
-
-          ar: "ماذا يحتاج الذكاء الاصطناعي عادةً حتى يتعلم الأنماط؟",
-        },
-
-        options: [
-          {
-            id: "a",
-
-            text: {
-              en: "Data and examples",
-              ar: "بيانات وأمثلة",
-            },
-          },
-
-          {
-            id: "b",
-
-            text: {
-              en: "Only electricity",
-              ar: "الكهرباء فقط",
-            },
-          },
-
-          {
-            id: "c",
-
-            text: {
-              en: "A keyboard",
-              ar: "لوحة مفاتيح",
+              en: "Training data never affects an AI system.",
+              ar: "بيانات التدريب لا تؤثر أبدًا على نظام AI.",
             },
           },
         ],
@@ -484,69 +286,366 @@ const lessonTemplates = [
         correctAnswer: "a",
 
         explanation: {
-          en: "Exactly. Many AI systems learn patterns from data and examples.",
+          en: "Exactly. AI depends heavily on the examples it learns from. Limited training data can lead to weaker results.",
 
-          ar: "بالضبط. تتعلم الكثير من أنظمة الذكاء الاصطناعي الأنماط من البيانات والأمثلة.",
+          ar: "بالضبط. تعتمد أنظمة AI كثيرًا على الأمثلة التي تتعلم منها. البيانات المحدودة قد تؤدي إلى نتائج أضعف.",
         },
       },
 
-
       /* =================================
-         SUMMARY
+         7 — PROMPT EXPERIMENT
       ================================= */
 
       {
-        id: "summary",
+        id: "prompt-lab",
 
-        type: "summary",
+        type: "task",
+
+        icon: "🧪",
 
         title: {
-          en: "What did we learn?",
-          ar: "ماذا تعلمنا؟",
+          en: "AI Lab — Can You Improve the Answer?",
+          ar: "مختبر AI — هل تستطيع تحسين الإجابة؟",
         },
 
-        icon: "🌟",
+        introduction: {
+          en: "Now you will test how the instructions you give an AI can change its result.",
 
-        items: {
+          ar: "الآن ستختبر كيف يمكن لطريقة كتابة التعليمات للذكاء الاصطناعي أن تغيّر النتيجة.",
+        },
+
+        steps: {
           en: [
-            "AI allows computers to perform intelligent tasks.",
-            "We use AI in many applications around us.",
-            "AI systems can learn patterns from data.",
-            "AI can help people solve problems and create new ideas.",
+            "Open an AI assistant approved by your teacher.",
+            "First write a very simple prompt: 'Give me an idea for a school robot.'",
+            "Read the answer and give it a score from 1–5.",
+            "Now improve the prompt by adding who the robot is for, what problem it should solve, and an important limitation.",
+            "Example limitation: the robot may cost no more than 100 dollars.",
+            "Compare the first and second answers.",
+            "Improve your prompt one more time.",
+            "Decide which version produced the best result and explain why.",
           ],
 
           ar: [
-            "الذكاء الاصطناعي يساعد الحاسوب على تنفيذ مهام ذكية.",
-            "نستخدم الذكاء الاصطناعي في الكثير من التطبيقات حولنا.",
-            "يمكن لأنظمة AI تعلم الأنماط من البيانات.",
-            "يمكن للذكاء الاصطناعي مساعدة الإنسان في حل المشكلات وابتكار أفكار جديدة.",
+            "افتح أداة ذكاء اصطناعي وافق عليها المعلم.",
+            "اكتب أولًا Prompt بسيطًا جدًا: «اقترح فكرة لروبوت يساعد المدرسة».",
+            "اقرأ النتيجة وأعطها علامة من 1 إلى 5.",
+            "الآن حسّن الـPrompt: حدد لمن الروبوت، ما المشكلة التي يحلها، وأضف قيدًا مهمًا.",
+            "مثال على القيد: يجب ألا تزيد تكلفة الروبوت عن 100 دولار.",
+            "قارن بين الإجابة الأولى والثانية.",
+            "حسّن الـPrompt مرة ثالثة.",
+            "حدد أي نسخة أعطت أفضل نتيجة واشرح لماذا.",
+          ],
+        },
+
+        answerPrompt: {
+          en: "What changed between your first and best prompt?",
+
+          ar: "ما الذي تغير بين الـPrompt الأول وأفضل Prompt كتبته؟",
+        },
+      },
+
+      /* =================================
+         8 — AI CAN BE WRONG
+      ================================= */
+
+      {
+        id: "ai-can-be-wrong",
+
+        type: "content",
+
+        icon: "⚠️",
+
+        title: {
+          en: "Do Not Trust AI Automatically",
+          ar: "لا تثق بـAI تلقائيًا",
+        },
+
+        paragraphs: {
+          en: [
+            "An AI answer can sound confident even when it is incomplete or wrong.",
+            "That means an important AI skill is not only knowing how to ask questions. It is also knowing how to evaluate the answer.",
+            "For important information, we should check reliable sources instead of assuming the AI is always correct.",
+          ],
+
+          ar: [
+            "قد تبدو إجابة AI واثقة جدًا حتى عندما تكون ناقصة أو خاطئة.",
+            "لذلك إحدى أهم مهارات استخدام الذكاء الاصطناعي ليست فقط معرفة كيف نسأله، بل كيف نفحص إجابته.",
+            "عندما تكون المعلومة مهمة يجب التحقق منها من مصادر موثوقة بدل افتراض أن AI صحيح دائمًا.",
           ],
         },
       },
 
-
       /* =================================
-         REFLECTION
+         9 — ERROR HUNTER
       ================================= */
 
       {
-        id: "reflection",
+        id: "error-hunter",
+
+        type: "task",
+
+        icon: "🧐",
+
+        title: {
+          en: "Error Hunter",
+          ar: "صياد الأخطاء",
+        },
+
+        introduction: {
+          en: "Your job is no longer to ask AI for an answer. Your job is to evaluate the answer like a scientist.",
+
+          ar: "مهمتك الآن ليست الحصول على إجابة من AI، بل تقييم الإجابة مثل عالم.",
+        },
+
+        steps: {
+          en: [
+            "Ask the AI a factual question about a topic you already know.",
+            "Read its answer carefully.",
+            "Identify one claim that could be checked.",
+            "Think of another source you could use to verify it.",
+            "Decide: trustworthy, uncertain, or probably wrong.",
+            "Explain what evidence you would need before trusting it.",
+          ],
+
+          ar: [
+            "اسأل AI سؤالًا معلوماتيًا عن موضوع تعرف عنه مسبقًا.",
+            "اقرأ الإجابة بدقة.",
+            "اختر معلومة واحدة يمكن التحقق منها.",
+            "فكر بمصدر آخر تستطيع استخدامه للتحقق.",
+            "قرر: موثوقة، غير مؤكدة، أم على الأغلب خاطئة.",
+            "اشرح ما الدليل الذي تحتاجه قبل أن تثق بالإجابة.",
+          ],
+        },
+
+        answerPrompt: {
+          en: "Which claim did you decide to verify, and how would you check it?",
+
+          ar: "أي معلومة قررت التحقق منها؟ وكيف ستفحصها؟",
+        },
+      },
+
+      /* =================================
+         10 — MAIN DESIGN CHALLENGE
+      ================================= */
+
+      {
+        id: "design-your-ai",
+
+        type: "task",
+
+        icon: "🚀",
+
+        title: {
+          en: "Main Challenge — Design Your Own AI System",
+          ar: "التحدي الرئيسي — صمّم نظام AI خاصًا بك",
+        },
+
+        introduction: {
+          en: "A school has hired you as an AI inventor. Design an AI system that solves a real problem — but you must explain how it works, not only give it a cool name.",
+
+          ar: "اختارتك المدرسة لتكون مخترع AI. صمّم نظام ذكاء اصطناعي يحل مشكلة حقيقية، لكن عليك أن تشرح كيف سيعمل وليس فقط أن تعطيه اسمًا جميلًا.",
+        },
+
+        steps: {
+          en: [
+            "Choose one real problem in school or everyday life.",
+            "Give your AI system a name.",
+            "Explain who will use it.",
+            "What information or data would the system need?",
+            "What should the AI predict, recognize, recommend or create?",
+            "Give one example of input.",
+            "Give one example of output.",
+            "Describe one mistake the AI could make.",
+            "Explain how a human should check or control the system.",
+          ],
+
+          ar: [
+            "اختر مشكلة حقيقية في المدرسة أو الحياة اليومية.",
+            "أعطِ نظام AI اسمًا.",
+            "حدد من سيستخدمه.",
+            "ما المعلومات أو البيانات التي سيحتاجها النظام؟",
+            "ماذا يجب على AI أن يتنبأ أو يتعرف أو يقترح أو ينشئ؟",
+            "أعطِ مثالًا على Input.",
+            "أعطِ مثالًا على Output.",
+            "صف خطأ واحدًا يمكن أن يرتكبه النظام.",
+            "اشرح كيف يجب أن يراقب الإنسان عمل النظام.",
+          ],
+        },
+
+        answerPrompt: {
+          en: "Present your AI invention: problem, data, input, output, possible mistake and human control.",
+
+          ar: "اعرض اختراعك: المشكلة، البيانات، Input، Output، خطأ محتمل وكيف سيتحكم الإنسان بالنظام.",
+        },
+      },
+
+      /* =================================
+         11 — CHALLENGE+
+      ================================= */
+
+      {
+        id: "ai-challenge-plus",
+
+        type: "task",
+
+        icon: "🔥",
+
+        title: {
+          en: "Challenge+ — For Expert Investigators",
+          ar: "Challenge+ — للمحققين المتقدمين",
+        },
+
+        introduction: {
+          en: "A great invention also needs a critic. Try to find a weakness in your own AI idea.",
+
+          ar: "المخترع القوي لا يدافع فقط عن فكرته، بل يبحث أيضًا عن نقاط ضعفها.",
+        },
+
+        steps: {
+          en: [
+            "Imagine your AI system gives a wrong result.",
+            "What might have caused the mistake?",
+            "Could the training data be incomplete?",
+            "Could the user give unclear information?",
+            "Could the system treat some users unfairly?",
+            "Suggest one improvement that would make your system safer or more accurate.",
+          ],
+
+          ar: [
+            "تخيل أن نظام AI الخاص بك أعطى نتيجة خاطئة.",
+            "ما السبب المحتمل للخطأ؟",
+            "هل يمكن أن تكون بيانات التدريب ناقصة؟",
+            "هل يمكن أن يعطي المستخدم معلومات غير واضحة؟",
+            "هل يمكن أن يعامل النظام بعض المستخدمين بشكل غير عادل؟",
+            "اقترح تحسينًا واحدًا يجعل النظام أكثر أمانًا أو دقة.",
+          ],
+        },
+
+        answerPrompt: {
+          en: "What is the biggest weakness in your AI system, and how would you improve it?",
+
+          ar: "ما أكبر نقطة ضعف في نظام AI الخاص بك؟ وكيف ستحسنها؟",
+        },
+      },
+
+      /* =================================
+         12 — FINAL CHECK
+      ================================= */
+
+      {
+        id: "ai-final-challenge",
+
+        type: "multipleChoice",
+
+        icon: "🏆",
+
+        title: {
+          en: "Final Detective Test",
+          ar: "اختبار المحقق النهائي",
+        },
+
+        question: {
+          en: "An AI gives you a very confident answer. What is the smartest response?",
+
+          ar: "أعطاك AI إجابة تبدو واثقة جدًا. ما التصرف الأذكى؟",
+        },
+
+        options: [
+          {
+            id: "a",
+            text: {
+              en: "Believe it because AI cannot make mistakes.",
+              ar: "أصدقها لأن AI لا يخطئ.",
+            },
+          },
+          {
+            id: "b",
+            text: {
+              en: "Check important claims and think about whether the answer makes sense.",
+              ar: "أتحقق من المعلومات المهمة وأفكر إن كانت الإجابة منطقية.",
+            },
+          },
+          {
+            id: "c",
+            text: {
+              en: "Copy the answer immediately without reading it.",
+              ar: "أنسخ الإجابة مباشرة دون قراءتها.",
+            },
+          },
+        ],
+
+        correctAnswer: "b",
+
+        explanation: {
+          en: "Exactly. Good AI users do not only generate answers — they evaluate them.",
+
+          ar: "بالضبط. المستخدم الجيد للذكاء الاصطناعي لا يكتفي بالحصول على إجابة، بل يقوم بتقييمها أيضًا.",
+        },
+      },
+
+      /* =================================
+         13 — FINAL PRODUCT
+      ================================= */
+
+      {
+        id: "ai-final-product",
+
+        type: "summary",
+
+        icon: "🎨",
+
+        title: {
+          en: "Your Mission Product",
+          ar: "ناتج مهمتك",
+        },
+
+        items: {
+          en: [
+            "You investigated what AI is.",
+            "You distinguished AI from fixed-rule programs.",
+            "You explored training data.",
+            "You improved a prompt through experimentation.",
+            "You evaluated an AI answer instead of trusting it automatically.",
+            "You designed an AI solution with input, output, data and possible risks.",
+            "Keep your AI invention — it can become part of your final course project.",
+          ],
+
+          ar: [
+            "حققت في معنى الذكاء الاصطناعي.",
+            "ميّزت بين AI والبرامج التي تعمل بقواعد ثابتة.",
+            "اكتشفت أهمية بيانات التدريب.",
+            "حسّنت Prompt من خلال التجربة.",
+            "فحصت إجابة AI بدل أن تثق بها تلقائيًا.",
+            "صممت حل AI يشمل Input وOutput والبيانات والمخاطر المحتملة.",
+            "احتفظ بتصميمك، فقد يصبح جزءًا من مشروعك النهائي في البرنامج.",
+          ],
+        },
+      },
+
+      /* =================================
+         14 — REFLECTION
+      ================================= */
+
+      {
+        id: "ai-reflection",
 
         type: "reflection",
 
-        title: {
-          en: "Before you finish...",
-          ar: "قبل أن تنهي الدرس...",
-        },
-
         icon: "💬",
 
-        question: {
-          en: "What was the most surprising thing you learned about AI today?",
+        title: {
+          en: "Investigator's Final Note",
+          ar: "الملاحظة الأخيرة للمحقق",
+        },
 
-          ar: "ما أكثر شيء فاجأك وتعلمته اليوم عن الذكاء الاصطناعي؟",
+        question: {
+          en: "After today's investigation, what is one thing you would NEVER assume about artificial intelligence again? Explain your answer.",
+
+          ar: "بعد تحقيق اليوم، ما الشيء الذي لن تفترضه بعد الآن عن الذكاء الاصطناعي؟ اشرح إجابتك.",
         },
       },
+
     ],
   },
 

@@ -1,0 +1,833 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed data model and authorization boundaries
+    // ===============================================================
+    // users/{uid}: private identity, role, class, plan, and XP fields.
+    // studentLoginIndex/{u_|c_ alias}: immutable UID/auth-email mapping;
+    //   browser reads denied, validated create-only writes during signup.
+    // classes/{id}, lessons/{id}: teacher-owned educational content.
+    // lessonProgress/{student_lesson}, lessonCompletions/{student_lesson},
+    //   portfolio/{student_lesson_section}: student-owned learning records.
+    // programs/{id}, plans/{id}: owner-managed product catalog.
+    // programAccess, programPurchases, subscriptions, subscriptionPayments,
+    //   paddleWebhookEvents, studentLoginRateLimits: server-written records.
+    // Timestamps used for creation/update are Firestore timestamp values;
+    // identity and ownership fields are immutable outside explicit workflows.
+    // ===============================================================
+    // TechMinds authorization model:
+    // - users/{uid} is the source of truth for role and account status.
+    // - owners manage the catalog and account status.
+    // - teachers can only manage records tied to their own teacherId.
+    // - students can only write their own learning data.
+    // - billing/access documents are written only by trusted Cloud Functions.
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function userPath(userId) {
+      return /databases/$(database)/documents/users/$(userId);
+    }
+
+    function currentUserExists() {
+      return signedIn() && exists(userPath(request.auth.uid));
+    }
+
+    function currentUser() {
+      return get(userPath(request.auth.uid)).data;
+    }
+
+    function accountIsActive(data) {
+      return data.get('accountStatus', 'active') == 'active';
+    }
+
+    function hasRole(role) {
+      return currentUserExists()
+        && currentUser().role == role
+        && accountIsActive(currentUser());
+    }
+
+    function isOwner() {
+      return hasRole('owner');
+    }
+
+    function isTeacher() {
+      return hasRole('teacher');
+    }
+
+    function isStudent() {
+      return hasRole('student');
+    }
+
+    function shortString(value, maximum) {
+      return value is string && value.size() > 0 && value.size() <= maximum;
+    }
+
+    function optionalString(data, field, maximum) {
+      return !(field in data)
+        || data[field] == null
+        || (data[field] is string && data[field].size() <= maximum);
+    }
+
+    function nonNegativeNumber(value, maximum) {
+      return value is number && value >= 0 && value <= maximum;
+    }
+
+    function validRole(role) {
+      return role in ['owner', 'teacher', 'student'];
+    }
+
+    function validAccountStatus(status) {
+      return status in ['active', 'inactive', 'suspended'];
+    }
+
+    function userCreateKeysAreValid(data) {
+      return data.keys().hasAll([
+          'uid', 'name', 'role', 'plan', 'subscriptionStatus',
+          'accountStatus', 'createdAt'
+        ])
+        && data.keys().hasOnly([
+          'uid', 'name', 'email', 'phoneNumber', 'photoURL', 'role',
+          'authProvider', 'studentAccountType', 'username', 'usernameNormalized', 'studentCode',
+          'authEmail', 'teacherId', 'teacherName', 'classId', 'className',
+          'classCode', 'grade', 'learningTrack', 'xp', 'level', 'badges',
+          'completedLessons', 'plan', 'subscriptionStatus', 'billingCycle',
+          'subscriptionId', 'paymentStatus', 'selectedTrack', 'pendingPlan',
+          'pendingBillingCycle', 'pendingTrack', 'pendingPurchase',
+          'pendingPurchaseUpdatedAt', 'accountStatus', 'createdBy',
+          'createdByRole', 'createdAt', 'updatedAt'
+        ]);
+    }
+
+    function validUserCreate(data, userId) {
+      return userCreateKeysAreValid(data)
+        && data.uid == userId
+        && shortString(data.name, 120)
+        && validRole(data.role)
+        && validAccountStatus(data.accountStatus)
+        && data.accountStatus == 'active'
+        && data.createdAt == request.time
+        && optionalString(data, 'email', 320)
+        && optionalString(data, 'phoneNumber', 40)
+        && optionalString(data, 'photoURL', 2048)
+        && optionalString(data, 'username', 60)
+        && optionalString(data, 'usernameNormalized', 60)
+        && optionalString(data, 'studentCode', 60)
+        && optionalString(data, 'authEmail', 320)
+        && optionalString(data, 'teacherId', 128)
+        && optionalString(data, 'classId', 128)
+        && optionalString(data, 'classCode', 60)
+        && (!('studentAccountType' in data)
+          || data.studentAccountType in ['class', 'independent'])
+        && data.get('badges', []) is list
+        && data.get('badges', []).size() <= 100
+        && nonNegativeNumber(data.get('xp', 0), 100000000)
+        && nonNegativeNumber(data.get('level', 1), 100000);
+    }
+
+    function validSelfRegistration(data, userId) {
+      return isSelf(userId)
+        && data.role in ['teacher', 'student']
+        && data.plan == 'free'
+        && data.subscriptionStatus in ['inactive', 'free']
+        && data.get('xp', 0) == 0
+        && data.get('level', 1) == 1
+        && (data.role != 'student'
+          || (data.studentAccountType == 'independent'
+            && data.email == request.auth.token.email
+            && data.authEmail == request.auth.token.email
+            && data.get('teacherId', null) == null
+            && data.get('classId', null) == null));
+    }
+
+    function validTeacherCreatedStudent(data, userId) {
+      return isTeacher()
+        && data.role == 'student'
+        && data.studentAccountType == 'class'
+        && data.uid == userId
+        && data.teacherId == request.auth.uid
+        && shortString(data.classId, 128)
+        && exists(/databases/$(database)/documents/classes/$(data.classId))
+        && get(/databases/$(database)/documents/classes/$(data.classId)).data.teacherId
+          == request.auth.uid
+        && data.plan == 'classAccess'
+        && data.subscriptionStatus == 'teacher_managed'
+        && data.get('createdBy', '') == 'teacher'
+        && data.get('xp', 0) == 0
+        && data.get('level', 1) == 1;
+    }
+
+    function identityIsUnchanged() {
+      return request.resource.data.uid == resource.data.uid
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.get('usernameNormalized', null)
+          == resource.data.get('usernameNormalized', null)
+        && request.resource.data.get('studentCode', null)
+          == resource.data.get('studentCode', null)
+        && request.resource.data.get('studentAccountType', null)
+          == resource.data.get('studentAccountType', null);
+    }
+
+    function isSelfProfileUpdate(userId) {
+      return isSelf(userId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'name', 'phoneNumber', 'photoURL', 'updatedAt'
+        ])
+        && shortString(request.resource.data.name, 120)
+        && optionalString(request.resource.data, 'phoneNumber', 40)
+        && optionalString(request.resource.data, 'photoURL', 2048)
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    function isSelfPlanSelection(userId) {
+      return isSelf(userId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'plan', 'subscriptionStatus', 'paymentStatus', 'billingCycle',
+          'selectedTrack', 'pendingPlan', 'pendingBillingCycle',
+          'pendingTrack', 'planUpdatedAt', 'planSelectionUpdatedAt'
+        ])
+        && request.resource.data.get('plan', 'free') in [resource.data.get('plan', 'free'), 'free']
+        && request.resource.data.get('subscriptionStatus', 'inactive')
+          in [resource.data.get('subscriptionStatus', 'inactive'), 'free', 'inactive']
+        && request.resource.data.get('paymentStatus', 'not_started')
+          in ['not_started', 'not_required', 'school_request']
+        && optionalString(request.resource.data, 'pendingPlan', 128)
+        && optionalString(request.resource.data, 'pendingBillingCycle', 32)
+        && optionalString(request.resource.data, 'pendingTrack', 128)
+        && optionalString(request.resource.data, 'selectedTrack', 128)
+        && (request.resource.data.get('planUpdatedAt', null) == request.time
+          || request.resource.data.get('planSelectionUpdatedAt', null) == request.time);
+    }
+
+    function isSelfPendingPurchase(userId) {
+      return isSelf(userId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'pendingPurchase', 'pendingPurchaseUpdatedAt'
+        ])
+        && request.resource.data.pendingPurchase is map
+        && request.resource.data.pendingPurchase.keys().hasAll([
+          'type', 'programId', 'licenseType', 'createdAt'
+        ])
+        && request.resource.data.pendingPurchase.keys().hasOnly([
+          'type', 'programId', 'licenseType', 'classId', 'createdAt'
+        ])
+        && request.resource.data.pendingPurchase.type == 'program'
+        && shortString(request.resource.data.pendingPurchase.programId, 128)
+        && request.resource.data.pendingPurchase.licenseType
+          in ['student', 'teacher', 'class']
+        && optionalString(request.resource.data.pendingPurchase, 'classId', 128)
+        && shortString(request.resource.data.pendingPurchase.createdAt, 64)
+        && request.resource.data.pendingPurchaseUpdatedAt == request.time;
+    }
+
+    function isValidSelfClassJoin(userId) {
+      let classId = request.resource.data.classId;
+      let classData = get(/databases/$(database)/documents/classes/$(classId)).data;
+      return isSelf(userId)
+        && resource.data.role == 'student'
+        && resource.data.get('classId', null) in [null, '']
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'classId', 'classCode', 'className', 'teacherId', 'teacherName',
+          'grade', 'learningTrack', 'joinedClassAt'
+        ])
+        && shortString(classId, 128)
+        && exists(/databases/$(database)/documents/classes/$(classId))
+        && classData.status == 'active'
+        && request.resource.data.teacherId == classData.teacherId
+        && request.resource.data.classCode == classData.classCode
+        && request.resource.data.className == classData.name
+        && request.resource.data.joinedClassAt == request.time;
+    }
+
+    function isValidXpCompletion(userId) {
+      let lessonId = request.resource.data.lastCompletedLessonId;
+      let completionId = userId + '_' + lessonId;
+      let completion = getAfter(
+        /databases/$(database)/documents/lessonCompletions/$(completionId)
+      ).data;
+      return isSelf(userId)
+        && resource.data.role == 'student'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'xp', 'completedLessons', 'lastCompletedLessonId', 'updatedAt'
+        ])
+        && shortString(lessonId, 128)
+        && !exists(/databases/$(database)/documents/lessonCompletions/$(completionId))
+        && existsAfter(/databases/$(database)/documents/lessonCompletions/$(completionId))
+        && completion.studentId == userId
+        && completion.lessonId == lessonId
+        && request.resource.data.xp
+          == resource.data.get('xp', 0) + completion.xpReward
+        && request.resource.data.completedLessons
+          == resource.data.get('completedLessons', 0) + 1
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    function isTeacherManagingStudent() {
+      return isTeacher()
+        && resource.data.role == 'student'
+        && resource.data.teacherId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'accountStatus', 'classId', 'className', 'classCode', 'grade',
+          'learningTrack', 'updatedAt'
+        ])
+        && validAccountStatus(request.resource.data.accountStatus)
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    function isOwnerChangingAccountStatus() {
+      return isOwner()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'accountStatus', 'accountStatusUpdatedAt', 'accountStatusUpdatedBy'
+        ])
+        && validAccountStatus(request.resource.data.accountStatus)
+        && request.resource.data.accountStatusUpdatedAt == request.time
+        && request.resource.data.accountStatusUpdatedBy == request.auth.uid;
+    }
+
+    function teacherOwnsStudentClass(data) {
+      return isTeacher()
+        && shortString(data.get('classId', ''), 128)
+        && exists(/databases/$(database)/documents/classes/$(data.classId))
+        && get(/databases/$(database)/documents/classes/$(data.classId)).data.teacherId
+          == request.auth.uid;
+    }
+
+    function memberId(classId, studentId) {
+      return classId + '_' + studentId;
+    }
+
+    function isActiveClassMember(classId, studentId) {
+      return exists(/databases/$(database)/documents/classMembers/$(memberId(classId, studentId)))
+        && get(/databases/$(database)/documents/classMembers/$(memberId(classId, studentId))).data.status == 'active';
+    }
+
+    match /users/{userId} {
+      allow get: if isSelf(userId)
+        || isOwner()
+        || (isTeacher() && resource.data.teacherId == request.auth.uid)
+        || teacherOwnsStudentClass(resource.data);
+      allow list: if isOwner()
+        || (isTeacher() && resource.data.teacherId == request.auth.uid)
+        || teacherOwnsStudentClass(resource.data);
+      allow create: if validUserCreate(request.resource.data, userId)
+        && (validSelfRegistration(request.resource.data, userId)
+          || validTeacherCreatedStudent(request.resource.data, userId));
+      allow update: if identityIsUnchanged()
+        && (isSelfProfileUpdate(userId)
+          || isSelfPlanSelection(userId)
+          || isSelfPendingPurchase(userId)
+          || isValidSelfClassJoin(userId)
+          || isValidXpCompletion(userId)
+          || isTeacherManagingStudent()
+          || isOwnerChangingAccountStatus());
+      allow delete: if false;
+    }
+
+    // Only trusted Cloud Functions may resolve an alias. Browser clients can
+    // create the two immutable records as part of an authorized signup batch,
+    // but can never read, query, update, or delete them.
+    match /studentLoginIndex/{indexId} {
+      allow read: if false;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasAll(['uid', 'authEmail', 'type', 'createdAt'])
+        && request.resource.data.keys().hasOnly([
+          'uid', 'authEmail', 'teacherId', 'classId', 'type', 'createdAt'
+        ])
+        && request.resource.data.type in ['username', 'code']
+        && shortString(request.resource.data.uid, 128)
+        && shortString(request.resource.data.authEmail, 320)
+        && request.resource.data.createdAt == request.time
+        && !exists(userPath(request.resource.data.uid))
+        && existsAfter(userPath(request.resource.data.uid))
+        && getAfter(userPath(request.resource.data.uid)).data.role == 'student'
+        && request.resource.data.authEmail
+          == getAfter(userPath(request.resource.data.uid)).data.authEmail
+        && request.resource.data.get('teacherId', null)
+          == getAfter(userPath(request.resource.data.uid)).data.get('teacherId', null)
+        && request.resource.data.get('classId', null)
+          == getAfter(userPath(request.resource.data.uid)).data.get('classId', null)
+        && ((request.resource.data.type == 'username'
+            && indexId == 'u_' + getAfter(
+              userPath(request.resource.data.uid)
+            ).data.usernameNormalized)
+          || (request.resource.data.type == 'code'
+            && indexId == 'c_' + getAfter(
+              userPath(request.resource.data.uid)
+            ).data.studentCode.lower()))
+        && (request.auth.uid == request.resource.data.uid
+          || (isTeacher()
+            && getAfter(userPath(request.resource.data.uid)).data.teacherId
+              == request.auth.uid));
+      allow update, delete: if false;
+    }
+
+    function validClass(data, classId) {
+      return data.keys().hasAll([
+          'id', 'teacherId', 'name', 'classCode', 'studentCount',
+          'status', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id', 'teacherId', 'teacherName', 'teacherEmail', 'name', 'grade',
+          'learningTrack', 'classCode', 'studentCount', 'status',
+          'createdAt', 'updatedAt'
+        ])
+        && data.id == classId
+        && shortString(data.teacherId, 128)
+        && shortString(data.name, 120)
+        && shortString(data.classCode, 60)
+        && nonNegativeNumber(data.studentCount, 100000)
+        && data.status in ['active', 'inactive', 'archived'];
+    }
+
+    match /classes/{classId} {
+      allow get: if isOwner()
+        || (isTeacher() && resource.data.teacherId == request.auth.uid)
+        || (isStudent() && resource.data.status == 'active');
+      allow list: if isOwner()
+        || (isTeacher() && resource.data.teacherId == request.auth.uid);
+      allow create: if isTeacher()
+        && validClass(request.resource.data, classId)
+        && request.resource.data.teacherId == request.auth.uid
+        && request.resource.data.studentCount == 0
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if (isOwner()
+          || (isTeacher() && resource.data.teacherId == request.auth.uid))
+        && validClass(request.resource.data, classId)
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.teacherId == resource.data.teacherId
+        && request.resource.data.classCode == resource.data.classCode
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    match /classCodes/{codeId} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if isTeacher()
+        && request.resource.data.keys().hasAll([
+          'classId', 'classCode', 'teacherId', 'createdAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'classId', 'classCode', 'teacherId', 'createdAt'
+        ])
+        && request.resource.data.teacherId == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && existsAfter(
+          /databases/$(database)/documents/classes/$(request.resource.data.classId)
+        )
+        && getAfter(
+          /databases/$(database)/documents/classes/$(request.resource.data.classId)
+        ).data.teacherId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    function validProgram(data) {
+      return data.keys().hasAll([
+          'title', 'description', 'status', 'createdBy', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'title', 'description', 'icon', 'category', 'ageFrom', 'ageTo',
+          'level', 'grades', 'pricing', 'purchaseOptions', 'finalProject', 'status',
+          'sellable', 'programType', 'createdBy', 'createdByRole', 'ownerName',
+          'lessonCount', 'salesCount', 'studentsCount', 'currency', 'paddlePriceIds',
+          'createdAt', 'updatedAt', 'publishedAt'
+        ])
+        && data.title is map
+        && data.description is map
+        && data.title.size() <= 10
+        && data.description.size() <= 10
+        && data.status in ['draft', 'published', 'archived'];
+    }
+
+    match /programs/{programId} {
+      allow read: if (resource.data.status == 'published') || isOwner();
+      allow create: if isOwner()
+        && validProgram(request.resource.data)
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if isOwner()
+        && validProgram(request.resource.data)
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if isOwner();
+    }
+
+    match /plans/{planId} {
+      // Plans are a public product catalog and contain no customer records.
+      allow read: if true;
+      allow create: if isOwner()
+        && request.resource.data.keys().hasAll([
+          'audience', 'name', 'active', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if isOwner()
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    function studentCanReadLesson(data) {
+      return isStudent()
+        && data.status == 'published'
+        && shortString(currentUser().get('classId', ''), 128)
+        && data.classId == currentUser().classId;
+    }
+
+    function validLesson(data) {
+      return data.keys().hasAll(['status', 'sections', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly([
+          'programId', 'lessonType', 'sellable', 'createdBy', 'createdByRole',
+          'teacherId', 'teacherName', 'classId', 'className', 'classCode',
+          'grade', 'learningTrack', 'sourceType', 'templateId', 'title',
+          'titleI18n', 'description', 'descriptionI18n', 'minutes',
+          'estimatedMinutes', 'xp', 'xpReward', 'activityType', 'resourceUrl',
+          'coverImage', 'imageAlt', 'themeColor', 'accentColor', 'surfaceColor',
+          'status', 'lessonNumber', 'order', 'sections', 'slideCount',
+          'completedCount', 'createdAt', 'updatedAt', 'publishedAt', 'archivedAt'
+        ])
+        && data.status in ['draft', 'published', 'archived']
+        && data.sections is list
+        && data.sections.size() <= 300
+        && optionalString(data, 'resourceUrl', 2048)
+        && optionalString(data, 'coverImage', 2048)
+        && (!('imageAlt' in data)
+          || (data.imageAlt is map && data.imageAlt.size() <= 10))
+        && (!('themeColor' in data)
+          || (data.themeColor is string
+            && data.themeColor.matches('^#[0-9a-fA-F]{6}$')))
+        && (!('accentColor' in data)
+          || (data.accentColor is string
+            && data.accentColor.matches('^#[0-9a-fA-F]{6}$')))
+        && (!('surfaceColor' in data)
+          || (data.surfaceColor is string
+            && data.surfaceColor.matches('^#[0-9a-fA-F]{6}$')))
+        && nonNegativeNumber(data.get('xpReward', data.get('xp', 0)), 10000);
+    }
+
+    match /lessons/{lessonId} {
+      allow read: if isOwner()
+        || (isTeacher() && resource.data.teacherId == request.auth.uid)
+        || studentCanReadLesson(resource.data);
+      allow create: if validLesson(request.resource.data)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time
+        && ((isOwner()
+            && request.resource.data.createdBy == request.auth.uid
+            && request.resource.data.lessonType == 'commercial')
+          || (isTeacher()
+            && request.resource.data.teacherId == request.auth.uid
+            && exists(/databases/$(database)/documents/classes/$(request.resource.data.classId))
+            && get(/databases/$(database)/documents/classes/$(request.resource.data.classId)).data.teacherId
+              == request.auth.uid));
+      allow update: if validLesson(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.get('createdBy', null) == resource.data.get('createdBy', null)
+        && request.resource.data.get('teacherId', null) == resource.data.get('teacherId', null)
+        && request.resource.data.get('classId', null) == resource.data.get('classId', null)
+        && request.resource.data.updatedAt == request.time
+        && (isOwner()
+          || (isTeacher() && resource.data.teacherId == request.auth.uid));
+      allow delete: if isOwner() && resource.data.get('lessonType', '') == 'commercial';
+    }
+
+    match /attendance/{attendanceId} {
+      allow read: if isOwner()
+        || (isTeacher() && resource.data.teacherId == request.auth.uid);
+      allow create, update: if isTeacher()
+        && request.resource.data.teacherId == request.auth.uid
+        && request.resource.data.attendanceId == attendanceId
+        && attendanceId == request.resource.data.classId + '_' + request.resource.data.date
+        && shortString(request.resource.data.classId, 128)
+        && shortString(request.resource.data.date, 32)
+        && exists(/databases/$(database)/documents/classes/$(request.resource.data.classId))
+        && get(/databases/$(database)/documents/classes/$(request.resource.data.classId)).data.teacherId
+          == request.auth.uid
+        && request.resource.data.students is map
+        && request.resource.data.students.size() <= 1000
+        && request.resource.data.studentCount is int
+        && request.resource.data.studentCount >= 0
+        && request.resource.data.studentCount <= 1000
+        && request.resource.data.updatedAt == request.time
+        && ((resource == null && request.resource.data.createdAt == request.time)
+          || (resource != null
+            && request.resource.data.createdAt == resource.data.createdAt));
+      allow delete: if false;
+    }
+
+    // Mission state is optional: existing lesson schemas and behavior are preserved.
+    function validMissionProgress(data, lesson) {
+      return !('mission' in data) || (lesson.get('activityType', '') == 'mission'
+        && data.mission is map
+        && data.mission.keys().hasAll(['version', 'currentScreen', 'screens', 'skills'])
+        && data.mission.keys().hasOnly(['version', 'currentScreen', 'screens', 'skills'])
+        && data.mission.version == 1
+        && data.mission.currentScreen is int
+        && data.mission.currentScreen >= 0
+        && data.mission.currentScreen < lesson.sections.size()
+        && data.currentSlide == data.mission.currentScreen
+        && data.mission.screens is map
+        && data.mission.screens.size() <= 300
+        && data.mission.skills is map
+        && data.mission.skills.size() <= 50);
+    }
+
+    function validStudentProgress(data, progressId) {
+      let lesson = get(/databases/$(database)/documents/lessons/$(data.lessonId)).data;
+      return data.keys().hasAll([
+          'studentId', 'lessonId', 'teacherId', 'classId', 'currentSlide',
+          'maxUnlockedSlide', 'selectedAnswers', 'answerResults',
+          'taskAnswers', 'status', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'studentId', 'studentName', 'lessonId', 'lessonTitle', 'teacherId',
+          'classId', 'className', 'currentSlide', 'maxUnlockedSlide',
+          'selectedAnswers', 'answerResults', 'taskAnswers', 'status',
+          'teacherFeedback', 'teacherReviewedAt', 'createdAt', 'completedAt',
+          'updatedAt', 'mission'
+        ])
+        && data.studentId == request.auth.uid
+        && progressId == request.auth.uid + '_' + data.lessonId
+        && exists(/databases/$(database)/documents/lessons/$(data.lessonId))
+        && studentCanReadLesson(lesson)
+        && data.teacherId == lesson.teacherId
+        && data.classId == lesson.classId
+        && nonNegativeNumber(data.currentSlide, 10000)
+        && nonNegativeNumber(data.maxUnlockedSlide, 10000)
+        && data.selectedAnswers is map
+        && data.selectedAnswers.size() <= 500
+        && data.answerResults is map
+        && data.answerResults.size() <= 500
+        && data.taskAnswers is map
+        && data.taskAnswers.size() <= 500
+        && validMissionProgress(data, lesson)
+        && data.status in ['in_progress', 'completed']
+        && data.updatedAt == request.time;
+    }
+
+    match /lessonProgress/{progressId} {
+      // A first visit must be able to establish that its own record is absent.
+      allow get: if isStudent()
+        && progressId.matches(request.auth.uid + '_.*')
+        && !exists(/databases/$(database)/documents/lessonProgress/$(progressId));
+      allow read: if isOwner()
+        || (isStudent() && resource.data.studentId == request.auth.uid)
+        || (isTeacher() && resource.data.teacherId == request.auth.uid);
+      allow create: if isStudent()
+        && validStudentProgress(request.resource.data, progressId)
+        && (!(request.resource.data.keys().hasAny(['createdAt']))
+          || request.resource.data.createdAt == request.time);
+      allow update: if (isStudent()
+          && validStudentProgress(request.resource.data, progressId)
+          && request.resource.data.studentId == resource.data.studentId
+          && request.resource.data.lessonId == resource.data.lessonId
+          && request.resource.data.teacherId == resource.data.teacherId
+          && request.resource.data.classId == resource.data.classId
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'studentName', 'lessonTitle', 'className', 'currentSlide',
+            'maxUnlockedSlide', 'selectedAnswers', 'answerResults',
+            'taskAnswers', 'status', 'completedAt', 'updatedAt', 'mission'
+          ]))
+        || (isTeacher()
+          && resource.data.teacherId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'teacherFeedback', 'teacherReviewedAt'
+          ])
+          && request.resource.data.teacherFeedback is map
+          && request.resource.data.teacherFeedback.size() <= 500
+          && request.resource.data.teacherReviewedAt == request.time);
+      allow delete: if false;
+    }
+
+    function completionUpdatesStudent(data) {
+      let studentBefore = get(userPath(data.studentId)).data;
+      let studentAfter = getAfter(userPath(data.studentId)).data;
+      return studentBefore.role == 'student'
+        && studentAfter.lastCompletedLessonId == data.lessonId
+        && studentAfter.xp == studentBefore.get('xp', 0) + data.xpReward
+        && studentAfter.completedLessons
+          == studentBefore.get('completedLessons', 0) + 1;
+    }
+
+    match /lessonCompletions/{completionId} {
+      allow get: if isStudent()
+        && completionId.matches(request.auth.uid + '_.*')
+        && !exists(/databases/$(database)/documents/lessonCompletions/$(completionId));
+      allow read: if isOwner()
+        || (isStudent() && resource.data.studentId == request.auth.uid)
+        || (isTeacher() && resource.data.teacherId == request.auth.uid);
+      allow create: if isStudent()
+        && request.resource.data.keys().hasAll([
+          'studentId', 'lessonId', 'teacherId', 'classId', 'xpReward', 'completedAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'studentId', 'studentName', 'lessonId', 'lessonTitle', 'teacherId',
+          'classId', 'className', 'xpReward', 'completedAt'
+        ])
+        && request.resource.data.studentId == request.auth.uid
+        && completionId == request.auth.uid + '_' + request.resource.data.lessonId
+        && exists(/databases/$(database)/documents/lessons/$(request.resource.data.lessonId))
+        && studentCanReadLesson(
+          get(/databases/$(database)/documents/lessons/$(request.resource.data.lessonId)).data
+        )
+        && request.resource.data.teacherId
+          == get(/databases/$(database)/documents/lessons/$(request.resource.data.lessonId)).data.teacherId
+        && request.resource.data.classId
+          == get(/databases/$(database)/documents/lessons/$(request.resource.data.lessonId)).data.classId
+        && request.resource.data.xpReward
+          == get(/databases/$(database)/documents/lessons/$(request.resource.data.lessonId)).data.get(
+            'xpReward',
+            get(/databases/$(database)/documents/lessons/$(request.resource.data.lessonId)).data.get('xp', 0)
+          )
+        && nonNegativeNumber(request.resource.data.xpReward, 10000)
+        && completionUpdatesStudent(request.resource.data)
+        && request.resource.data.completedAt == request.time;
+      allow update, delete: if false;
+    }
+
+    match /portfolio/{portfolioId} {
+      allow read: if isOwner()
+        || (isStudent() && resource.data.studentId == request.auth.uid)
+        || (isTeacher() && resource.data.teacherId == request.auth.uid);
+      allow create, update: if isStudent()
+        && request.resource.data.studentId == request.auth.uid
+        && portfolioId == request.auth.uid + '_' + request.resource.data.lessonId
+          + '_' + request.resource.data.sectionId
+        && request.resource.data.keys().hasAll([
+          'studentId', 'lessonId', 'sectionId', 'teacherId', 'classId',
+          'title', 'description', 'answer', 'status', 'updatedAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'studentId', 'studentName', 'teacherId', 'classId', 'className',
+          'lessonId', 'lessonTitle', 'sectionId', 'title', 'description',
+          'answer', 'projectType', 'status', 'createdAt', 'updatedAt'
+        ])
+        && shortString(request.resource.data.lessonId, 128)
+        && shortString(request.resource.data.sectionId, 128)
+        && request.resource.data.answer is string
+        && request.resource.data.answer.size() <= 20000
+        && request.resource.data.status == 'completed'
+        && exists(/databases/$(database)/documents/lessons/$(request.resource.data.lessonId))
+        && studentCanReadLesson(
+          get(/databases/$(database)/documents/lessons/$(request.resource.data.lessonId)).data
+        )
+        && request.resource.data.teacherId
+          == get(/databases/$(database)/documents/lessons/$(request.resource.data.lessonId)).data.teacherId
+        && request.resource.data.classId
+          == get(/databases/$(database)/documents/lessons/$(request.resource.data.lessonId)).data.classId
+        && request.resource.data.updatedAt == request.time
+        && (resource == null
+          || (request.resource.data.studentId == resource.data.studentId
+            && request.resource.data.lessonId == resource.data.lessonId
+            && request.resource.data.sectionId == resource.data.sectionId
+            && request.resource.data.teacherId == resource.data.teacherId
+            && request.resource.data.classId == resource.data.classId));
+      allow delete: if false;
+    }
+
+    match /platformSettings/public {
+      allow read: if true;
+      allow create, update: if isOwner()
+        && request.resource.data.keys().hasAll([
+          'platformName', 'supportEmail', 'supportPhone', 'whatsapp',
+          'updatedBy', 'updatedAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'platformName', 'supportEmail', 'supportPhone', 'whatsapp',
+          'updatedBy', 'updatedAt'
+        ])
+        && shortString(request.resource.data.platformName, 120)
+        && request.resource.data.supportEmail is string
+        && request.resource.data.supportEmail.size() <= 320
+        && request.resource.data.supportPhone is string
+        && request.resource.data.supportPhone.size() <= 40
+        && request.resource.data.whatsapp is string
+        && request.resource.data.whatsapp.size() <= 40
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    match /platformSettings/{document=**} {
+      allow read, write: if false;
+    }
+
+    match /programAccess/{accessId} {
+      allow get: if isOwner()
+        || (signedIn() && resource.data.get('userId', '') == request.auth.uid)
+        || (isTeacher() && resource.data.get('teacherId', '') == request.auth.uid)
+        || (isStudent()
+          && resource.data.get('classId', '') == currentUser().get('classId', ''));
+      allow list: if isOwner();
+      allow write: if false;
+    }
+
+    match /programPurchases/{purchaseId} {
+      allow read: if isOwner()
+        || (signedIn() && resource.data.get('userId', '') == request.auth.uid);
+      allow write: if false;
+    }
+
+    // Membership and assignment mutations are performed by callable Functions,
+    // which validate the authenticated role and class ownership server-side.
+    match /classMembers/{membershipId} {
+      allow get: if isOwner()
+        || (isStudent() && resource.data.studentId == request.auth.uid)
+        || (isTeacher() && resource.data.teacherId == request.auth.uid);
+      allow list: if isOwner()
+        || (isTeacher() && resource.data.teacherId == request.auth.uid)
+        || (isTeacher()
+          && exists(/databases/$(database)/documents/classes/$(resource.data.classId))
+          && get(/databases/$(database)/documents/classes/$(resource.data.classId)).data.teacherId == request.auth.uid)
+        || (isStudent() && resource.data.studentId == request.auth.uid);
+      allow write: if false;
+    }
+
+    match /classAssignments/{assignmentId} {
+      allow get: if isOwner()
+        || (isTeacher() && resource.data.teacherId == request.auth.uid)
+        || (isStudent() && isActiveClassMember(resource.data.classId, request.auth.uid));
+      allow list: if isOwner()
+        || (isTeacher() && resource.data.teacherId == request.auth.uid)
+        || (isStudent() && isActiveClassMember(resource.data.classId, request.auth.uid));
+      allow write: if false;
+    }
+
+    match /subscriptions/{userId} {
+      allow read: if isOwner() || isSelf(userId);
+      allow write: if false;
+    }
+
+    match /subscriptionPayments/{paymentId} {
+      allow read: if isOwner()
+        || (signedIn() && resource.data.get('userId', '') == request.auth.uid);
+      allow write: if false;
+    }
+
+    match /paddleWebhookEvents/{eventId} {
+      allow read, write: if false;
+    }
+
+    match /studentLoginRateLimits/{document=**} {
+      allow read, write: if false;
+    }
+
+    // Deny new collections by default until their authorization model is explicit.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

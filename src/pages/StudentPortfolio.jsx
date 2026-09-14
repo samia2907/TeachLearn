@@ -25,6 +25,8 @@ import {
 
 import "./StudentPortfolio.css";
 
+import { hebrewText } from "../data/hebrewText";
+
 
 function StudentPortfolio() {
   const navigate =
@@ -42,6 +44,8 @@ function StudentPortfolio() {
   ) =>
     language === "ar"
       ? arabic
+      : language === "he"
+        ? hebrewText(english)
       : english;
 
 
@@ -235,7 +239,9 @@ function StudentPortfolio() {
           >
             {language === "ar"
               ? "↩ الرئيسية"
-              : "← Dashboard"}
+              : language === "he"
+                ? "→ לוח הבקרה"
+                : "← Dashboard"}
           </button>
 
 
@@ -250,8 +256,8 @@ function StudentPortfolio() {
 
           <p>
             {text(
-              "A collection of the projects and challenges you completed in TechMinds.",
-              "مجموعة من المشاريع والمهام التي أنجزتها في TechMinds."
+              "A collection of the projects and challenges you completed in TeachLearn.",
+              "مجموعة من المشاريع والمهام التي أنجزتها في TeachLearn."
             )}
           </p>
 
@@ -443,7 +449,7 @@ function StudentPortfolio() {
 
                     {project.lessonTitle
                       ? `📚 ${project.lessonTitle}`
-                      : "TechMinds"}
+                      : "TeachLearn"}
 
                   </small>
 
@@ -456,8 +462,8 @@ function StudentPortfolio() {
                   <p>
                     {project.description ||
                       text(
-                        "TechMinds project",
-                        "مشروع TechMinds"
+                        "TeachLearn project",
+                        "مشروع TeachLearn"
                       )}
                   </p>
 
@@ -544,8 +550,8 @@ function StudentPortfolio() {
 
             <small>
               {text(
-                "MY TECHMINDS PROJECT",
-                "مشروعي في TechMinds"
+                "MY TEACHLEARN PROJECT",
+                "مشروعي في TeachLearn"
               )}
             </small>
 

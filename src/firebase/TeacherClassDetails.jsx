@@ -35,6 +35,10 @@ import {
 } from "../firebase/studentAuth";
 
 import {
+  isStudentAliasAvailable,
+} from "../firebase/studentLoginApi";
+
+import {
   useLanguage,
 } from "../context/LanguageContext";
 
@@ -174,18 +178,13 @@ function TeacherClassDetails() {
         const normalized =
           normalizeCode(code);
 
-        const snapshot =
-          await getDoc(
-            doc(
-              db,
-              "studentLoginIndex",
-              `c_${normalized}`
-            )
+        const available =
+          await isStudentAliasAvailable(
+            "code",
+            normalized
           );
 
-        if (
-          !snapshot.exists()
-        ) {
+        if (available) {
           return code;
         }
       }
@@ -408,15 +407,14 @@ function TeacherClassDetails() {
             `u_${normalizedUsername}`
           );
 
-        const usernameSnapshot =
-          await getDoc(
-            usernameRef
+        const usernameAvailable =
+          await isStudentAliasAvailable(
+            "username",
+            normalizedUsername
           );
 
 
-        if (
-          usernameSnapshot.exists()
-        ) {
+        if (!usernameAvailable) {
           throw new Error(
             "username-taken"
           );
@@ -589,7 +587,7 @@ function TeacherClassDetails() {
             classId,
 
             type:
-              "studentCode",
+              "code",
 
             createdAt:
               serverTimestamp(),

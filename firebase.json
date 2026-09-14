@@ -16,6 +16,13 @@
       ]
     }
   ],
+  "firestore": {
+    "database": "default",
+    "location": "nam5",
+    "edition": "enterprise",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
   "hosting": {
     "public": "dist",
     "ignore": [

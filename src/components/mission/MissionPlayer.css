@@ -1,0 +1,389 @@
+.mission-player {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+  color: #172544;
+  font-family: inherit;
+}
+
+.mission-player * {
+  box-sizing: border-box;
+}
+
+.mission-player button,
+.mission-player select {
+  font: inherit;
+  min-height: 44px;
+  border: 1px solid #c2cde1;
+  border-radius: 12px;
+  padding: 10px 16px;
+  background: #fff;
+  color: #172544;
+  cursor: pointer;
+}
+
+.mission-player button:hover:not(:disabled) {
+  background: #eef2ff;
+  border-color: #4f46e5;
+}
+
+.mission-player button:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+.mission-player button:focus-visible,
+.mission-player select:focus-visible {
+  outline: 3px solid #4f46e5;
+  outline-offset: 3px;
+}
+
+.mission-player .mission-primary {
+  background: #4935b7;
+  color: #fff;
+  border-color: #4935b7;
+}
+
+.mission-player .mission-primary:hover:not(:disabled) {
+  background: #352588;
+}
+
+.mission-topbar,
+.mission-controls,
+.mission-navigation,
+.mission-progress-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.mission-language,
+.mission-directions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mission-player button[aria-pressed="true"] {
+  background: #eae5ff;
+  border: 2px solid #4935b7;
+}
+
+.mission-player h1 {
+  font-size: clamp(1.6rem, 4vw, 2.5rem);
+  margin: 28px 0 20px;
+}
+
+.mission-player progress {
+  width: 100%;
+  height: 14px;
+  accent-color: #4935b7;
+  margin: 12px 0 24px;
+}
+
+.mission-xp {
+  font-weight: 800;
+}
+
+.mission-card {
+  background: #fff;
+  border: 1px solid #dce3ef;
+  border-radius: 24px;
+  padding: clamp(20px, 5vw, 42px);
+  box-shadow: 0 12px 40px #26375c0d;
+}
+
+.mission-card h2 {
+  font-size: clamp(1.35rem, 3vw, 1.9rem);
+  margin: 12px 0;
+}
+
+.mission-screen-count {
+  color: #52617d;
+  font-size: .9rem;
+}
+
+.mission-prompt {
+  line-height: 1.9;
+  font-size: 1.15rem;
+  white-space: pre-line;
+}
+
+.mission-mascot {
+  font-size: 5rem;
+  text-align: center;
+  padding: 12px;
+}
+
+.mission-options {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.mission-options button {
+  text-align: start;
+  padding: 18px;
+}
+
+.mission-options .mission-option-label {
+  color: #172544;
+  opacity: 1;
+  visibility: visible;
+}
+
+.mission-options button:disabled .mission-option-label,
+.mission-options button[aria-pressed="true"] .mission-option-label {
+  color: #172544;
+  opacity: 1;
+}
+
+.mission-sequence {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.mission-sequence li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f4f6fb;
+  border: 1px solid #dce3ef;
+  border-radius: 12px;
+}
+
+.mission-sequence li[draggable="true"] {
+  cursor: grab;
+}
+
+.mission-sequence li > div {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.mission-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-size), 1fr);
+  gap: 5px;
+  max-width: 340px;
+  margin: 24px auto;
+  background: #dce3ef;
+  border: 5px solid #dce3ef;
+  border-radius: 12px;
+}
+
+.mission-grid > div {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  background: #f4f7ff;
+  font-size: 2rem;
+  border-radius: 5px;
+}
+
+.mission-grid .mission-wall {
+  background: #34415d;
+  color: #fff;
+}
+
+.mission-grid .mission-goal {
+  background: #fff0b8;
+}
+
+.mission-board-description {
+  font-size: .85rem;
+  line-height: 1.6;
+  color: #52617d;
+}
+
+.mission-directions {
+  justify-content: center;
+}
+
+.mission-commands {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+  gap: 8px;
+  min-height: 50px;
+}
+
+.mission-commands li {
+  background: #f0edff;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.mission-controls {
+  justify-content: flex-start;
+  margin-top: 20px;
+}
+
+.mission-navigation {
+  border-top: 1px solid #dce3ef;
+  padding-top: 22px;
+  margin-top: 28px;
+}
+
+.mission-hint,
+.mission-feedback,
+.mission-success {
+  padding: 14px;
+  border-radius: 12px;
+  line-height: 1.7;
+}
+
+.mission-hint,
+.mission-feedback {
+  background: #fff3d5;
+  color: #684800;
+}
+
+.mission-success {
+  background: #e1f6ec;
+  color: #145a3d;
+}
+
+.mission-skills {
+  margin-top: 24px;
+}
+
+.mission-skills h2 {
+  font-size: 1.1rem;
+}
+
+.mission-skills > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mission-skills span {
+  border: 1px solid #dce3ef;
+  border-radius: 20px;
+  padding: 8px 14px;
+  background: #fff;
+}
+
+.mission-complete {
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+}
+
+/* Reusable short explanation screen */
+.mission-explain {
+  background:
+    radial-gradient(circle at top right, #f2edff 0, transparent 32%),
+    #fff;
+}
+
+.mission-explain-icon {
+  width: 72px;
+  height: 72px;
+  margin: 8px auto 14px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  background: #f0edff;
+  font-size: 2.4rem;
+}
+
+.mission-explain-image {
+  display: block;
+  width: min(100%, 560px);
+  max-height: 300px;
+  object-fit: contain;
+  margin: 16px auto 22px;
+  border-radius: 18px;
+}
+
+.mission-comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 24px 0;
+}
+
+.mission-comparison article {
+  min-height: 120px;
+  padding: 18px;
+  border: 1px solid #dce3ef;
+  border-radius: 18px;
+  background: #f8f9ff;
+}
+
+.mission-comparison strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 1.05rem;
+}
+
+.mission-comparison p {
+  margin: 0;
+  line-height: 1.7;
+}
+
+.mission-example {
+  margin: 22px 0;
+  padding: 18px;
+  border-radius: 16px;
+  background: #eef7ff;
+  border: 1px solid #cfe5ff;
+  line-height: 1.8;
+  font-weight: 700;
+  text-align: center;
+}
+
+.mission-complete strong {
+  font-size: 2rem;
+}
+
+.mission-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .mission-comparison {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-explain-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .mission-player {
+    padding: 16px 12px 36px;
+  }
+
+  .mission-topbar {
+    gap: 8px;
+  }
+
+  .mission-sequence li {
+    align-items: flex-start;
+  }
+
+  .mission-commands select {
+    max-width: 140px;
+  }
+}

@@ -736,6 +736,8 @@
     grid-template-columns:
       repeat(2, 1fr);
   }
+}
+
 .join-class-dashboard-button {
   margin-top: 14px;
 
@@ -759,4 +761,395 @@
 
   cursor: pointer;
 }
+
+
+/* =====================
+   HERO (redesign)
+===================== */
+
+.student-hero-text {
+  flex: 1;
+}
+
+.hero-meta-row {
+  display: flex;
+  gap: 10px;
+  margin: 14px 0 12px;
+}
+
+.hero-chip {
+  padding: 6px 13px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.18);
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.hero-progress-bar {
+  max-width: 380px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.hero-progress-bar div {
+  background: linear-gradient(90deg, #fde68a, #fbbf24);
+}
+
+.hero-progress-label {
+  display: block;
+  margin-top: 6px;
+  opacity: 0.85;
+  font-size: 12px;
+}
+
+
+/* =====================
+   MISSION CTA
+===================== */
+
+.mission-cta-card {
+  max-width: 1200px;
+  margin: 0 auto 25px;
+  padding: 32px 40px;
+  border-radius: 26px;
+  color: white;
+  background: linear-gradient(120deg, #4338ca, #7c3aed, #db2777);
+  box-shadow: 0 20px 45px rgba(124, 58, 237, 0.28);
+}
+
+.mission-cta-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+}
+
+.mission-cta-card h2 {
+  margin: 14px 0 8px;
+  font-size: 26px;
+}
+
+.mission-cta-teaser {
+  margin: 0 0 18px;
+  max-width: 620px;
+  opacity: 0.92;
+  line-height: 1.6;
+}
+
+.mission-cta-progress {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 420px;
+}
+
+.mission-cta-progress .student-progress-bar {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.mission-cta-progress .student-progress-bar div {
+  background: linear-gradient(90deg, #fde68a, #fbbf24);
+}
+
+.mission-cta-button {
+  margin-top: 22px;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 14px;
+  background: white;
+  color: #4338ca;
+  font-weight: 900;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+}
+
+
+/* =====================
+   QUICK PROGRESS CARDS
+===================== */
+
+.quick-cards {
+  max-width: 1200px;
+  margin: 0 auto 25px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.quick-card {
+  padding: 16px;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+  border-top: 4px solid;
+  text-align: center;
+}
+
+.quick-card span {
+  font-size: 22px;
+}
+
+.quick-card small {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.quick-card strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 19px;
+}
+
+.quick-card.purple {
+  border-color: #8b5cf6;
+}
+
+.quick-card.blue {
+  border-color: #3b82f6;
+}
+
+.quick-card.green {
+  border-color: #10b981;
+}
+
+
+/* =====================
+   MAIN COLUMNS
+===================== */
+
+.student-main-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+
+/* MISSION PATH */
+
+.mission-path-panel {
+  border-top: 5px solid #4338ca;
+}
+
+.mission-path-panel h3 {
+  margin: 0 0 16px;
+}
+
+.mission-path-empty {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.mission-path {
+  display: flex;
+  flex-direction: column;
+}
+
+.mission-path-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.mission-path-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+}
+
+.mission-path-step.active {
+  background: #eef2ff;
+}
+
+.mission-path-icon {
+  font-size: 22px;
+  width: 34px;
+  text-align: center;
+}
+
+.mission-path-label {
+  display: flex;
+  flex-direction: column;
+}
+
+.mission-path-label strong {
+  font-size: 13px;
+  color: #1e293b;
+}
+
+.mission-path-label em {
+  font-style: normal;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.mission-path-step.locked .mission-path-label strong,
+.mission-path-step.locked .mission-path-label em {
+  color: #94a3b8;
+}
+
+.mission-path-connector {
+  width: 2px;
+  height: 18px;
+  margin-inline-start: 27px;
+  background: #e2e8f0;
+}
+
+
+/* CONTINUE LEARNING */
+
+.continue-learning-panel {
+  border-top: 5px solid #f97316;
+  background: linear-gradient(145deg, white, #fff7ed);
+}
+
+.continue-learning-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  color: #c2410c;
+  background: #ffedd5;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.continue-learning-icon {
+  margin-top: 16px;
+  font-size: 48px;
+}
+
+.continue-learning-panel h2 {
+  margin: 10px 0 6px;
+}
+
+.continue-learning-panel p {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.continue-learning-button {
+  margin-top: 10px;
+  padding: 13px 24px;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  background: linear-gradient(135deg, #f97316, #f59e0b);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.secondary-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.secondary-links button {
+  padding: 8px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: white;
+  color: #475569;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+
+/* BADGE CARDS */
+
+.badge-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.badge-card {
+  position: relative;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fef3c7, #fff7ed);
+}
+
+.badge-card-icon {
+  font-size: 30px;
+}
+
+.badge-card small {
+  font-weight: 700;
+  font-size: 11px;
+  text-align: center;
+  padding: 0 6px;
+}
+
+.badge-card.locked {
+  background: linear-gradient(135deg, #ede9fe, #f5f3ff);
+  opacity: 0.65;
+}
+
+.badge-card.locked .badge-card-icon {
+  filter: grayscale(0.6);
+}
+
+.badge-card-lock {
+  position: absolute;
+  top: 6px;
+  inset-inline-end: 8px;
+  font-size: 12px;
+}
+
+
+/* CLASS (compact) */
+
+.class-panel.compact {
+  padding: 20px 24px;
+}
+
+.class-panel.compact h2 {
+  margin: 10px 0 5px;
+  font-size: 17px;
+}
+
+
+/* RESPONSIVE ADDITIONS */
+
+@media (max-width: 900px) {
+  .quick-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .student-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .mission-cta-card {
+    padding: 24px 22px;
+  }
+
+  .quick-cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .badge-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }

@@ -31,6 +31,7 @@ import {
 function ProtectedRoute({
   children,
   allowedRole,
+  requiredPlan,
 }) {
   const navigate =
     useNavigate();
@@ -54,6 +55,16 @@ function ProtectedRoute({
     blockedStudent,
     setBlockedStudent,
   ] = useState(false);
+
+  const [
+    planAllowed,
+    setPlanAllowed,
+  ] = useState(!requiredPlan);
+
+  const [
+    checkingPlan,
+    setCheckingPlan,
+  ] = useState(Boolean(requiredPlan));
 
 
   const text = (
@@ -168,11 +179,34 @@ function ProtectedRoute({
               data.role !==
                 allowedRole
             ) {
+              setCheckingPlan(false);
               setAllowed(
                 false
               );
 
               return;
+            }
+
+            if (requiredPlan) {
+              const subscriptionSnapshot =
+                await getDoc(
+                  doc(
+                    db,
+                    "subscriptions",
+                    user.uid
+                  )
+                );
+
+              const subscription =
+                subscriptionSnapshot.exists()
+                  ? subscriptionSnapshot.data()
+                  : null;
+
+              setPlanAllowed(
+                subscription?.status === "active" &&
+                subscription.planId === requiredPlan
+              );
+              setCheckingPlan(false);
             }
 
 
@@ -211,6 +245,7 @@ function ProtectedRoute({
 
   }, [
     allowedRole,
+    requiredPlan,
   ]);
 
 
@@ -304,6 +339,87 @@ function ProtectedRoute({
           )}
         </p>
 
+      </div>
+    );
+  }
+
+  if (requiredPlan && checkingPlan) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "grid",
+          placeItems: "center",
+          background: "#f7f8fc",
+          color: "#475569",
+          fontFamily: '"Segoe UI", Tahoma, Arial, sans-serif',
+        }}
+      >
+        {text(
+          "Checking your subscription...",
+          "جارٍ التحقق من اشتراكك..."
+        )}
+      </div>
+    );
+  }
+
+  if (requiredPlan && !planAllowed) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          padding: "24px",
+          display: "grid",
+          placeItems: "center",
+          background: "linear-gradient(135deg, #f8fafc, #f5f3ff)",
+          direction: language === "ar" || language === "he" ? "rtl" : "ltr",
+          fontFamily: '"Segoe UI", Tahoma, Arial, sans-serif',
+        }}
+      >
+        <div
+          style={{
+            width: "min(480px, 100%)",
+            padding: "36px 30px",
+            borderRadius: "20px",
+            background: "#ffffff",
+            textAlign: "center",
+            boxShadow: "0 20px 55px rgba(15,23,42,0.12)",
+          }}
+        >
+          <div style={{ fontSize: "42px", marginBottom: "14px" }}>🔒</div>
+          <h1 style={{ margin: "0 0 10px", color: "#172033", fontSize: "25px" }}>
+            {text(
+              "This feature requires an upgrade",
+              "هذه الميزة تتطلب ترقية الخطة"
+            )}
+          </h1>
+          <p style={{ margin: "0 0 24px", color: "#64748b", lineHeight: "1.7" }}>
+            {text(
+              "Upgrade your subscription to access this feature.",
+              "قم بترقية اشتراكك للوصول إلى هذه الميزة."
+            )}
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate("/plans")}
+            style={{
+              width: "100%",
+              minHeight: "48px",
+              border: "none",
+              borderRadius: "12px",
+              background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
+              color: "#ffffff",
+              fontSize: "15px",
+              fontWeight: "800",
+              cursor: "pointer",
+            }}
+          >
+            {text(
+              "Upgrade Plan",
+              "ترقية الخطة"
+            )}
+          </button>
+        </div>
       </div>
     );
   }
@@ -479,8 +595,8 @@ function ProtectedRoute({
             }}
           >
             {text(
-              "You currently cannot access TechMinds. Please contact your teacher if you believe this was a mistake.",
-              "لا يمكنك حاليًا الدخول إلى TechMinds. يرجى التواصل مع المعلّم إذا كنت تعتقد أن الحساب تم تعطيله بالخطأ."
+              "You currently cannot access TeachLearn. Please contact your teacher if you believe this was a mistake.",
+              "لا يمكنك حاليًا الدخول إلى TeachLearn. يرجى التواصل مع المعلّم إذا كنت تعتقد أن الحساب تم تعطيله بالخطأ."
             )}
           </p>
 

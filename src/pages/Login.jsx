@@ -19,6 +19,7 @@ import {
 } from "firebase/firestore";
 
 import {
+  Link,
   useNavigate,
 } from "react-router-dom";
 
@@ -28,10 +29,15 @@ import {
 } from "../firebase/firebase";
 
 import {
+  signInStudentWithCode,
+} from "../firebase/studentLoginApi";
+
+import {
   useLanguage,
 } from "../context/LanguageContext";
 
 import "./Login.css";
+import WelcomeHero from "../components/WelcomeHero";
 
 function Login() {
   const navigate = useNavigate();
@@ -61,6 +67,9 @@ function Login() {
 
   const [password, setPassword] =
     useState("");
+
+  const [showPassword, setShowPassword] =
+    useState(false);
 
   // =========================
   // PHONE LOGIN
@@ -96,19 +105,22 @@ function Login() {
   // =========================
 
   const [
-    studentCode,
-    setStudentCode,
-  ] = useState("");
+    studentLoginMethod,
+    setStudentLoginMethod,
+  ] = useState("class");
 
   const [
-    classCode,
-    setClassCode,
+    studentCode,
+    setStudentCode,
   ] = useState("");
 
   const [
     studentPassword,
     setStudentPassword,
   ] = useState("");
+
+  const [showStudentPassword, setShowStudentPassword] =
+    useState(false);
 
   // =========================
   // TRANSLATION HELPER
@@ -199,10 +211,12 @@ function Login() {
 
     setEmail("");
     setPassword("");
+    setShowPassword(false);
 
-    setClassCode("");
+    
     setStudentCode("");
     setStudentPassword("");
+    setStudentLoginMethod("class");
 
     setShowPhoneLogin(false);
 
@@ -268,7 +282,7 @@ function Login() {
   };
 
   // =========================
-  // VERIFY TEACHER PROFILE
+  // VERIFY TEACHER OR OWNER PROFILE
   // =========================
 
   const verifyTeacherProfile =
@@ -298,13 +312,13 @@ function Login() {
         userSnap.data();
 
       if (
-        userData.role !==
-        "teacher"
+        userData.role !== "teacher" &&
+        userData.role !== "owner"
       ) {
         await signOut(auth);
 
         throw new Error(
-          "not-teacher"
+          "not-teacher-or-owner"
         );
       }
 
@@ -320,7 +334,9 @@ function Login() {
       }
 
       navigate(
-        "/teacher"
+        userData.role === "owner"
+          ? "/owner"
+          : "/teacher"
       );
     };
 
@@ -356,15 +372,15 @@ function Login() {
 
       if (
         authError.message ===
-        "not-teacher"
+        "not-teacher-or-owner"
       ) {
         setError(
           text(
-            "This account is not a teacher account.",
+            "This account is not a teacher or owner account.",
 
-            "هذا الحساب ليس حساب معلّم.",
+            "هذا الحساب ليس حساب معلّم أو مالك.",
 
-            "חשבון זה אינו חשבון מורה."
+            "חשבון זה אינו חשבון מורה או בעלים."
           )
         );
 
@@ -949,21 +965,229 @@ function Login() {
 
       clearMessages();
 
-      console.log({
-        classCode,
-        studentCode,
-        studentPassword,
-      });
+      if (
+        !studentCode.trim() ||
+        !studentPassword.length
+      ) {
+        setError(
+          text(
+            "Enter your student code or username and password.",
 
-      setError(
-        text(
-          "Student login will be activated after we create the student login system.",
+            "أدخل رمز الطالب وكلمة المرور.",
 
-          "سيتم تفعيل دخول الطالب بعد إنشاء نظام دخول الطلاب.",
+            "יש להזין קוד תלמיד וסיסמה."
+          )
+        );
 
-          "התחברות התלמיד תופעל לאחר שנשלים את מערכת התחברות התלמידים."
-        )
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        await signInStudentWithCode({
+          studentCode,
+          password:
+            studentPassword,
+        });
+
+        navigate(
+          "/student"
+        );
+      } catch (
+        authError
+      ) {
+        console.error(
+          "Student auth error:",
+          authError.code ||
+          authError.message
+        );
+
+        if (
+          authError.code ===
+          "functions/resource-exhausted" ||
+          authError.code === "auth/too-many-requests"
+        ) {
+          setError(
+            text(
+              "Too many login attempts. Please wait and try again.",
+
+              "محاولات دخول كثيرة. انتظر قليلًا ثم حاول مجددًا.",
+
+              "בוצעו יותר מדי ניסיונות התחברות. יש להמתין ולנסות שוב."
+            )
+          );
+        } else if (
+          authError.code ===
+          "functions/unavailable" ||
+          authError.code === "auth/network-request-failed"
+        ) {
+          setError(
+            text(
+              "Student login is temporarily unavailable.",
+
+              "دخول الطلاب غير متاح مؤقتًا.",
+
+              "התחברות תלמידים אינה זמינה כרגע."
+            )
+          );
+        } else if (
+          authError.code ===
+          "functions/not-found"
+        ) {
+          setError(
+            text(
+              "This student code or username was not found. Please check it and try again.",
+
+              "رمز الطالب غير موجود. يرجى التحقق منه والمحاولة مرة أخرى.",
+
+              "קוד התלמיד לא נמצא. יש לבדוק אותו ולנסות שוב."
+            )
+          );
+        } else if (
+          ["auth/wrong-password", "auth/invalid-credential", "auth/invalid-login-credentials"].includes(authError.code)
+        ) {
+          setError(
+            text(
+              "Incorrect password. Please contact your teacher to reset it.",
+
+              "كلمة المرور غير صحيحة. تواصل مع معلمك لإعادة تعيين كلمة المرور.",
+
+              "הסיסמה שגויה. יש לפנות למורה כדי לאפס את הסיסמה."
+            )
+          );
+        } else if (
+          authError.code ===
+          "functions/failed-precondition" ||
+          authError.code === "auth/user-disabled"
+        ) {
+          setError(
+            text(
+              "This account is not available right now. Please contact your teacher.",
+
+              "هذا الحساب غير متاح حاليًا. يرجى التواصل مع معلمك.",
+
+              "החשבון אינו זמין כרגע. יש לפנות למורה."
+            )
+          );
+        } else {
+          setError(
+            text(
+              "Student code, username, or password is incorrect.",
+
+              "رمز الطالب أو كلمة المرور غير صحيحة.",
+
+              "קוד התלמיד או הסיסמה אינם נכונים."
+            )
+          );
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+  const verifyIndependentStudentProfile =
+    async (firebaseUser) => {
+      const userSnap = await getDoc(
+        doc(db, "users", firebaseUser.uid)
       );
+
+      if (!userSnap.exists()) {
+        await signOut(auth);
+        throw new Error("student-profile-not-found");
+      }
+
+      const userData = userSnap.data();
+      const belongsToClass =
+        userData.studentAccountType === "class" ||
+        (!userData.studentAccountType &&
+          Boolean(userData.classId) &&
+          Boolean(userData.teacherId));
+
+      if (userData.role !== "student") {
+        await signOut(auth);
+        throw new Error("not-student");
+      }
+
+      if (userData.accountStatus !== "active") {
+        await signOut(auth);
+        throw new Error("account-inactive");
+      }
+
+      if (belongsToClass) {
+        await signOut(auth);
+        throw new Error("class-student-use-code");
+      }
+
+      navigate("/student");
+    };
+
+  const handleIndependentStudentLogin =
+    async (e) => {
+      e.preventDefault();
+      clearMessages();
+
+      const normalizedEmail =
+        email.trim().toLowerCase();
+
+      if (!normalizedEmail || password.length < 6) {
+        setError(
+          text(
+            "Enter your email and password.",
+            "أدخل البريد الإلكتروني وكلمة المرور.",
+            "יש להזין אימייל וסיסמה."
+          )
+        );
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const result =
+          await signInWithEmailAndPassword(
+            auth,
+            normalizedEmail,
+            password
+          );
+
+        await verifyIndependentStudentProfile(
+          result.user
+        );
+      } catch (authError) {
+        console.error(
+          "Independent student auth error:",
+          authError.code || authError.message
+        );
+
+        if (authError.message === "class-student-use-code") {
+          setError(
+            text(
+              "This student belongs to a class. Use the class-code login.",
+              "هذا الطالب تابع لصف. استخدم الدخول برمز الصف ورمز الطالب.",
+              "תלמיד זה שייך לכיתה. יש להתחבר באמצעות קוד הכיתה וקוד התלמיד."
+            )
+          );
+        } else if (authError.message === "account-inactive") {
+          setError(
+            text(
+              "This account is not active.",
+              "هذا الحساب غير نشط.",
+              "חשבון זה אינו פעיל."
+            )
+          );
+        } else {
+          setError(
+            text(
+              "Email or password is incorrect, or this is not an independent student account.",
+              "البريد أو كلمة المرور غير صحيحة، أو أن الحساب ليس حساب طالب مستقل.",
+              "האימייל או הסיסמה שגויים, או שזה אינו חשבון תלמיד עצמאי."
+            )
+          );
+        }
+      } finally {
+        setLoading(false);
+      }
     };
 
   // =========================
@@ -1324,6 +1548,8 @@ function Login() {
         </p>
       </div>
 
+      {!mode && <WelcomeHero language={language} />}
+
       {/* =====================
           ROLE SELECTION
       ===================== */}
@@ -1532,7 +1758,7 @@ function Login() {
             </label>
 
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
 
               placeholder={text(
                 "Enter password",
@@ -1555,6 +1781,28 @@ function Login() {
 
               required
             />
+
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() =>
+                setShowPassword(
+                  !showPassword
+                )
+              }
+            >
+              {showPassword
+                ? text(
+                    "Hide password",
+                    "إخفاء كلمة المرور",
+                    "הסתרת סיסמה"
+                  )
+                : text(
+                    "Show password",
+                    "إظهار كلمة المرور",
+                    "הצגת סיסמה"
+                  )}
+            </button>
 
             {/* RESET PASSWORD */}
 
@@ -1991,53 +2239,47 @@ function Login() {
             )}
           </p>
 
+          <div className="student-login-methods" role="tablist">
+            <button
+              type="button"
+              className={studentLoginMethod === "class" ? "active" : ""}
+              onClick={() => {
+                clearMessages();
+                setStudentLoginMethod("class");
+              }}
+            >
+              {text("Student code or username", "رمز الطالب أو اسم المستخدم", "קוד תלמיד או שם משתמש")}
+            </button>
+            <button
+              type="button"
+              className={studentLoginMethod === "independent" ? "active" : ""}
+              onClick={() => {
+                clearMessages();
+                setStudentLoginMethod("independent");
+              }}
+            >
+              {text("Independent student", "طالب مستقل", "תלמיד עצמאי")}
+            </button>
+          </div>
+
           <form
             onSubmit={
-              handleStudentLogin
+              studentLoginMethod === "class"
+                ? handleStudentLogin
+                : handleIndependentStudentLogin
             }
 
             className="login-form"
           >
-            <label>
+            {studentLoginMethod === "class" && (
+              <>
+            <label htmlFor="student-code">
               {text(
-                "Class Code",
-                "رمز الصف",
-                "קוד כיתה"
-              )}
-            </label>
+                "Student Code or Username",
 
-            <input
-              type="text"
+                "رمز الطالب أو اسم المستخدم",
 
-              placeholder={text(
-                "Example: 5A2026",
-                "مثال: 5A2026",
-                "לדוגמה: 5A2026"
-              )}
-
-              value={
-                classCode
-              }
-
-              onChange={(
-                e
-              ) =>
-                setClassCode(
-                  e.target
-                    .value
-                )
-              }
-
-              required
-            />
-
-            <label>
-              {text(
-                "Student Code",
-
-                "رمز الطالب",
-
-                "קוד תלמיד"
+                "קוד תלמיד או שם משתמש"
               )}
             </label>
 
@@ -2051,6 +2293,11 @@ function Login() {
 
                 "לדוגמה: TL-7K29PQ"
               )}
+
+              id="student-code"
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
 
               value={
                 studentCode
@@ -2077,7 +2324,12 @@ function Login() {
             </label>
 
             <input
-              type="password"
+              type={
+                showStudentPassword
+                  ? "text"
+                  : "password"
+              }
+              autoComplete="current-password"
 
               placeholder={text(
                 "Enter password",
@@ -2103,10 +2355,81 @@ function Login() {
               required
             />
 
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() =>
+                setShowStudentPassword(
+                  !showStudentPassword
+                )
+              }
+            >
+              {showStudentPassword
+                ? text(
+                    "Hide password",
+                    "إخفاء كلمة المرور",
+                    "הסתרת סיסמה"
+                  )
+                : text(
+                    "Show password",
+                    "إظهار كلمة المرور",
+                    "הצגת סיסמה"
+                  )}
+            </button>
+              </>
+            )}
+
+            {studentLoginMethod === "independent" && (
+              <>
+                <label>{text("Email", "البريد الإلكتروني", "אימייל")}</label>
+                <input
+                  type="email"
+                  placeholder="student@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                  required
+                />
+
+                <label>{text("Password", "كلمة المرور", "סיסמה")}</label>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder={text("Enter password", "أدخل كلمة المرور", "הזינו סיסמה")}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  required
+                />
+
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword
+                    ? text("Hide password", "إخفاء كلمة المرور", "הסתרת סיסמה")
+                    : text("Show password", "إظهار كلمة المرور", "הצגת סיסמה")}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleResetPassword}
+                  disabled={loading}
+                  style={forgotPasswordStyle}
+                >
+                  {text("Forgot password?", "نسيت كلمة المرور؟", "שכחת סיסמה?")}
+                </button>
+              </>
+            )}
+
             {error && (
               <p className="login-error">
                 {error}
               </p>
+            )}
+
+            {success && (
+              <p className="login-success">{success}</p>
             )}
 
             <button
@@ -2118,17 +2441,30 @@ function Login() {
                 loading
               }
             >
-              {text(
-                "Enter My Class 🚀",
-
-                "ادخل إلى صفي 🚀",
-
-                "כניסה לכיתה שלי 🚀"
-              )}
+              {studentLoginMethod === "class"
+                ? text("Enter My Class 🚀", "ادخل إلى صفي 🚀", "כניסה לכיתה שלי 🚀")
+                : text("Sign In 🚀", "تسجيل الدخول 🚀", "התחברות 🚀")}
             </button>
+
+            {studentLoginMethod === "independent" && (
+              <button
+                type="button"
+                className="register-button independent-register-button"
+                onClick={() => navigate("/register?role=student")}
+              >
+                {text(
+                  "Create an independent student account",
+                  "إنشاء حساب طالب مستقل",
+                  "יצירת חשבון תלמיד עצמאי"
+                )}
+              </button>
+            )}
           </form>
         </div>
       )}
+      <footer className="login-about-footer">
+        <Link to="/about">{text("About Us", "من نحن", "אודותינו")}</Link>
+      </footer>
     </div>
   );
 }

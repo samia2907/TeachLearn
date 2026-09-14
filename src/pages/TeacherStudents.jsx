@@ -38,8 +38,17 @@ import {
 } from "../firebase/studentAuth";
 
 import {
+  isStudentAliasAvailable,
+  resetStudentPassword,
+} from "../firebase/studentLoginApi";
+
+import {
   useLanguage,
 } from "../context/LanguageContext";
+
+import {
+  isStrongPassword,
+} from "../utils/passwordPolicy";
 
 import "./TeacherStudents.css";
 
@@ -170,16 +179,145 @@ function TeacherStudents() {
 
 
   /* =====================================================
+     RESET PASSWORD
+  ===================================================== */
+
+  const [
+    resetPasswordTarget,
+    setResetPasswordTarget,
+  ] = useState(null);
+
+  const [
+    resetPasswordValue,
+    setResetPasswordValue,
+  ] = useState("");
+
+  const [
+    resetPasswordLoading,
+    setResetPasswordLoading,
+  ] = useState(false);
+
+  const [
+    resetPasswordError,
+    setResetPasswordError,
+  ] = useState("");
+
+  const [
+    resetPasswordSuccess,
+    setResetPasswordSuccess,
+  ] = useState(false);
+
+  // In-memory only for the current session. Never persisted to Firestore,
+  // and cleared automatically on page refresh.
+  const [
+    sessionTempPasswords,
+    setSessionTempPasswords,
+  ] = useState({});
+
+  const [
+    copiedPasswordId,
+    setCopiedPasswordId,
+  ] = useState("");
+
+
+  /* =====================================================
+     PRINT
+  ===================================================== */
+
+  const [
+    printMode,
+    setPrintMode,
+  ] = useState(null);
+
+  const [
+    printClassId,
+    setPrintClassId,
+  ] = useState("all");
+
+
+  /* =====================================================
      TRANSLATION
   ===================================================== */
 
+  const hebrewLabels = {
+    "Loading students...": "התלמידים נטענים...",
+    "Back to Dashboard": "חזרה ללוח הבקרה",
+    Students: "תלמידים",
+    "Manage students, accounts, classes and learning progress.": "ניהול תלמידים, חשבונות, כיתות והתקדמות לימודית.",
+    "Add Student": "הוספת תלמיד",
+    "Total Students": "סך התלמידים",
+    Classes: "כיתות",
+    Active: "פעיל",
+    Inactive: "לא פעיל",
+    "No classes yet": "עדיין אין כיתות",
+    "Create a class before adding students.": "יש ליצור כיתה לפני הוספת תלמידים.",
+    "Create Class": "יצירת כיתה",
+    "STUDENT MANAGEMENT": "ניהול תלמידים",
+    "My Students": "התלמידים שלי",
+    "Search, filter and manage the students connected to your account.": "חיפוש, סינון וניהול התלמידים המקושרים לחשבון שלך.",
+    "Search name, username, student code...": "חיפוש לפי שם, שם משתמש או קוד תלמיד...",
+    "All Classes": "כל הכיתות",
+    "No Class": "ללא כיתה",
+    "All Statuses": "כל המצבים",
+    RESULTS: "תוצאות",
+    "No students yet": "עדיין אין תלמידים",
+    "Add your first student to one of your classes.": "הוסיפו את התלמיד הראשון לאחת הכיתות שלכם.",
+    "Create a class first, then add your students.": "צרו כיתה תחילה ולאחר מכן הוסיפו את התלמידים.",
+    "Add First Student": "הוספת תלמיד ראשון",
+    "No students found": "לא נמצאו תלמידים",
+    "Try another search term or change the filters.": "נסו מונח חיפוש אחר או שנו את המסננים.",
+    "Clear Filters": "ניקוי מסננים",
+    Student: "תלמיד",
+    Username: "שם משתמש",
+    "Student Code": "קוד תלמיד",
+    Class: "כיתה",
+    Level: "רמה",
+    Actions: "פעולות",
+    Progress: "התקדמות",
+    Portfolio: "תיק עבודות",
+    "Please complete all fields.": "יש למלא את כל השדות.",
+    "Use at least 8 characters with uppercase, lowercase, a number, and a special symbol.": "יש להשתמש ב-8 תווים לפחות, כולל אות גדולה, אות קטנה, מספר וסימן מיוחד.",
+    "This username is already in use.": "שם המשתמש הזה כבר נמצא בשימוש.",
+    "Could not create the student.": "לא ניתן ליצור את התלמיד.",
+
+    // Reset password
+    "Reset Password": "איפוס סיסמה",
+    "Generate Temporary Password": "יצירת סיסמה זמנית",
+    "Copy Password": "העתקת סיסמה",
+    Copy: "העתקה",
+    Copied: "הועתק",
+    "Temporary Password": "סיסמה זמנית",
+    "New Temporary Password": "סיסמה זמנית חדשה",
+    "Password changed successfully.": "הסיסמה שונתה בהצלחה.",
+    "This password is shown only once during this session and will not be available after refreshing the page.":
+      "סיסמה זו מוצגת רק פעם אחת במהלך הפעלה זו ולא תהיה זמינה לאחר רענון הדף.",
+    "You are not authorized to manage this student.": "אין לך הרשאה לנהל תלמיד זה.",
+    "Please enter a valid password (at least 8 characters).": "יש להזין סיסמה תקינה (לפחות 8 תווים).",
+    "Could not reset the password. Please try again.": "לא ניתן היה לאפס את הסיסמה. נסה שוב.",
+    "Resetting...": "מאפס...",
+    Done: "סיום",
+    Cancel: "ביטול",
+
+    // Print
+    "Print Students List": "הדפסת רשימת תלמידים",
+    "Print Login Details": "הדפסת פרטי כניסה",
+    "All Students": "כל התלמידים",
+    "Select Class": "בחירת כיתה",
+    "Contact teacher": "יש לפנות למורה",
+    Grade: "כיתה/שכבה",
+    "Login Details": "פרטי כניסה",
+  };
+
   const text = (
     english,
-    arabic
+    arabic,
+    hebrew = hebrewLabels[english] || english
   ) =>
     language === "ar"
       ? arabic
-      : english;
+      : language === "he"
+        ? hebrew
+        : english;
 
 
   /* =====================================================
@@ -470,17 +608,14 @@ function TeacherStudents() {
           );
 
 
-        const snapshot =
-          await getDoc(
-            doc(
-              db,
-              "studentLoginIndex",
-              `c_${normalized}`
-            )
+        const available =
+          await isStudentAliasAvailable(
+            "code",
+            normalized
           );
 
 
-        if (!snapshot.exists()) {
+        if (available) {
           return code;
         }
       }
@@ -546,14 +681,11 @@ function TeacherStudents() {
       }
 
 
-      if (
-        password.length <
-        6
-      ) {
+      if (!isStrongPassword(password)) {
         setError(
           text(
-            "Password must contain at least 6 characters.",
-            "يجب أن تحتوي كلمة المرور على 6 أحرف على الأقل."
+            "Use at least 8 characters with uppercase, lowercase, a number, and a special symbol.",
+            "استخدم 8 أحرف على الأقل، تشمل حرفًا كبيرًا وصغيرًا ورقمًا ورمزًا خاصًا."
           )
         );
 
@@ -646,15 +778,14 @@ function TeacherStudents() {
           );
 
 
-        const usernameSnapshot =
-          await getDoc(
-            usernameRef
+        const usernameAvailable =
+          await isStudentAliasAvailable(
+            "username",
+            normalizedUsername
           );
 
 
-        if (
-          usernameSnapshot.exists()
-        ) {
+        if (!usernameAvailable) {
           throw new Error(
             "username-taken"
           );
@@ -718,6 +849,9 @@ function TeacherStudents() {
 
             role:
               "student",
+
+            studentAccountType:
+              "class",
 
             username:
               username.trim(),
@@ -832,7 +966,7 @@ function TeacherStudents() {
               selectedClass.id,
 
             type:
-              "studentCode",
+              "code",
 
             createdAt:
               serverTimestamp(),
@@ -1459,6 +1593,305 @@ function TeacherStudents() {
 
 
   /* =====================================================
+     RESET PASSWORD
+  ===================================================== */
+
+  const generateTemporaryPassword =
+    () => {
+      const letters =
+        "ABCDEFGHJKLMNPQRSTUVWXYZ";
+
+      const lowers =
+        "abcdefghjkmnpqrstuvwxyz";
+
+      const digits =
+        "23456789";
+
+      const pick =
+        (chars) =>
+          chars[
+            Math.floor(
+              Math.random() *
+                chars.length
+            )
+          ];
+
+      let digitsPart =
+        "";
+
+      for (
+        let index = 0;
+        index < 6;
+        index++
+      ) {
+        digitsPart +=
+          pick(digits);
+      }
+
+      return `${pick(letters)}${pick(lowers)}-${digitsPart}`;
+    };
+
+
+  const openResetPassword =
+    (student) => {
+      setSelectedStudent(
+        null
+      );
+
+      setResetPasswordTarget(
+        student
+      );
+
+      setResetPasswordValue("");
+      setResetPasswordError("");
+      setResetPasswordSuccess(
+        false
+      );
+    };
+
+
+  const closeResetPassword =
+    () => {
+      if (
+        resetPasswordLoading
+      ) {
+        return;
+      }
+
+      setResetPasswordTarget(
+        null
+      );
+
+      setResetPasswordValue("");
+      setResetPasswordError("");
+      setResetPasswordSuccess(
+        false
+      );
+    };
+
+
+  const handleResetPassword =
+    async () => {
+      if (
+        !resetPasswordTarget
+      ) {
+        return;
+      }
+
+      const newPassword =
+        resetPasswordValue.trim();
+
+      if (
+        !isStrongPassword(
+          newPassword
+        )
+      ) {
+        setResetPasswordError(
+          text(
+            "Use at least 8 characters with uppercase, lowercase, a number, and a special symbol.",
+            "استخدم 8 أحرف على الأقل، تشمل حرفًا كبيرًا وصغيرًا ورقمًا ورمزًا خاصًا."
+          )
+        );
+
+        return;
+      }
+
+      try {
+        setResetPasswordLoading(
+          true
+        );
+
+        setResetPasswordError("");
+
+        await resetStudentPassword(
+          {
+            studentUid:
+              resetPasswordTarget.id,
+
+            newPassword,
+          }
+        );
+
+        setSessionTempPasswords(
+          (previous) => ({
+            ...previous,
+
+            [resetPasswordTarget.id]:
+              newPassword,
+          })
+        );
+
+        setResetPasswordSuccess(
+          true
+        );
+
+      } catch (resetError) {
+        // Never log the password value, only the error code/message.
+        console.error(
+          "Reset password error:",
+          resetError.code ||
+          resetError.message
+        );
+
+        if (
+          resetError.code ===
+          "functions/permission-denied"
+        ) {
+          setResetPasswordError(
+            text(
+              "You are not authorized to manage this student.",
+              "لا تملك صلاحية إدارة هذا الطالب."
+            )
+          );
+        } else if (
+          resetError.code ===
+          "functions/invalid-argument"
+        ) {
+          setResetPasswordError(
+            text(
+              "Please enter a valid password (at least 8 characters).",
+              "يرجى إدخال كلمة مرور صالحة (8 أحرف على الأقل)."
+            )
+          );
+        } else if (
+          resetError.code ===
+          "functions/not-found"
+        ) {
+          setResetPasswordError(
+            text(
+              "Student was not found.",
+              "لم يتم العثور على الطالب."
+            )
+          );
+        } else {
+          setResetPasswordError(
+            text(
+              "Could not reset the password. Please try again.",
+              "تعذر إعادة تعيين كلمة المرور. حاول مرة أخرى."
+            )
+          );
+        }
+
+      } finally {
+        setResetPasswordLoading(
+          false
+        );
+      }
+    };
+
+
+  const handleCopyPassword =
+    async (
+      studentId,
+      value
+    ) => {
+      if (!value) {
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(
+          value
+        );
+
+        setCopiedPasswordId(
+          studentId
+        );
+
+        setTimeout(
+          () =>
+            setCopiedPasswordId(
+              ""
+            ),
+          2000
+        );
+
+      } catch (copyError) {
+        console.error(
+          "Copy password error:",
+          copyError
+        );
+      }
+    };
+
+
+  /* =====================================================
+     PRINT
+  ===================================================== */
+
+  const printList =
+    useMemo(
+      () => {
+        const base =
+          printClassId ===
+          "all"
+            ? students
+            : students.filter(
+                (student) =>
+                  student.classId ===
+                  printClassId
+              );
+
+        return [...base].sort(
+          (a, b) =>
+            String(
+              a.name || ""
+            ).localeCompare(
+              String(
+                b.name || ""
+              )
+            )
+        );
+      },
+
+      [
+        students,
+        printClassId,
+      ]
+    );
+
+
+  useEffect(
+    () => {
+      if (!printMode) {
+        return undefined;
+      }
+
+      const timer =
+        setTimeout(
+          () =>
+            window.print(),
+          80
+        );
+
+      const handleAfterPrint =
+        () =>
+          setPrintMode(
+            null
+          );
+
+      window.addEventListener(
+        "afterprint",
+        handleAfterPrint
+      );
+
+      return () => {
+        clearTimeout(
+          timer
+        );
+
+        window.removeEventListener(
+          "afterprint",
+          handleAfterPrint
+        );
+      };
+    },
+
+    [printMode]
+  );
+
+
+  /* =====================================================
      LOADING
   ===================================================== */
 
@@ -1508,7 +1941,9 @@ function TeacherStudents() {
           >
             {language === "ar"
               ? "↩ رجوع للرئيسية"
-              : "← Back to Dashboard"}
+              : language === "he"
+                ? "→ חזרה ללוח הבקרה"
+                : "← Back to Dashboard"}
           </button>
 
 
@@ -1568,6 +2003,24 @@ function TeacherStudents() {
               }
             >
               عربي
+            </button>
+
+
+            <button
+              type="button"
+              className={
+                language ===
+                "he"
+                  ? "active"
+                  : ""
+              }
+              onClick={() =>
+                setLanguage(
+                  "he"
+                )
+              }
+            >
+              עברית
             </button>
 
           </div>
@@ -2012,6 +2465,87 @@ function TeacherStudents() {
               <strong>
                 {filteredStudents.length}
               </strong>
+
+            </div>
+
+
+            {/* PRINT */}
+
+            <div className="students-print-toolbar">
+
+              <select
+                value={
+                  printClassId
+                }
+                onChange={(event) =>
+                  setPrintClassId(
+                    event.target.value
+                  )
+                }
+              >
+
+                <option value="all">
+                  {text(
+                    "All Students",
+                    "كل الطلاب"
+                  )}
+                </option>
+
+
+                {classes.map(
+                  (classItem) => (
+
+                    <option
+                      key={
+                        classItem.id
+                      }
+                      value={
+                        classItem.id
+                      }
+                    >
+                      {classItem.name}
+                    </option>
+
+                  )
+                )}
+
+              </select>
+
+
+              <button
+                type="button"
+                className="students-print-button"
+                onClick={() =>
+                  setPrintMode(
+                    "students"
+                  )
+                }
+              >
+                🖨{" "}
+                {text(
+                  "Print Students List",
+                  "طباعة قائمة الطلاب",
+                  "הדפסת רשימת תלמידים"
+                )}
+              </button>
+
+
+              <button
+                type="button"
+                className="students-print-button"
+                onClick={() =>
+                  setPrintMode(
+                    "logins"
+                  )
+                }
+              >
+                🖨{" "}
+                {text(
+                  "Print Login Details",
+                  "طباعة بيانات الدخول",
+                  "הדפסת פרטי כניסה"
+                )}
+              </button>
 
             </div>
 
@@ -2486,6 +3020,51 @@ function TeacherStudents() {
 
             <div className="student-manage-actions">
 
+              <button
+                type="button"
+                className="student-reset-password-button"
+                disabled={
+                  studentActionLoading
+                }
+                onClick={() =>
+                  openResetPassword(
+                    selectedStudent
+                  )
+                }
+              >
+
+                <span>
+                  🔑
+                </span>
+
+
+                <div>
+
+                  <strong>
+                    {text(
+                      "Reset Password",
+                      "إعادة تعيين كلمة المرور"
+                    )}
+                  </strong>
+
+
+                  <small>
+                    {text(
+                      "Set a new temporary password for this student.",
+                      "تعيين كلمة مرور مؤقتة جديدة لهذا الطالب.",
+                      "הגדרת סיסמה זמנית חדשה לתלמיד זה."
+                    )}
+                  </small>
+
+                </div>
+
+                <b>
+                  ›
+                </b>
+
+              </button>
+
+
               {selectedStudent.classId && (
 
                 <button
@@ -2639,6 +3218,285 @@ function TeacherStudents() {
 
 
       {/* =================================================
+          RESET PASSWORD MODAL
+      ================================================= */}
+
+      {resetPasswordTarget && (
+
+        <div
+          className="student-add-overlay"
+          onClick={() =>
+            !resetPasswordLoading &&
+            closeResetPassword()
+          }
+        >
+
+          <div
+            className="student-add-modal student-reset-modal"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+
+            <div className="student-add-header">
+
+              <div className="student-manage-heading">
+
+                <div className="student-add-icon">
+                  🔑
+                </div>
+
+
+                <div>
+
+                  <small>
+                    {text(
+                      "STUDENT MANAGEMENT",
+                      "إدارة الطالب"
+                    )}
+                  </small>
+
+
+                  <h2>
+                    {text(
+                      "Reset Password",
+                      "إعادة تعيين كلمة المرور"
+                    )}
+                  </h2>
+
+
+                  <p>
+                    {resetPasswordTarget.name}
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <button
+                type="button"
+                disabled={
+                  resetPasswordLoading
+                }
+                onClick={
+                  closeResetPassword
+                }
+              >
+                ×
+              </button>
+
+            </div>
+
+
+            {!resetPasswordSuccess ? (
+
+              <div className="student-add-form">
+
+                <label>
+
+                  {text(
+                    "New Temporary Password",
+                    "كلمة مرور مؤقتة جديدة"
+                  )}
+
+                  <input
+                    type="text"
+                    autoComplete="new-password"
+                    value={
+                      resetPasswordValue
+                    }
+                    onChange={(event) =>
+                      setResetPasswordValue(
+                        event.target.value
+                      )
+                    }
+                    placeholder="Tm-483726"
+                  />
+
+                </label>
+
+
+                <button
+                  type="button"
+                  className="student-generate-password-button"
+                  disabled={
+                    resetPasswordLoading
+                  }
+                  onClick={() =>
+                    setResetPasswordValue(
+                      generateTemporaryPassword()
+                    )
+                  }
+                >
+                  🎲{" "}
+                  {text(
+                    "Generate Temporary Password",
+                    "إنشاء كلمة مرور مؤقتة"
+                  )}
+                </button>
+
+
+                {resetPasswordError && (
+
+                  <div className="student-add-error">
+                    ⚠️{" "}
+                    {resetPasswordError}
+                  </div>
+
+                )}
+
+
+                <div className="student-add-buttons">
+
+                  <button
+                    type="button"
+                    className="student-add-cancel"
+                    disabled={
+                      resetPasswordLoading
+                    }
+                    onClick={
+                      closeResetPassword
+                    }
+                  >
+                    {text(
+                      "Cancel",
+                      "إلغاء"
+                    )}
+                  </button>
+
+
+                  <button
+                    type="button"
+                    className="student-add-save"
+                    disabled={
+                      resetPasswordLoading ||
+                      resetPasswordValue.trim()
+                        .length < 8
+                    }
+                    onClick={
+                      handleResetPassword
+                    }
+                  >
+                    {resetPasswordLoading
+                      ? text(
+                          "Resetting...",
+                          "جارٍ إعادة التعيين..."
+                        )
+                      : text(
+                          "Reset Password",
+                          "إعادة تعيين كلمة المرور"
+                        )}
+                  </button>
+
+                </div>
+
+              </div>
+
+            ) : (
+
+              <div className="student-add-form">
+
+                <div className="student-reset-success">
+                  ✅{" "}
+                  {text(
+                    "Password changed successfully.",
+                    "تم تغيير كلمة المرور بنجاح.",
+                    "הסיסמה שונתה בהצלחה."
+                  )}
+                </div>
+
+
+                <label>
+
+                  {text(
+                    "Temporary Password",
+                    "كلمة المرور المؤقتة"
+                  )}
+
+                  <div className="student-password-display">
+
+                    <code>
+                      {
+                        sessionTempPasswords[
+                          resetPasswordTarget.id
+                        ]
+                      }
+                    </code>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleCopyPassword(
+                          resetPasswordTarget.id,
+                          sessionTempPasswords[
+                            resetPasswordTarget.id
+                          ]
+                        )
+                      }
+                    >
+                      {copiedPasswordId ===
+                      resetPasswordTarget.id
+                        ? text(
+                            "Copied",
+                            "تم النسخ"
+                          )
+                        : text(
+                            "Copy",
+                            "نسخ"
+                          )}
+                    </button>
+
+                  </div>
+
+                </label>
+
+
+                <div className="student-code-note">
+
+                  <span>
+                    ⚠️
+                  </span>
+
+                  <p>
+                    {text(
+                      "This password is shown only once during this session and will not be available after refreshing the page.",
+                      "تُعرض كلمة المرور هذه مرة واحدة فقط خلال هذه الجلسة ولن تكون متاحة بعد تحديث الصفحة."
+                    )}
+                  </p>
+
+                </div>
+
+
+                <div className="student-add-buttons">
+
+                  <button
+                    type="button"
+                    className="student-add-save"
+                    onClick={
+                      closeResetPassword
+                    }
+                  >
+                    {text(
+                      "Done",
+                      "تم"
+                    )}
+                  </button>
+
+                </div>
+
+              </div>
+
+            )}
+
+          </div>
+
+        </div>
+
+      )}
+
+
+      {/* =================================================
           ADD STUDENT MODAL
       ================================================= */}
 
@@ -2673,7 +3531,7 @@ function TeacherStudents() {
                 <div>
 
                   <small>
-                    TECHMINDS
+                    TEACHLEARN
                   </small>
 
 
@@ -2687,8 +3545,8 @@ function TeacherStudents() {
 
                   <p>
                     {text(
-                      "Create a TechMinds account for your student.",
-                      "أنشئ حساب TechMinds جديد للطالب."
+                      "Create a TeachLearn account for your student.",
+                      "أنشئ حساب TeachLearn جديد للطالب."
                     )}
                   </p>
 
@@ -2844,8 +3702,9 @@ function TeacherStudents() {
                   }
                   placeholder={
                     text(
-                      "At least 6 characters",
-                      "6 أحرف على الأقل"
+                      "8+ characters: Aa, 1, !",
+                      "8+ أحرف: Aa، 1، !",
+                      "8+ תווים: Aa, 1, !"
                     )
                   }
                   required
@@ -2862,8 +3721,8 @@ function TeacherStudents() {
 
                 <p>
                   {text(
-                    "TechMinds creates a unique student code automatically. The student can log in using either the username or student code.",
-                    "سيقوم TechMinds بإنشاء رمز خاص للطالب تلقائيًا، ويمكن للطالب تسجيل الدخول باسم المستخدم أو رمز الطالب."
+                    "TeachLearn creates a unique student code automatically. The student can log in using either the username or student code.",
+                    "سيقوم TeachLearn بإنشاء رمز خاص للطالب تلقائيًا، ويمكن للطالب تسجيل الدخول باسم المستخدم أو رمز الطالب."
                   )}
                 </p>
 
@@ -2923,6 +3782,213 @@ function TeacherStudents() {
             </form>
 
           </div>
+
+        </div>
+
+      )}
+
+
+      {/* =================================================
+          PRINT SHEET (only rendered while printing)
+      ================================================= */}
+
+      {printMode && (
+
+        <div
+          className="print-sheet"
+          dir={
+            language === "ar" ||
+            language === "he"
+              ? "rtl"
+              : "ltr"
+          }
+        >
+
+          <div className="print-sheet-header">
+
+            <h1>TeachLearn</h1>
+
+            {printClassId !==
+              "all" && (
+              <p>
+                {getClassName(
+                  printClassId
+                )}
+              </p>
+            )}
+
+            {teacher?.name && (
+              <p>
+                {teacher.name}
+              </p>
+            )}
+
+            <p>
+              {new Date().toLocaleDateString(
+                language === "ar"
+                  ? "ar-EG"
+                  : language === "he"
+                    ? "he-IL"
+                    : "en-GB"
+              )}
+            </p>
+
+            <h2>
+              {printMode ===
+              "students"
+                ? text(
+                    "Students List",
+                    "قائمة الطلاب",
+                    "רשימת תלמידים"
+                  )
+                : text(
+                    "Login Details",
+                    "بيانات الدخول",
+                    "פרטי כניסה"
+                  )}
+            </h2>
+
+          </div>
+
+
+          <table className="print-sheet-table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  {text(
+                    "Student",
+                    "الطالب"
+                  )}
+                </th>
+
+                <th>
+                  {text(
+                    "Username",
+                    "اسم المستخدم"
+                  )}
+                </th>
+
+                <th>
+                  {text(
+                    "Student Code",
+                    "رمز الطالب"
+                  )}
+                </th>
+
+                {printMode ===
+                  "students" && (
+
+                  <>
+                    <th>
+                      {text(
+                        "Class",
+                        "الصف"
+                      )}
+                    </th>
+
+                    <th>
+                      {text(
+                        "Grade",
+                        "الصف الدراسي"
+                      )}
+                    </th>
+                  </>
+
+                )}
+
+                {printMode ===
+                  "logins" && (
+
+                  <th>
+                    {text(
+                      "Temporary Password",
+                      "كلمة المرور المؤقتة"
+                    )}
+                  </th>
+
+                )}
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              {printList.map(
+                (student) => (
+
+                  <tr
+                    key={
+                      student.id
+                    }
+                  >
+
+                    <td>
+                      {student.name}
+                    </td>
+
+                    <td>
+                      {student.username}
+                    </td>
+
+                    <td>
+                      {student.studentCode}
+                    </td>
+
+                    {printMode ===
+                      "students" && (
+
+                      <>
+                        <td>
+                          {student.classId
+                            ? (
+                                student.className ||
+                                getClassName(
+                                  student.classId
+                                )
+                              )
+                            : text(
+                                "No Class",
+                                "بدون صف"
+                              )}
+                        </td>
+
+                        <td>
+                          {student.grade ||
+                            "—"}
+                        </td>
+                      </>
+
+                    )}
+
+                    {printMode ===
+                      "logins" && (
+
+                      <td>
+                        {sessionTempPasswords[
+                          student.id
+                        ] ||
+                          text(
+                            "Contact teacher",
+                            "تواصل مع المعلم",
+                            "יש לפנות למורה"
+                          )}
+                      </td>
+
+                    )}
+
+                  </tr>
+
+                )
+              )}
+
+            </tbody>
+
+          </table>
 
         </div>
 

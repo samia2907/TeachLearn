@@ -1,4 +1,6 @@
 import {
+  lazy,
+  Suspense,
   useEffect,
   useMemo,
   useState,
@@ -23,6 +25,13 @@ import {
 } from "../context/LanguageContext";
 
 import "./ProgramLessonPlayer.css";
+import { getLessonSections, isCodingConfig } from "../components/code/codingConfig";
+import { useCodeText } from "../components/code/codeText";
+const CodeRunner = lazy(() => import("../components/code/CodeRunner"));
+const MissionPlayer = lazy(() => import("../components/mission/MissionPlayer"));
+
+import { hebrewText } from "../data/hebrewText";
+import { auth } from "../firebase/firebase";
 
 
 const functions =
@@ -33,6 +42,9 @@ const functions =
 
 
 function ProgramLessonPlayer() {
+  const { text: codeText } = useCodeText();
+  const [codingResults, setCodingResults] = useState({});
+  const [codingAnswers, setCodingAnswers] = useState({});
   const navigate =
     useNavigate();
 
@@ -98,6 +110,8 @@ function ProgramLessonPlayer() {
   ) =>
     language === "ar"
       ? arabic
+      : language === "he"
+        ? hebrewText(english)
       : english;
 
 
@@ -242,17 +256,9 @@ function ProgramLessonPlayer() {
      SECTIONS
   ===================================================== */
 
-  const sections =
-    useMemo(
-      () =>
-        Array.isArray(
-          lesson?.sections
-        )
-          ? lesson.sections
-          : [],
-
-      [lesson]
-    );
+  const sections = useMemo(() => getLessonSections(lesson), [lesson]);
+  const codingKey = section => lessonId + ":" + (section.id || sections.indexOf(section));
+  const codingReady = sections.every(item => !isCodingConfig(item.codingConfig) || codingResults[codingKey(item)]);
 
 
   const section =
@@ -315,12 +321,96 @@ function ProgramLessonPlayer() {
     );
 
 
+  const taskText =
+    localized(
+      section?.task
+    );
+
+
+  const infoBox =
+    localized(
+      section?.infoBox
+    );
+
+
+  const challengeBox =
+    localized(
+      section?.challengeBox
+    );
+
+
   const options =
     Array.isArray(
       section?.options
     )
       ? section.options
       : [];
+
+
+  const slideKind =
+    section?.challenge
+      ? "challenge"
+      : section?.type ||
+        "content";
+
+
+  const slideThemes = {
+    content: {
+      themeColor: "#6d28d9",
+      accentColor: "#2563eb",
+      surfaceColor: "#f5f3ff",
+    },
+    question: {
+      themeColor: "#7c3aed",
+      accentColor: "#ec4899",
+      surfaceColor: "#fdf4ff",
+    },
+    multipleChoice: {
+      themeColor: "#059669",
+      accentColor: "#22c55e",
+      surfaceColor: "#ecfdf5",
+    },
+    task: {
+      themeColor: "#ea580c",
+      accentColor: "#f59e0b",
+      surfaceColor: "#fff7ed",
+    },
+    challenge: {
+      themeColor: "#e11d48",
+      accentColor: "#f97316",
+      surfaceColor: "#fff1f2",
+    },
+    summary: {
+      themeColor: "#0891b2",
+      accentColor: "#0ea5e9",
+      surfaceColor: "#ecfeff",
+    },
+    reflection: {
+      themeColor: "#9333ea",
+      accentColor: "#c026d3",
+      surfaceColor: "#faf5ff",
+    },
+  };
+
+
+  const currentTheme =
+    slideThemes[slideKind] ||
+    slideThemes.content;
+
+
+  const slideThemeColor =
+    section?.themeColor ||
+    currentTheme.themeColor;
+
+
+  const slideAccentColor =
+    section?.accentColor ||
+    currentTheme.accentColor;
+
+
+  const slideSurfaceColor =
+    section?.surfaceColor ||
+    currentTheme.surfaceColor;
 
 
   /* =====================================================
@@ -405,6 +495,8 @@ function ProgramLessonPlayer() {
 
   const nextSlide =
     () => {
+      if (isCodingConfig(section?.codingConfig) && !codingResults[codingKey(section)]) return;
+      if (currentSlide === sections.length - 1 && !codingReady) return;
       if (
         currentSlide <
         sections.length - 1
@@ -502,6 +594,18 @@ function ProgramLessonPlayer() {
     );
   }
 
+  if (lesson.activityType === "mission") {
+    return (
+      <Suspense fallback={<div className="program-player-loading">🤖</div>}>
+        <MissionPlayer
+          lesson={lesson}
+          student={{ id: auth.currentUser?.uid || "program-student" }}
+          onExit={() => navigate(`/programs/${programId}`)}
+        />
+      </Suspense>
+    );
+  }
+
 
   /* =====================================================
      EMPTY
@@ -564,7 +668,7 @@ function ProgramLessonPlayer() {
 
 
           <small>
-            TECHMINDS
+            TEACHLEARN
           </small>
 
 
@@ -633,7 +737,30 @@ function ProgramLessonPlayer() {
   ===================================================== */
 
   return (
-    <div className="program-player-page">
+    <div
+      className={`program-player-page slide-theme-${slideKind}`}
+      style={{
+        "--lesson-theme":
+          lesson.themeColor ||
+          "#6d28d9",
+        "--lesson-accent":
+          lesson.accentColor ||
+          "#4f46e5",
+        "--lesson-surface":
+          lesson.surfaceColor ||
+          "#f5f3ff",
+        "--lesson-cover-background":
+          lesson.coverImage
+            ? `url("${lesson.coverImage}")`
+            : "none",
+        "--type-color":
+          slideThemeColor,
+        "--type-accent":
+          slideAccentColor,
+        "--type-soft":
+          slideSurfaceColor,
+      }}
+    >
 
       {/* HEADER */}
 
@@ -719,6 +846,89 @@ function ProgramLessonPlayer() {
       </header>
 
 
+      <section
+        className={`player-lesson-hero ${
+          lesson.coverImage
+            ? "has-cover"
+            : "no-cover"
+        }`}
+        aria-label={localized(lesson.title)}
+      >
+        <div className="player-lesson-hero-overlay" />
+
+        <div className="player-lesson-hero-content">
+
+          <div className="player-lesson-hero-text">
+
+            <span className="player-lesson-hero-kicker">
+              {text(
+                "Interactive Lesson",
+                "درس تفاعلي"
+              )}
+            </span>
+
+            <h1>
+              {localized(
+                lesson.title
+              )}
+            </h1>
+
+            {localized(lesson.description) && (
+              <p>
+                {localized(
+                  lesson.description
+                )}
+              </p>
+            )}
+
+            <div className="player-lesson-hero-meta">
+
+              <span>
+                ⏱️ {lesson.minutes || 0}{" "}
+                {text(
+                  "min",
+                  "دقيقة"
+                )}
+              </span>
+
+              <span>
+                ⭐ {lesson.xp || 0} XP
+              </span>
+
+              <span>
+                📚 {sections.length}{" "}
+                {text(
+                  "slides",
+                  "شرائح"
+                )}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          {lesson.coverImage && (
+            <div className="player-lesson-hero-image-wrap">
+              <img
+                src={lesson.coverImage}
+                alt={
+                  localized(
+                    lesson.imageAlt
+                  ) ||
+                  localized(
+                    lesson.title
+                  )
+                }
+                className="player-lesson-hero-image"
+              />
+            </div>
+          )}
+
+        </div>
+      </section>
+
+
       {/* PROGRESS */}
 
       <section className="player-progress-section">
@@ -762,7 +972,7 @@ function ProgramLessonPlayer() {
 
       <main className="player-content">
 
-        <section className="player-slide-card">
+        <section className={`player-slide-card player-slide-${slideKind}`}>
 
           <div className="player-slide-top">
 
@@ -774,8 +984,10 @@ function ProgramLessonPlayer() {
 
             <span className="player-slide-type">
 
-              {section.type ===
-              "question"
+              {section.challenge
+                ? "🔥"
+                : section.type ===
+                  "question"
                 ? "❓"
                 : section.type ===
                   "multipleChoice"
@@ -814,12 +1026,128 @@ function ProgramLessonPlayer() {
             </h1>
 
 
+            {(section?.emoji ||
+              section?.visualImage) && (
+
+              <div className="player-slide-visual">
+
+                {section?.emoji && (
+                  <div className="player-big-emoji">
+                    {section.emoji}
+                  </div>
+                )}
+
+                {section?.visualImage && (
+                  <img
+                    src={section.visualImage}
+                    alt={
+                      localized(
+                        section.visualAlt
+                      ) ||
+                      sectionTitle
+                    }
+                  />
+                )}
+
+              </div>
+
+            )}
+
+
             {sectionContent && (
               <p className="player-main-text">
                 {sectionContent}
               </p>
             )}
 
+
+            {taskText && (
+              <div className={`player-task-card ${
+                section?.challenge
+                  ? "challenge"
+                  : ""
+              }`}>
+                <span>
+                  {section?.challenge
+                    ? "🔥"
+                    : "🛠️"}
+                </span>
+
+                <div>
+                  <strong>
+                    {section?.challenge
+                      ? text(
+                          "Challenge",
+                          "تحدّي"
+                        )
+                      : text(
+                          "Your Mission",
+                          "مهمتك"
+                        )}
+                  </strong>
+
+                  <p>
+                    {taskText}
+                  </p>
+                </div>
+              </div>
+            )}
+
+
+            {infoBox && (
+              <div className="player-info-box">
+                <span>💡</span>
+
+                <div>
+                  <strong>
+                    {text(
+                      "Important",
+                      "معلومة مهمة"
+                    )}
+                  </strong>
+
+                  <p>
+                    {infoBox}
+                  </p>
+                </div>
+              </div>
+            )}
+
+
+            {challengeBox && (
+              <div className="player-extra-challenge">
+                <span>🔥</span>
+
+                <div>
+                  <strong>
+                    {text(
+                      "Challenge",
+                      "تحدّي"
+                    )}
+                  </strong>
+
+                  <p>
+                    {challengeBox}
+                  </p>
+                </div>
+              </div>
+            )}
+
+
+            {isCodingConfig(section.codingConfig) && (
+              <Suspense fallback={<p>{codeText("editorLoading")}</p>}>
+                <CodeRunner
+                  key={codingKey(section)}
+                  config={section.codingConfig}
+                  initialCode={codingAnswers[codingKey(section)]}
+                  onEdit={() => setCodingResults(previous => ({ ...previous, [codingKey(section)]: false }))}
+                  onResult={result => {
+                    setCodingAnswers(previous => ({ ...previous, [codingKey(section)]: result.code }));
+                    setCodingResults(previous => ({ ...previous, [codingKey(section)]: result.passed }));
+                  }}
+                />
+              </Suspense>
+            )}
 
             {question && (
               <div className="player-question">
@@ -1077,6 +1405,7 @@ function ProgramLessonPlayer() {
         <button
           type="button"
           className="player-next"
+          disabled={(isCodingConfig(section?.codingConfig) && !codingResults[codingKey(section)]) || (currentSlide === sections.length - 1 && !codingReady)}
           onClick={
             nextSlide
           }

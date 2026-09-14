@@ -24,6 +24,8 @@ import {
 
 import "./OwnerSales.css";
 
+import { hebrewText } from "../data/hebrewText";
+
 
 function OwnerSales() {
   const navigate =
@@ -77,6 +79,8 @@ function OwnerSales() {
   ) =>
     language === "ar"
       ? arabic
+      : language === "he"
+        ? hebrewText(english)
       : english;
 
 
@@ -497,12 +501,14 @@ function OwnerSales() {
           >
             {language === "ar"
               ? "↩ العودة للرئيسية"
-              : "← Back to Dashboard"}
+              : language === "he"
+                ? "→ חזרה ללוח הבקרה"
+                : "← Back to Dashboard"}
           </button>
 
 
           <small>
-            TECHMINDS COMMERCE
+            TEACHLEARN COMMERCE
           </small>
 
 
@@ -562,6 +568,10 @@ function OwnerSales() {
               }
             >
               عربي
+            </button>
+
+            <button type="button" className={language === "he" ? "active" : ""} onClick={() => setLanguage("he")}>
+              עברית
             </button>
 
           </div>
@@ -1460,8 +1470,8 @@ function OwnerSales() {
               🔒{" "}
 
               {text(
-                "Payment card numbers and CVV are never stored in TechMinds.",
-                "لا يتم حفظ رقم البطاقة أو CVV داخل TechMinds."
+                "Payment card numbers and CVV are never stored in TeachLearn.",
+                "لا يتم حفظ رقم البطاقة أو CVV داخل TeachLearn."
               )}
 
             </div>

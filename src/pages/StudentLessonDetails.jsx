@@ -1,4 +1,6 @@
 import {
+  lazy,
+  Suspense,
   useEffect,
   useMemo,
   useState,
@@ -32,9 +34,16 @@ import {
 } from "../context/LanguageContext";
 
 import "./StudentLessonDetails.css";
+import { getLessonSections, isCodingConfig } from "../components/code/codingConfig";
+import { useCodeText } from "../components/code/codeText";
+const CodeRunner = lazy(() => import("../components/code/CodeRunner"));
+const MissionPlayer = lazy(() => import("../components/mission/MissionPlayer"));
+
+import { hebrewText } from "../data/hebrewText";
 
 
 function StudentLessonDetails() {
+  const { text: codeText } = useCodeText();
   const navigate =
     useNavigate();
 
@@ -58,6 +67,8 @@ function StudentLessonDetails() {
   ) =>
     language === "ar"
       ? arabic
+      : language === "he"
+        ? hebrewText(english)
       : english;
 
 
@@ -238,18 +249,7 @@ function StudentLessonDetails() {
      SECTIONS
   ===================================================== */
 
-  const sections =
-    useMemo(
-      () =>
-        Array.isArray(
-          lesson?.sections
-        )
-          ? lesson.sections
-          : [],
-      [
-        lesson,
-      ]
-    );
+  const sections = useMemo(() => getLessonSections(lesson), [lesson]);
 
 
   const currentSection =
@@ -516,13 +516,11 @@ function StudentLessonDetails() {
             lessonData
           );
 
+          // Missions own their progress lifecycle; legacy lessons keep the existing viewer.
+          if (lessonData.activityType === "mission") return;
 
-          const lessonSections =
-            Array.isArray(
-              lessonData.sections
-            )
-              ? lessonData.sections
-              : [];
+
+          const lessonSections = getLessonSections(lessonData);
 
 
           /* =============================================
@@ -903,6 +901,7 @@ function StudentLessonDetails() {
           "Save lesson progress:",
           progressError
         );
+        if (changes.coding) throw progressError;
       }
     };
 
@@ -1097,6 +1096,9 @@ function StudentLessonDetails() {
 
   const canContinue =
     (section) => {
+      if (isCodingConfig(section?.codingConfig) && !lessonCompleted) {
+        return answerResults[section.id] === "correct";
+      }
 
       if (
         !section ||
@@ -1460,6 +1462,8 @@ const addTaskToPortfolio =
 
   const completeLesson =
     async () => {
+      if (completingLesson || lessonCompleted) return;
+      if (sections.some(section => isCodingConfig(section.codingConfig) && !canContinue(section))) return;
 
       const currentUser =
         auth.currentUser;
@@ -1611,6 +1615,9 @@ const addTaskToPortfolio =
 
                 completedLessons:
                   increment(1),
+
+                lastCompletedLessonId:
+                  lesson.id,
 
                 updatedAt:
                   serverTimestamp(),
@@ -1838,6 +1845,31 @@ const addTaskToPortfolio =
 
       if (!section) {
         return null;
+      }
+
+      if (isCodingConfig(section.codingConfig)) {
+        return (
+          <div>
+            <p>{localized(section.introduction || section.content || section.description || section.text)}</p>
+            {renderList(section.steps)}
+            <Suspense fallback={<p>{codeText("editorLoading")}</p>}>
+              <CodeRunner
+                key={lesson.id + ":" + section.id}
+                config={section.codingConfig}
+                initialCode={taskAnswers[section.id]}
+                xpReward={Number(lesson.xpReward || 0)}
+                onEdit={() => setAnswerResults(previous => ({ ...previous, [section.id]: "pending" }))}
+                onResult={async result => {
+                  const nextAnswers = { ...taskAnswers, [section.id]: result.code };
+                  const nextResults = { ...answerResults, [section.id]: result.passed ? "correct" : "wrong" };
+                  setTaskAnswers(nextAnswers);
+                  await saveProgress({ taskAnswers: nextAnswers, answerResults: nextResults, coding: true });
+                  setAnswerResults(nextResults);
+                }}
+              />
+            </Suspense>
+          </div>
+        );
       }
 
 
@@ -2757,6 +2789,13 @@ const addTaskToPortfolio =
   }
 
 
+  if (lesson.activityType === "mission") {
+    return <Suspense fallback={<div className="lesson-details-loading">🤖</div>}>
+      <MissionPlayer key={lesson.id} lesson={lesson} student={studentProfile}
+        onExit={() => navigate("/student/lessons")} />
+    </Suspense>;
+  }
+
   /* =====================================================
      SIMPLE CUSTOM LESSON
   ===================================================== */
@@ -2834,7 +2873,7 @@ const addTaskToPortfolio =
           <div>
 
             <span>
-              TECHMINDS
+              TEACHLEARN
             </span>
 
 
@@ -3187,8 +3226,8 @@ const addTaskToPortfolio =
           <span>
 
             {text(
-              "TECHMINDS INTERACTIVE LESSON",
-              "درس تفاعلي من TechMinds"
+              "TEACHLEARN INTERACTIVE LESSON",
+              "درس تفاعلي من TeachLearn"
             )}
 
           </span>

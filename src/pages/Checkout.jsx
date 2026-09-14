@@ -27,9 +27,16 @@ import {
 } from "../context/LanguageContext";
 
 import "./Checkout.css";
+import { readPaddleConfig, selectPaddlePrice, programLicenseForRole } from "../firebase/paddleConfig";
+import { httpsCallable } from "firebase/functions";
+import { functions } from "../firebase/firebase";
+
+import { hebrewText } from "../data/hebrewText";
 
 
 function Checkout() {
+  const [programAccessReady, setProgramAccessReady] = useState(false);
+  const isSandbox = (import.meta.env.VITE_PADDLE_ENVIRONMENT || "sandbox") === "sandbox";
   const navigate =
     useNavigate();
 
@@ -105,6 +112,8 @@ function Checkout() {
   ) =>
     language === "ar"
       ? arabic
+      : language === "he"
+        ? hebrewText(english)
       : english;
 
 
@@ -339,10 +348,10 @@ function Checkout() {
 
           const paddleInstance =
             await initializePaddle({
-              token,
+              token: readPaddleConfig(import.meta.env).token,
 
               environment:
-                "sandbox",
+                readPaddleConfig(import.meta.env).environment,
 
               eventCallback:
                 (event) => {
@@ -371,8 +380,8 @@ function Checkout() {
 
                     setMessage(
                       language === "ar"
-                        ? "✅ تمت عملية الدفع التجريبية بنجاح."
-                        : "✅ Sandbox payment completed successfully."
+                        ? "تم الدفع. جارٍ التحقق من تفعيل الوصول…"
+                        : "Payment completed. Confirming your access…"
                     );
                   }
 
@@ -659,9 +668,28 @@ function Checkout() {
 
 
   const licenseType =
-    pendingPurchase
-      ?.licenseType ||
-    "student";
+    programLicenseForRole(userData?.role, pendingPurchase?.licenseType);
+
+  // Listen for the server-written entitlement; checkout.completed alone cannot grant access.
+  useEffect(() => {
+    if (checkoutType !== "program" || !paymentCompleted || !pendingPurchase?.programId || !licenseType) return;
+    let cancelled = false;
+    let timer;
+    let attempts = 0;
+    const confirm = async () => {
+      try {
+        const response = await httpsCallable(functions, "getPurchasedProgram")({ programId: pendingPurchase.programId, accessOnly: true });
+        if (cancelled) return;
+        if (response.data?.access?.status === "active") {
+          setProgramAccessReady(true);
+          return;
+        }
+      } catch { /* The webhook may still be processing. Never grant access from the checkout event. */ }
+      if (!cancelled && ++attempts < 30) timer = setTimeout(confirm, 2000);
+    };
+    confirm();
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [checkoutType, paymentCompleted, pendingPurchase?.programId, pendingPurchase?.classId, licenseType]);
 
 
   /* =====================================================
@@ -766,42 +794,16 @@ function Checkout() {
 
   const getPaddlePriceId =
     () => {
-      /*
-        PROGRAM PRICES
-
-        Later each program can have:
-
-        paddlePriceIds: {
-          student: "pri_xxx",
-          teacher: "pri_xxx",
-          class: "pri_xxx"
-        }
-      */
-
-      if (
-        checkoutType ===
-          "program" &&
-        programData
-          ?.paddlePriceIds
-          ?.[licenseType]
-      ) {
-        return programData
-          .paddlePriceIds[
-            licenseType
-          ];
-      }
-
-
-      /*
-        For the Sandbox test we currently
-        use one Paddle Price ID.
-      */
-
-      return (
-        import.meta.env
-          .VITE_PADDLE_TEST_PRICE_ID ||
-        ""
-      );
+      const config = readPaddleConfig(import.meta.env);
+      if (checkoutType === "program" && !licenseType) throw new Error("This account cannot purchase programs.");
+      return selectPaddlePrice({
+        ...config,
+        testPriceId: import.meta.env.VITE_PADDLE_TEST_PRICE_ID,
+        type: checkoutType,
+        programPriceId: programData?.paddlePriceIds?.[licenseType],
+        planId: userData?.pendingPlan,
+        billingCycle,
+      });
     };
 
 
@@ -948,13 +950,7 @@ function Checkout() {
                 license_type:
                   licenseType,
 
-                class_id:
-                  licenseType ===
-                    "class"
-                    ? pendingPurchase
-                        ?.classId ||
-                      ""
-                    : "",
+                ...(licenseType === "class" ? { class_id: pendingPurchase?.classId || "" } : {}),
               }),
         };
 
@@ -1201,6 +1197,8 @@ function Checkout() {
       ? localized(
           programData?.title
         )
+      : language === "he"
+      ? hebrewText(plan.en)
       : language === "ar"
       ? plan.ar
       : plan.en;
@@ -1252,6 +1250,20 @@ function Checkout() {
           }
         >
           العربية
+        </button>
+
+        <button
+          type="button"
+          className={
+            language === "he"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setLanguage("he")
+          }
+        >
+          עברית
         </button>
 
       </div>
@@ -1319,7 +1331,9 @@ function Checkout() {
             {language ===
             "ar"
               ? "↩ رجوع"
-              : "← Back"}
+              : language === "he"
+                ? "→ חזרה"
+                : "← Back"}
 
           </button>
 
@@ -1438,10 +1452,11 @@ function Checkout() {
 
                     {selectedTrack.icon}{" "}
 
-                    {language ===
-                    "ar"
+                    {language === "ar"
                       ? selectedTrack.ar
-                      : selectedTrack.en}
+                      : language === "he"
+                        ? hebrewText(selectedTrack.en)
+                        : selectedTrack.en}
 
                   </strong>
 
@@ -1499,7 +1514,7 @@ function Checkout() {
 
               {userData.name ||
                 userData.username ||
-                "TechMinds User"}
+                "TeachLearn User"}
 
             </strong>
 
@@ -1610,12 +1625,12 @@ function Checkout() {
             }}
           >
 
-            🧪{" "}
+            {isSandbox ? "🧪 " : "🔒 "}
 
-            {text(
+            {isSandbox ? text(
               "Paddle Sandbox — this payment is for testing only. No real money will be charged.",
               "Paddle Sandbox — عملية الدفع الآن للتجربة فقط ولن يتم خصم أموال حقيقية."
-            )}
+            ) : text("Live payment — you will be charged the amount shown in Paddle checkout.", "دفع حقيقي — سيتم خصم المبلغ الظاهر في نافذة الدفع لدى Paddle.")}
 
           </div>
 
@@ -1657,14 +1672,22 @@ function Checkout() {
           {/* =================================================
               SECURITY
           ================================================= */}
+          {checkoutType === "program" && paymentCompleted && (
+            <div aria-live="polite">
+              <p>{programAccessReady ? text("Your program is ready.", "برنامجك جاهز.") : text("Waiting for payment confirmation. You can return to My Programs; access updates automatically.", "بانتظار تأكيد الدفع. يمكنك العودة إلى برامجي؛ يتم تحديث الوصول تلقائيًا.")}</p>
+              <button type="button" className="secure-payment-button" onClick={() => navigate(programAccessReady ? `/programs/${pendingPurchase.programId}` : "/programs")}>
+                {programAccessReady ? text("Open Program", "فتح البرنامج") : text("My Programs", "برامجي")}
+              </button>
+            </div>
+          )}
 
           <div className="payment-security">
 
             🔐{" "}
 
             {text(
-              "Payment is processed securely by Paddle. TechMinds never stores card numbers or CVV.",
-              "تتم معالجة الدفع بشكل آمن بواسطة Paddle، ولا يقوم TechMinds بحفظ أرقام البطاقات أو CVV."
+                "Payment is processed securely by Paddle. TeachLearn never stores card numbers or CVV.",
+              "تتم معالجة الدفع بشكل آمن بواسطة Paddle، ولا يقوم TeachLearn بحفظ أرقام البطاقات أو CVV."
             )}
 
           </div>

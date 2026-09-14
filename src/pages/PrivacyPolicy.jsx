@@ -4,6 +4,8 @@ import {
 
 import "./LegalPages.css";
 
+import { hebrewText } from "../data/hebrewText";
+
 
 function PrivacyPolicy() {
   const {
@@ -14,11 +16,14 @@ function PrivacyPolicy() {
 
   const text = (
     english,
-    arabic
+    arabic,
+    hebrew = hebrewText(english)
   ) =>
     language === "ar"
       ? arabic
-      : english;
+      : language === "he"
+        ? hebrew
+        : english;
 
 
   return (
@@ -34,7 +39,7 @@ function PrivacyPolicy() {
             href="/"
             className="legal-logo"
           >
-            🚀 TechMinds
+            🚀 TeachLearn
           </a>
 
 
@@ -69,6 +74,14 @@ function PrivacyPolicy() {
               عربي
             </button>
 
+            <button
+              type="button"
+              className={language === "he" ? "active" : ""}
+              onClick={() => setLanguage("he")}
+            >
+              עברית
+            </button>
+
           </div>
 
         </header>
@@ -83,7 +96,7 @@ function PrivacyPolicy() {
           </div>
 
           <span>
-            TECHMINDS
+            TEACHLEARN
           </span>
 
           <h1>
@@ -116,8 +129,8 @@ function PrivacyPolicy() {
             <h2>
               1.{" "}
               {text(
-                "About TechMinds",
-                "حول TechMinds"
+                "About TeachLearn",
+                "حول TeachLearn"
               )}
             </h2>
 
@@ -373,7 +386,7 @@ function LegalFooter({
     <footer className="legal-footer">
 
       <span>
-        © 2026 TechMinds
+        © 2026 TeachLearn
       </span>
 
       <div>

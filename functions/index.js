@@ -2,60 +2,434 @@ const {
   onRequest,
   onCall,
   HttpsError,
-} = require(
-  "firebase-functions/v2/https"
-);
+} = require("firebase-functions/v2/https");
 
 const {
   defineSecret,
-} = require(
-  "firebase-functions/params"
-);
+} = require("firebase-functions/params");
 
 const {
   initializeApp,
-} = require(
-  "firebase-admin/app"
-);
+} = require("firebase-admin/app");
 
 const {
   getFirestore,
   FieldValue,
-} = require(
-  "firebase-admin/firestore"
-);
+  Timestamp,
+} = require("firebase-admin/firestore");
 
 const {
+  getAuth,
+} = require("firebase-admin/auth");
+
+const {
+  createHash,
   createHmac,
   timingSafeEqual,
-} = require(
-  "crypto"
-);
+} = require("crypto");
+
+const {
+  TranslationServiceClient,
+} = require("@google-cloud/translate");
 
 
 /* =========================================================
    FIREBASE ADMIN
 ========================================================= */
 
-const app =
-  initializeApp();
-
+const app = initializeApp();
 
 /*
-  IMPORTANT:
-
   Your Firestore database ID is:
-  "default"
+  default
 
   Do NOT change it to:
-  "(default)"
+  (default)
 */
 
-const db =
-  getFirestore(
-    app,
-    "default"
+const db = getFirestore(app, "default");
+
+const translationClient =
+  new TranslationServiceClient();
+
+
+/* =========================================================
+   TRANSLATE PLAN
+========================================================= */
+
+exports.translatePlan =
+  onCall(
+    {
+      region: "europe-west1",
+      timeoutSeconds: 30,
+      memory: "256MiB",
+    },
+
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "You must sign in first."
+        );
+      }
+
+      const ownerSnapshot =
+        await db
+          .collection("users")
+          .doc(request.auth.uid)
+          .get();
+
+      if (
+        !ownerSnapshot.exists ||
+        ownerSnapshot.data().role !== "owner"
+      ) {
+        throw new HttpsError(
+          "permission-denied",
+          "Only owners can translate plans."
+        );
+      }
+
+      const input = request.data || {};
+
+      const contents = [
+        String(input.name || ""),
+        String(input.description || ""),
+        String(input.features || ""),
+      ];
+
+      const translate =
+        async (targetLanguageCode) => {
+          const [response] =
+            await translationClient.translateText({
+              parent:
+                `projects/${process.env.GCLOUD_PROJECT}/locations/global`,
+
+              contents,
+
+              mimeType:
+                "text/plain",
+
+              sourceLanguageCode:
+                "en",
+
+              targetLanguageCode,
+            });
+
+          return response.translations.map(
+            (translation) =>
+              translation.translatedText || ""
+          );
+        };
+
+      const [arabic, hebrew] =
+        await Promise.all([
+          translate("ar"),
+          translate("he"),
+        ]);
+
+      return {
+        arabic: {
+          name: arabic[0],
+          description: arabic[1],
+          features: arabic[2],
+        },
+
+        hebrew: {
+          name: hebrew[0],
+          description: hebrew[1],
+          features: hebrew[2],
+        },
+      };
+    }
   );
+
+/* =========================================================
+   PHASE 1 CLASS MEMBERSHIPS AND ACCESS
+========================================================= */
+
+function requireActiveUser(request) {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "You must sign in first.");
+  }
+
+  return db.collection("users").doc(request.auth.uid).get();
+}
+
+async function requireRole(request, role) {
+  const snapshot = await requireActiveUser(request);
+  const data = snapshot.data();
+
+  if (!snapshot.exists || data?.role !== role || data?.accountStatus === "blocked") {
+    throw new HttpsError("permission-denied", "You do not have permission for this action.");
+  }
+
+  return data;
+}
+
+function membershipId(classId, studentId) {
+  return `${safeId(classId)}_${safeId(studentId)}`;
+}
+
+function assignmentId(classId, contentType, contentId) {
+  return `${safeId(classId)}_${safeId(contentType)}_${safeId(contentId)}`;
+}
+
+exports.joinClass = onCall(
+  { region: "europe-west1", timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    await requireRole(request, "student");
+    const classCode = String(request.data?.classCode || "").trim().toLowerCase();
+
+    if (!classCode || classCode.length > 60) {
+      throw new HttpsError("invalid-argument", "A class code is required.");
+    }
+
+    const codeSnapshot = await db.collection("classCodes").doc(classCode).get();
+    if (!codeSnapshot.exists) {
+      throw new HttpsError("not-found", "Class code was not found.");
+    }
+
+    const classId = codeSnapshot.data().classId;
+    const classSnapshot = await db.collection("classes").doc(classId).get();
+    if (!classSnapshot.exists || classSnapshot.data().status !== "active") {
+      throw new HttpsError("failed-precondition", "This class is not active.");
+    }
+
+    const classData = classSnapshot.data();
+    const memberRef = db.collection("classMembers").doc(membershipId(classId, request.auth.uid));
+    const existing = await memberRef.get();
+
+    if (existing.exists && existing.data().status === "active") {
+      return { success: true, alreadyMember: true, membership: serializeValue(existing.data()) };
+    }
+
+    const membership = {
+      classId,
+      studentId: request.auth.uid,
+      teacherId: classData.teacherId,
+      status: "active",
+      joinedAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+
+    await memberRef.set(membership, { merge: true });
+    return { success: true, membership: serializeValue({ ...membership, classId, studentId: request.auth.uid, teacherId: classData.teacherId }) };
+  }
+);
+
+exports.leaveClass = onCall(
+  { region: "europe-west1", timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    await requireRole(request, "student");
+    const classId = String(request.data?.classId || "").trim();
+    if (!classId) {
+      throw new HttpsError("invalid-argument", "Class ID is required.");
+    }
+
+    const memberRef = db.collection("classMembers").doc(membershipId(classId, request.auth.uid));
+    const snapshot = await memberRef.get();
+    if (!snapshot.exists) {
+      return { success: true, alreadyLeft: true };
+    }
+
+    await memberRef.update({ status: "left", leftAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp() });
+    return { success: true };
+  }
+);
+
+exports.removeClassMember = onCall(
+  { region: "europe-west1", timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    await requireRole(request, "teacher");
+    const classId = String(request.data?.classId || "").trim();
+    const studentId = String(request.data?.studentId || "").trim();
+    const classSnapshot = await db.collection("classes").doc(classId).get();
+
+    if (!classSnapshot.exists || classSnapshot.data().teacherId !== request.auth.uid) {
+      throw new HttpsError("permission-denied", "You do not own this class.");
+    }
+
+    await db.collection("classMembers").doc(membershipId(classId, studentId)).update({
+      status: "removed",
+      removedAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    return { success: true };
+  }
+);
+
+exports.assignClassContent = onCall(
+  { region: "europe-west1", timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    await requireRole(request, "teacher");
+    const classId = String(request.data?.classId || "").trim();
+    const contentType = String(request.data?.contentType || "").trim();
+    const contentId = String(request.data?.contentId || "").trim();
+
+    if (!classId || !contentId || !["program", "lesson"].includes(contentType)) {
+      throw new HttpsError("invalid-argument", "Class, content type, and content ID are required.");
+    }
+
+    const classSnapshot = await db.collection("classes").doc(classId).get();
+    if (!classSnapshot.exists || classSnapshot.data().teacherId !== request.auth.uid) {
+      throw new HttpsError("permission-denied", "You do not own this class.");
+    }
+
+    const contentCollection = contentType === "program" ? "programs" : "lessons";
+    const contentSnapshot = await db.collection(contentCollection).doc(contentId).get();
+    if (!contentSnapshot.exists || contentSnapshot.data().status !== "published") {
+      throw new HttpsError("failed-precondition", "Only published content can be assigned.");
+    }
+
+    if (contentType === "lesson" && contentSnapshot.data().teacherId && contentSnapshot.data().teacherId !== request.auth.uid) {
+      throw new HttpsError("permission-denied", "You cannot assign another teacher's lesson.");
+    }
+
+    const assignment = {
+      classId,
+      teacherId: request.auth.uid,
+      contentType,
+      contentId,
+      status: "active",
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+
+    await db.collection("classAssignments").doc(assignmentId(classId, contentType, contentId)).set(assignment, { merge: true });
+    return { success: true, assignment: serializeValue(assignment) };
+  }
+);
+
+exports.resolveStudentAccess = onCall(
+  { region: "europe-west1", timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    await requireRole(request, "student");
+    const studentId = request.auth.uid;
+    const [memberships, purchases, access] = await Promise.all([
+      db.collection("classMembers").where("studentId", "==", studentId).where("status", "==", "active").get(),
+      db.collection("programPurchases").where("userId", "==", studentId).get(),
+      db.collection("programAccess").where("userId", "==", studentId).where("status", "==", "active").get(),
+    ]);
+
+    const activeMemberships = memberships.docs.map((document) => ({ id: document.id, ...serializeValue(document.data()) }));
+    const classIds = activeMemberships.map((membership) => membership.classId);
+    const assignmentSnapshots = await Promise.all(classIds.map((classId) => db.collection("classAssignments").where("classId", "==", classId).where("status", "==", "active").get()));
+    const assignments = assignmentSnapshots.flatMap((snapshot) => snapshot.docs.map((document) => ({ id: document.id, ...serializeValue(document.data()) })));
+
+    return {
+      success: true,
+      memberships: activeMemberships,
+      assignments,
+      purchases: purchases.docs.map((document) => ({ id: document.id, ...serializeValue(document.data()) })),
+      access: access.docs.map((document) => ({ id: document.id, ...serializeValue(document.data()) })),
+    };
+  }
+);
+
+
+/* =========================================================
+   RESET STUDENT PASSWORD
+========================================================= */
+
+const MIN_STUDENT_PASSWORD_LENGTH = 8;
+const MAX_STUDENT_PASSWORD_LENGTH = 128;
+
+async function teacherManagesStudent(teacherUid, studentUid, studentData) {
+  if (studentData.teacherId && studentData.teacherId === teacherUid) {
+    return true;
+  }
+
+  // Multi-teacher/multi-class model: check active classMembers relationship.
+  const membershipsSnapshot = await db
+    .collection("classMembers")
+    .where("studentId", "==", studentUid)
+    .where("status", "==", "active")
+    .get();
+
+  return membershipsSnapshot.docs.some(
+    (document) => document.data().teacherId === teacherUid
+  );
+}
+
+exports.resetStudentPassword = onCall(
+  { region: "europe-west1", timeoutSeconds: 30, memory: "256MiB" },
+  async (request) => {
+    const callerSnapshot = await requireActiveUser(request);
+    const callerData = callerSnapshot.data();
+
+    if (
+      !callerSnapshot.exists ||
+      callerData?.accountStatus === "blocked" ||
+      !["teacher", "owner"].includes(callerData?.role)
+    ) {
+      throw new HttpsError(
+        "permission-denied",
+        "You do not have permission for this action."
+      );
+    }
+
+    const studentUid = String(request.data?.studentUid || "").trim();
+    const newPassword = String(request.data?.newPassword || "");
+
+    if (!studentUid || studentUid.length > 128) {
+      throw new HttpsError("invalid-argument", "A valid student is required.");
+    }
+
+    if (
+      newPassword.length < MIN_STUDENT_PASSWORD_LENGTH ||
+      newPassword.length > MAX_STUDENT_PASSWORD_LENGTH
+    ) {
+      throw new HttpsError(
+        "invalid-argument",
+        `Password must be between ${MIN_STUDENT_PASSWORD_LENGTH} and ${MAX_STUDENT_PASSWORD_LENGTH} characters.`
+      );
+    }
+
+    const studentSnapshot = await db.collection("users").doc(studentUid).get();
+
+    if (!studentSnapshot.exists) {
+      throw new HttpsError("not-found", "Student was not found.");
+    }
+
+    const studentData = studentSnapshot.data();
+
+    if (studentData.role !== "student") {
+      throw new HttpsError("failed-precondition", "This account is not a student.");
+    }
+
+    if (callerData.role !== "owner") {
+      const authorized = await teacherManagesStudent(
+        request.auth.uid,
+        studentUid,
+        studentData
+      );
+
+      if (!authorized) {
+        throw new HttpsError(
+          "permission-denied",
+          "You are not authorized to manage this student."
+        );
+      }
+    }
+
+    try {
+      await getAuth(app).updateUser(studentUid, { password: newPassword });
+    } catch (updateError) {
+      // Never log the password itself, only the error code/message.
+      console.error(
+        "resetStudentPassword auth update failed:",
+        updateError.code || updateError.message
+      );
+
+      throw new HttpsError(
+        "internal",
+        "Could not update the student's password."
+      );
+    }
+
+    return { success: true };
+  }
+);
 
 
 /* =========================================================
@@ -72,13 +446,45 @@ const paddleWebhookSecret =
    ENVIRONMENT
 ========================================================= */
 
+const paddleEnvironment =
+  process.env.PADDLE_ENVIRONMENT ||
+  "sandbox";
+
+if (
+  ![
+    "sandbox",
+    "production",
+  ].includes(paddleEnvironment)
+) {
+  throw new Error(
+    "Invalid PADDLE_ENVIRONMENT."
+  );
+}
+
 const IS_SANDBOX =
-  true;
+  paddleEnvironment === "sandbox";
+
+
+const STUDENT_LOGIN_WINDOW_MS =
+  10 * 60 * 1000;
+
+const STUDENT_LOGIN_MAX_ATTEMPTS =
+  12;
+
+const STUDENT_AVAILABILITY_MAX_ATTEMPTS =
+  80;
 
 
 /* =========================================================
    VALID PLANS
 ========================================================= */
+
+/*
+  We keep these for now because your old
+  subscription system still exists.
+
+  Program purchases are handled separately.
+*/
 
 const STUDENT_PLANS =
   new Set([
@@ -86,7 +492,6 @@ const STUDENT_PLANS =
     "allAccess",
     "family",
   ]);
-
 
 const TEACHER_PLANS =
   new Set([
@@ -102,22 +507,15 @@ const TEACHER_PLANS =
 exports.paymentTest =
   onRequest(
     {
-      region:
-        "europe-west1",
-
-      cors:
-        true,
+      region: "europe-west1",
+      cors: true,
     },
 
-    (
-      request,
-      response
-    ) => {
+    (request, response) => {
       response
         .status(200)
         .json({
-          success:
-            true,
+          success: true,
 
           app:
             "TechMinds",
@@ -141,32 +539,14 @@ exports.paymentTest =
    GENERAL HELPERS
 ========================================================= */
 
-function safeId(
-  value
-) {
-  return String(
-    value || ""
-  )
-    .replace(
-      /\//g,
-      "_"
-    )
-    .replace(
-      /\s+/g,
-      "_"
-    );
+function safeId(value) {
+  return String(value || "")
+    .replace(/\//g, "_")
+    .replace(/\s+/g, "_");
 }
 
 
-/*
-  Convert Firestore timestamps
-  to values that Callable Functions
-  can safely send to React.
-*/
-
-function serializeValue(
-  value
-) {
+function serializeValue(value) {
   if (
     value === null ||
     value === undefined
@@ -174,43 +554,31 @@ function serializeValue(
     return value ?? null;
   }
 
-
   if (
     value &&
-    typeof value.toDate ===
-      "function"
+    typeof value.toDate === "function"
   ) {
     return value
       .toDate()
       .toISOString();
   }
 
-
-  if (
-    Array.isArray(
-      value
-    )
-  ) {
+  if (Array.isArray(value)) {
     return value.map(
       serializeValue
     );
   }
 
-
   if (
-    typeof value ===
-      "object"
+    typeof value === "object"
   ) {
     const result = {};
-
 
     for (
       const [
         key,
         itemValue,
-      ] of Object.entries(
-        value
-      )
+      ] of Object.entries(value)
     ) {
       result[key] =
         serializeValue(
@@ -218,77 +586,396 @@ function serializeValue(
         );
     }
 
-
     return result;
   }
-
 
   return value;
 }
 
 
 /* =========================================================
-   GET PURCHASED PROGRAM
+   STUDENT AUTH HELPERS
 ========================================================= */
 
-/*
-  IMPORTANT:
+function normalizeStudentLoginValue(
+  value
+) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "");
+}
 
-  React does NOT read paid lesson content
-  directly from Firestore.
 
-  This function:
+function getRequestIp(request) {
+  return String(
+    request.rawRequest?.ip ||
+    request.rawRequest
+      ?.socket
+      ?.remoteAddress ||
+    "unknown"
+  );
+}
 
-  1. Verifies Firebase Auth.
-  2. Reads the user's role.
-  3. Checks programAccess.
-  4. Only then returns paid lessons.
 
-  Firebase Admin bypasses Firestore Rules,
-  but we perform the authorization here.
-*/
+async function enforceStudentAuthRateLimit(
+  request,
+  scope,
+  maximumAttempts,
+  subject = ""
+) {
+  const now =
+    Date.now();
+
+  const fingerprint =
+    createHash("sha256")
+      .update(
+        `${process.env.GCLOUD_PROJECT || "techminds"}:${scope}:${subject}:${getRequestIp(request)}`
+      )
+      .digest("hex");
+
+  const rateLimitRef =
+    db
+      .collection(
+        "studentLoginRateLimits"
+      )
+      .doc(fingerprint);
+
+  await db.runTransaction(
+    async (
+      transaction
+    ) => {
+      const snapshot =
+        await transaction.get(
+          rateLimitRef
+        );
+
+      const data =
+        snapshot.exists
+          ? snapshot.data()
+          : null;
+
+      const windowStartedAtMs =
+        Number(
+          data?.windowStartedAtMs ||
+          0
+        );
+
+      const insideWindow =
+        now -
+          windowStartedAtMs <
+        STUDENT_LOGIN_WINDOW_MS;
+
+      const attempts =
+        insideWindow
+          ? Number(
+              data?.attempts ||
+              0
+            )
+          : 0;
+
+      if (
+        attempts >=
+        maximumAttempts
+      ) {
+        throw new HttpsError(
+          "resource-exhausted",
+          "Too many attempts. Please try again later."
+        );
+      }
+
+      transaction.set(
+        rateLimitRef,
+
+        {
+          scope,
+
+          attempts:
+            attempts + 1,
+
+          windowStartedAtMs:
+            insideWindow
+              ? windowStartedAtMs
+              : now,
+
+          updatedAt:
+            FieldValue
+              .serverTimestamp(),
+
+          expiresAt:
+            Timestamp.fromMillis(
+              now +
+                STUDENT_LOGIN_WINDOW_MS
+            ),
+        },
+
+        {
+          merge: true,
+        }
+      );
+    }
+  );
+}
+
+
+// Identifier (student code/username) does not resolve to any account.
+function invalidStudentIdentifier() {
+  throw new HttpsError(
+    "not-found",
+    "student-identifier-not-found"
+  );
+}
+
+
+// The resolved account/class is unusable.
+function studentAccountUnavailable() {
+  throw new HttpsError(
+    "failed-precondition",
+    "student-account-unavailable"
+  );
+}
+
+
+/* =========================================================
+   STUDENT ALIAS AVAILABILITY
+========================================================= */
+
+exports.studentAliasAvailable =
+  onCall(
+    {
+      region: "europe-west1",
+
+      timeoutSeconds: 15,
+
+      memory: "256MiB",
+
+      maxInstances: 20,
+    },
+
+    async (request) => {
+      const input =
+        request.data || {};
+
+      const kind =
+        String(
+          input.kind || ""
+        );
+
+      const normalizedValue =
+        normalizeStudentLoginValue(
+          input.value
+        );
+
+      const validUsername =
+        kind === "username" &&
+        /^[\p{L}\p{N}._-]{3,24}$/u
+          .test(
+            normalizedValue
+          );
+
+      const validCode =
+        kind === "code" &&
+        /^[a-z0-9._-]{3,60}$/
+          .test(
+            normalizedValue
+          );
+
+      if (
+        !validUsername &&
+        !validCode
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Invalid student alias."
+        );
+      }
+
+      await enforceStudentAuthRateLimit(
+        request,
+        "availability",
+        STUDENT_AVAILABILITY_MAX_ATTEMPTS
+      );
+
+      const prefix =
+        kind === "username"
+          ? "u_"
+          : "c_";
+
+      const snapshot =
+        await db
+          .collection(
+            "studentLoginIndex"
+          )
+          .doc(
+            prefix +
+              normalizedValue
+          )
+          .get();
+
+      return {
+        available:
+          !snapshot.exists,
+      };
+    }
+  );
+
+
+/* =========================================================
+   STUDENT LOGIN
+========================================================= */
+
+exports.studentLogin =
+  onCall(
+    {
+      region: "europe-west1",
+
+      timeoutSeconds: 20,
+
+      memory: "256MiB",
+
+      maxInstances: 20,
+    },
+
+    async (request) => {
+      const input =
+        request.data || {};
+
+      const studentCode =
+        normalizeStudentLoginValue(
+          input.studentCode
+        );
+
+      if (!/^[\p{L}\p{N}._-]{3,60}$/u.test(studentCode)) {
+        throw new HttpsError("invalid-argument", "Invalid student alias.");
+      }
+
+      await enforceStudentAuthRateLimit(
+        request,
+        "login",
+        STUDENT_LOGIN_MAX_ATTEMPTS,
+        studentCode
+      );
+
+      // Resolve codes first, then usernames. Passwords go only to client Auth.
+      let indexSnapshot = await db.collection("studentLoginIndex")
+        .doc(`c_${studentCode}`).get();
+      if (!indexSnapshot.exists) {
+        indexSnapshot = await db.collection("studentLoginIndex")
+          .doc(`u_${studentCode}`).get();
+      }
+      if (!indexSnapshot.exists) {
+        invalidStudentIdentifier();
+      }
+      const indexData = indexSnapshot.data();
+      if (typeof indexData.uid !== "string" || !indexData.uid ||
+          typeof indexData.authEmail !== "string" || !indexData.authEmail) {
+        studentAccountUnavailable();
+      }
+
+      const studentSnapshot =
+        await db
+          .collection("users")
+          .doc(indexData.uid)
+          .get();
+
+      if (
+        !studentSnapshot.exists
+      ) {
+        invalidStudentIdentifier();
+      }
+
+      const student =
+        studentSnapshot.data();
+
+      const studentClassId =
+        typeof student.classId ===
+        "string"
+          ? student.classId
+          : "";
+
+      if (
+        student.role !==
+          "student" ||
+        student.studentAccountType ===
+          "independent" ||
+        student.accountStatus !==
+          "active" ||
+        !studentClassId ||
+        (
+          indexData.classId &&
+          indexData.classId !==
+            studentClassId
+        )
+      ) {
+        studentAccountUnavailable();
+      }
+
+      const classSnapshot =
+        await db
+          .collection("classes")
+          .doc(studentClassId)
+          .get();
+
+      if (
+        !classSnapshot.exists
+      ) {
+        studentAccountUnavailable();
+      }
+
+      const classData =
+        classSnapshot.data();
+
+      if (
+        classData.status !==
+          "active" ||
+        (
+          student.teacherId &&
+          classData.teacherId !==
+            student.teacherId
+        )
+      ) {
+        studentAccountUnavailable();
+      }
+
+      return {
+        authEmail: indexData.authEmail,
+        uid: indexData.uid,
+      };
+    }
+  );
+
+
+/* =========================================================
+   GET PURCHASED PROGRAM
+========================================================= */
 
 exports.getPurchasedProgram =
   onCall(
     {
-      region:
-        "europe-west1",
+      region: "europe-west1",
 
-      timeoutSeconds:
-        30,
+      timeoutSeconds: 30,
 
-      memory:
-        "256MiB",
+      memory: "256MiB",
     },
 
-    async (
-      request
-    ) => {
-      /* =========================
-         AUTH
-      ========================= */
-
-      if (
-        !request.auth
-      ) {
+    async (request) => {
+      if (!request.auth) {
         throw new HttpsError(
           "unauthenticated",
           "You must sign in first."
         );
       }
 
-
       const userId =
         request.auth.uid;
-
 
       const programId =
         String(
           request.data
             ?.programId ||
-          ""
+            ""
         ).trim();
-
 
       if (!programId) {
         throw new HttpsError(
@@ -297,21 +984,11 @@ exports.getPurchasedProgram =
         );
       }
 
-
-      /* =========================
-         USER
-      ========================= */
-
       const userSnapshot =
         await db
-          .collection(
-            "users"
-          )
-          .doc(
-            userId
-          )
+          .collection("users")
+          .doc(userId)
           .get();
-
 
       if (
         !userSnapshot.exists
@@ -322,23 +999,18 @@ exports.getPurchasedProgram =
         );
       }
 
-
       const userData =
         userSnapshot.data();
 
-
       const role =
         userData.role;
-
 
       if (
         ![
           "owner",
           "teacher",
           "student",
-        ].includes(
-          role
-        )
+        ].includes(role)
       ) {
         throw new HttpsError(
           "permission-denied",
@@ -346,21 +1018,11 @@ exports.getPurchasedProgram =
         );
       }
 
-
-      /* =========================
-         PROGRAM
-      ========================= */
-
       const programSnapshot =
         await db
-          .collection(
-            "programs"
-          )
-          .doc(
-            programId
-          )
+          .collection("programs")
+          .doc(programId)
           .get();
-
 
       if (
         !programSnapshot.exists
@@ -371,21 +1033,11 @@ exports.getPurchasedProgram =
         );
       }
 
-
       const programData =
         programSnapshot.data();
 
-
-      /*
-        Teacher / Student should only
-        consume published programs.
-
-        Owner can preview drafts too.
-      */
-
       if (
-        role !==
-          "owner" &&
+        role !== "owner" &&
         programData.status !==
           "published"
       ) {
@@ -395,25 +1047,14 @@ exports.getPurchasedProgram =
         );
       }
 
-
-      /* =========================
-         ACCESS
-      ========================= */
-
       let accessData =
         null;
 
 
-      /*
-        OWNER
-
-        Platform owner can preview
-        commercial programs.
-      */
+      /* OWNER */
 
       if (
-        role ===
-        "owner"
+        role === "owner"
       ) {
         accessData = {
           accessType:
@@ -435,14 +1076,11 @@ exports.getPurchasedProgram =
       }
 
 
-      /* =========================
-         TEACHER PERSONAL ACCESS
-      ========================= */
+      /* TEACHER PERSONAL PURCHASE */
 
       if (
         !accessData &&
-        role ===
-          "teacher"
+        role === "teacher"
       ) {
         const accessId =
           `teacher_${safeId(
@@ -451,24 +1089,19 @@ exports.getPurchasedProgram =
             programId
           )}`;
 
-
         const accessSnapshot =
           await db
             .collection(
               "programAccess"
             )
-            .doc(
-              accessId
-            )
+            .doc(accessId)
             .get();
-
 
         if (
           accessSnapshot.exists
         ) {
           const data =
             accessSnapshot.data();
-
 
           if (
             data.status ===
@@ -493,34 +1126,21 @@ exports.getPurchasedProgram =
       }
 
 
-      /* =========================
-         TEACHER CLASS LICENSE
-      ========================= */
-
-      /*
-        If Teacher bought the program
-        for one of their classes,
-        Teacher should also be able
-        to open the program.
-      */
+      /* TEACHER CLASS LICENSE */
 
       if (
         !accessData &&
-        role ===
-          "teacher"
+        role === "teacher"
       ) {
         const classesSnapshot =
           await db
-            .collection(
-              "classes"
-            )
+            .collection("classes")
             .where(
               "teacherId",
               "==",
               userId
             )
             .get();
-
 
         for (
           const classDocument
@@ -529,7 +1149,6 @@ exports.getPurchasedProgram =
           const classId =
             classDocument.id;
 
-
           const accessId =
             `class_${safeId(
               classId
@@ -537,24 +1156,19 @@ exports.getPurchasedProgram =
               programId
             )}`;
 
-
           const accessSnapshot =
             await db
               .collection(
                 "programAccess"
               )
-              .doc(
-                accessId
-              )
+              .doc(accessId)
               .get();
-
 
           if (
             accessSnapshot.exists
           ) {
             const data =
               accessSnapshot.data();
-
 
             if (
               data.status ===
@@ -573,7 +1187,6 @@ exports.getPurchasedProgram =
                 ...data,
               };
 
-
               break;
             }
           }
@@ -581,14 +1194,11 @@ exports.getPurchasedProgram =
       }
 
 
-      /* =========================
-         STUDENT PERSONAL ACCESS
-      ========================= */
+      /* STUDENT PERSONAL PURCHASE */
 
       if (
         !accessData &&
-        role ===
-          "student"
+        role === "student"
       ) {
         const accessId =
           `student_${safeId(
@@ -597,24 +1207,19 @@ exports.getPurchasedProgram =
             programId
           )}`;
 
-
         const accessSnapshot =
           await db
             .collection(
               "programAccess"
             )
-            .doc(
-              accessId
-            )
+            .doc(accessId)
             .get();
-
 
         if (
           accessSnapshot.exists
         ) {
           const data =
             accessSnapshot.data();
-
 
           if (
             data.status ===
@@ -639,21 +1244,17 @@ exports.getPurchasedProgram =
       }
 
 
-      /* =========================
-         STUDENT CLASS ACCESS
-      ========================= */
+      /* STUDENT CLASS ACCESS */
 
       if (
         !accessData &&
-        role ===
-          "student" &&
+        role === "student" &&
         userData.classId
       ) {
         const classId =
           String(
             userData.classId
           );
-
 
         const accessId =
           `class_${safeId(
@@ -662,24 +1263,19 @@ exports.getPurchasedProgram =
             programId
           )}`;
 
-
         const accessSnapshot =
           await db
             .collection(
               "programAccess"
             )
-            .doc(
-              accessId
-            )
+            .doc(accessId)
             .get();
-
 
         if (
           accessSnapshot.exists
         ) {
           const data =
             accessSnapshot.data();
-
 
           if (
             data.status ===
@@ -699,47 +1295,59 @@ exports.getPurchasedProgram =
         }
       }
 
+      /* STUDENT MULTI-CLASS ASSIGNMENT ACCESS */
 
-      /* =========================
-         DENY
-      ========================= */
+      if (!accessData && role === "student") {
+        const membershipsSnapshot = await db
+          .collection("classMembers")
+          .where("studentId", "==", userId)
+          .get();
 
-      if (
-        !accessData
-      ) {
+        for (const membershipDocument of membershipsSnapshot.docs) {
+          if (membershipDocument.data().status !== "active") {
+            continue;
+          }
+
+          const classId = membershipDocument.data().classId;
+          const assignmentId = `${classId}_program_${programId}`;
+          const assignmentSnapshot = await db
+            .collection("classAssignments")
+            .doc(assignmentId)
+            .get();
+
+          if (assignmentSnapshot.exists && assignmentSnapshot.data().status === "active") {
+            accessData = {
+              id: assignmentSnapshot.id,
+              accessType: "class",
+              ...assignmentSnapshot.data(),
+            };
+            break;
+          }
+        }
+      }
+
+
+      if (!accessData) {
         throw new HttpsError(
           "permission-denied",
           "You do not have access to this program."
         );
       }
 
+      if (request.data?.accessOnly === true) {
+        return { success: true, role, access: serializeValue(accessData) };
+      }
 
-      /* =========================
-         LESSONS
-      ========================= */
-
-      /*
-        Query ONLY by programId.
-
-        We intentionally filter commercial
-        and published in Node.js.
-
-        This avoids needing a new
-        Firestore composite index.
-      */
 
       const lessonsSnapshot =
         await db
-          .collection(
-            "lessons"
-          )
+          .collection("lessons")
           .where(
             "programId",
             "==",
             programId
           )
           .get();
-
 
       const lessons =
         lessonsSnapshot.docs
@@ -754,19 +1362,15 @@ exports.getPurchasedProgram =
             })
           )
           .filter(
-            (
-              lesson
-            ) => {
+            (lesson) => {
               if (
-                role ===
-                "owner"
+                role === "owner"
               ) {
                 return (
                   lesson.lessonType ===
-                    "commercial"
+                  "commercial"
                 );
               }
-
 
               return (
                 lesson.lessonType ===
@@ -777,16 +1381,8 @@ exports.getPurchasedProgram =
             }
           );
 
-
-      /* =========================
-         SORT
-      ========================= */
-
       lessons.sort(
-        (
-          first,
-          second
-        ) => {
+        (first, second) => {
           const firstOrder =
             Number(
               first.order ??
@@ -795,7 +1391,6 @@ exports.getPurchasedProgram =
               999999
             );
 
-
           const secondOrder =
             Number(
               second.order ??
@@ -803,7 +1398,6 @@ exports.getPurchasedProgram =
               second.position ??
               999999
             );
-
 
           if (
             firstOrder !==
@@ -815,18 +1409,15 @@ exports.getPurchasedProgram =
             );
           }
 
-
           const firstCreatedAt =
             first.createdAt
               ?.seconds ||
             0;
 
-
           const secondCreatedAt =
             second.createdAt
               ?.seconds ||
             0;
-
 
           return (
             firstCreatedAt -
@@ -835,14 +1426,8 @@ exports.getPurchasedProgram =
         }
       );
 
-
-      /* =========================
-         RESPONSE
-      ========================= */
-
       return {
-        success:
-          true,
+        success: true,
 
         role,
 
@@ -885,44 +1470,51 @@ function verifyPaddleSignature(
     return false;
   }
 
-
   let timestamp =
     null;
-
 
   const signatures =
     [];
 
-
   const parts =
-    signatureHeader.split(
-      ";"
-    );
-
+    signatureHeader.split(";");
 
   for (
-    const part
-    of parts
+    const part of parts
   ) {
-    const [
-      key,
-      value,
-    ] =
-      part.split("=");
-
+    const separatorIndex =
+      part.indexOf("=");
 
     if (
-      key ===
-      "ts"
+      separatorIndex === -1
+    ) {
+      continue;
+    }
+
+    const key =
+      part
+        .slice(
+          0,
+          separatorIndex
+        )
+        .trim();
+
+    const value =
+      part
+        .slice(
+          separatorIndex + 1
+        )
+        .trim();
+
+    if (
+      key === "ts"
     ) {
       timestamp =
         value;
     }
 
-
     if (
-      key ===
-      "h1"
+      key === "h1"
     ) {
       signatures.push(
         value
@@ -930,21 +1522,15 @@ function verifyPaddleSignature(
     }
   }
 
-
   if (
     !timestamp ||
-    signatures.length ===
-      0
+    signatures.length === 0
   ) {
     return false;
   }
 
-
   const timestampNumber =
-    Number(
-      timestamp
-    );
-
+    Number(timestamp);
 
   if (
     !Number.isFinite(
@@ -954,13 +1540,10 @@ function verifyPaddleSignature(
     return false;
   }
 
-
   const now =
     Math.floor(
-      Date.now() /
-      1000
+      Date.now() / 1000
     );
-
 
   const age =
     Math.abs(
@@ -968,11 +1551,12 @@ function verifyPaddleSignature(
       timestampNumber
     );
 
+  /*
+    Five minutes is intentionally
+    tolerant for Firebase cold starts.
+  */
 
-  if (
-    age >
-    300
-  ) {
+  if (age > 300) {
     console.error(
       "Expired Paddle webhook:",
       {
@@ -983,14 +1567,11 @@ function verifyPaddleSignature(
       }
     );
 
-
     return false;
   }
 
-
   const signedPayload =
     `${timestamp}:${rawBody}`;
-
 
   const expectedSignature =
     createHmac(
@@ -1000,17 +1581,13 @@ function verifyPaddleSignature(
       .update(
         signedPayload
       )
-      .digest(
-        "hex"
-      );
-
+      .digest("hex");
 
   const expectedBuffer =
     Buffer.from(
       expectedSignature,
       "hex"
     );
-
 
   for (
     const signature
@@ -1023,14 +1600,12 @@ function verifyPaddleSignature(
           "hex"
         );
 
-
       if (
         receivedBuffer.length !==
         expectedBuffer.length
       ) {
         continue;
       }
-
 
       if (
         timingSafeEqual(
@@ -1040,17 +1615,13 @@ function verifyPaddleSignature(
       ) {
         return true;
       }
-
-    } catch (
-      error
-    ) {
+    } catch (error) {
       console.error(
         "Signature comparison error:",
         error
       );
     }
   }
-
 
   return false;
 }
@@ -1064,18 +1635,13 @@ function getTransactionPriceIds(
   transaction
 ) {
   return (
-    transaction.items ||
-    []
+    transaction.items || []
   )
     .map(
-      (
-        item
-      ) =>
+      (item) =>
         item?.price?.id
     )
-    .filter(
-      Boolean
-    );
+    .filter(Boolean);
 }
 
 
@@ -1091,13 +1657,11 @@ function getAmount(
       0
     );
 
-
   return {
     amountMinor,
 
     amount:
-      amountMinor /
-      100,
+      amountMinor / 100,
 
     currency:
       transaction
@@ -1117,7 +1681,6 @@ function getProgramName(
     return program.title;
   }
 
-
   return (
     program
       ?.title
@@ -1125,6 +1688,10 @@ function getProgramName(
     program
       ?.title
       ?.ar ||
+    program
+      ?.title
+      ?.he ||
+    program.name ||
     "TechMinds Program"
   );
 }
@@ -1141,25 +1708,32 @@ async function processProgramPurchase(
   eventRef
 ) {
   const userId =
-    customData
-      .techminds_user_id;
-
+    String(
+      customData
+        .techminds_user_id ||
+      ""
+    ).trim();
 
   const programId =
-    customData
-      .program_id;
-
+    String(
+      customData
+        .program_id ||
+      ""
+    ).trim();
 
   const licenseType =
-    customData
-      .license_type ||
-    "student";
-
+    String(
+      customData
+        .license_type ||
+      ""
+    ).trim();
 
   const classId =
-    customData
-      .class_id ||
-    null;
+    customData.class_id
+      ? String(
+          customData.class_id
+        ).trim()
+      : null;
 
 
   if (
@@ -1189,22 +1763,13 @@ async function processProgramPurchase(
 
   const userRef =
     db
-      .collection(
-        "users"
-      )
-      .doc(
-        userId
-      );
-
+      .collection("users")
+      .doc(userId);
 
   const programRef =
     db
-      .collection(
-        "programs"
-      )
-      .doc(
-        programId
-      );
+      .collection("programs")
+      .doc(programId);
 
 
   const [
@@ -1238,14 +1803,18 @@ async function processProgramPurchase(
   const userData =
     userSnapshot.data();
 
-
   const programData =
     programSnapshot.data();
 
 
-  /* =========================
-     ROLE CHECK
-  ========================= */
+  /* ROLE VALIDATION */
+  if (userData.accountStatus && userData.accountStatus !== "active") {
+    throw new Error("This account is not active.");
+  }
+  if (transactionData.subscription_id ||
+      transactionData.items?.some((item) => item.price?.billing_cycle)) {
+    throw new Error("Program purchases require a one-time Paddle price.");
+  }
 
   if (
     licenseType ===
@@ -1254,58 +1823,55 @@ async function processProgramPurchase(
       "student"
   ) {
     throw new Error(
-      "Student license requires a student account."
+      "Student price can only be purchased by a student account."
     );
   }
 
 
   if (
-    (
-      licenseType ===
-        "teacher" ||
-      licenseType ===
-        "class"
-    ) &&
+    licenseType ===
+      "teacher" &&
     userData.role !==
       "teacher"
   ) {
     throw new Error(
-      "Teacher/Class license requires a teacher account."
+      "Teacher price can only be purchased by a teacher account."
     );
   }
 
 
-  /* =========================
-     CLASS CHECK
-  ========================= */
+  if (
+    licenseType ===
+      "class" &&
+    userData.role !==
+      "teacher"
+  ) {
+    throw new Error(
+      "Class price can only be purchased by a teacher account."
+    );
+  }
+
+
+  /* CLASS VALIDATION */
 
   let classData =
     null;
-
 
   if (
     licenseType ===
     "class"
   ) {
-    if (
-      !classId
-    ) {
+    if (!classId) {
       throw new Error(
         "Class ID is required."
       );
     }
 
-
     const classSnapshot =
       await db
-        .collection(
-          "classes"
-        )
-        .doc(
-          classId
-        )
+        .collection("classes")
+        .doc(classId)
         .get();
-
 
     if (
       !classSnapshot.exists
@@ -1315,10 +1881,8 @@ async function processProgramPurchase(
       );
     }
 
-
     classData =
       classSnapshot.data();
-
 
     if (
       classData.teacherId !==
@@ -1331,15 +1895,34 @@ async function processProgramPurchase(
   }
 
 
-  /* =========================
-     PRICE VALIDATION
-  ========================= */
+  /* PRICE VALIDATION */
 
   const transactionPriceIds =
     getTransactionPriceIds(
       transactionData
     );
 
+  if (
+    transactionPriceIds.length ===
+    0
+  ) {
+    throw new Error(
+      "No Paddle price was found on the transaction."
+    );
+  }
+
+
+  /*
+    Expected Firestore structure:
+
+    programs/{programId}
+
+    paddlePriceIds: {
+      student: "pri_...",
+      teacher: "pri_...",
+      class: "pri_..."
+    }
+  */
 
   const expectedPriceId =
     programData
@@ -1348,39 +1931,38 @@ async function processProgramPurchase(
     null;
 
 
-  if (
-    expectedPriceId
-  ) {
-    if (
-      !transactionPriceIds.includes(
-        expectedPriceId
-      )
-    ) {
-      throw new Error(
-        "Paddle price does not match the selected program."
-      );
-    }
+  /*
+    IMPORTANT:
+    We validate the price in Sandbox too.
 
-  } else if (
-    !IS_SANDBOX
-  ) {
+    This prevents somebody changing
+    customData from student -> teacher
+    while paying the cheaper student price.
+  */
+
+  if (!expectedPriceId || !/^pri_[a-z0-9]{26}$/.test(expectedPriceId)) {
     throw new Error(
-      "Program Paddle Price ID is not configured."
+      `Paddle ${licenseType} Price ID is not configured for this program.`
     );
   }
 
 
-  /* =========================
-     PAYMENT DATA
-  ========================= */
+  if (
+    transactionPriceIds.length !== 1 ||
+    transactionPriceIds[0] !== expectedPriceId ||
+    transactionData.items.length !== 1 ||
+    transactionData.items[0].quantity !== 1
+  ) {
+    throw new Error(
+      "Paddle price does not match the requested program license."
+    );
+  }
+
 
   const transactionId =
     transactionData.id;
 
-
-  if (
-    !transactionId
-  ) {
+  if (!transactionId) {
     throw new Error(
       "Missing Paddle transaction ID."
     );
@@ -1402,17 +1984,10 @@ async function processProgramPurchase(
       .collection(
         "programPurchases"
       )
-      .doc(
-        transactionId
-      );
+      .doc(transactionId);
 
-
-  /* =========================
-     ACCESS DOCUMENT ID
-  ========================= */
 
   let accessId;
-
 
   if (
     licenseType ===
@@ -1424,7 +1999,6 @@ async function processProgramPurchase(
       )}_${safeId(
         programId
       )}`;
-
   } else {
     accessId =
       `${safeId(
@@ -1442,14 +2016,8 @@ async function processProgramPurchase(
       .collection(
         "programAccess"
       )
-      .doc(
-        accessId
-      );
+      .doc(accessId);
 
-
-  /* =====================================================
-     ATOMIC WRITE
-  ===================================================== */
 
   await db.runTransaction(
     async (
@@ -1482,6 +2050,7 @@ async function processProgramPurchase(
       ) {
         firestoreTransaction.set(
           eventRef,
+
           {
             eventId:
               event.event_id,
@@ -1500,22 +2069,19 @@ async function processProgramPurchase(
           },
 
           {
-            merge:
-              true,
+            merge: true,
           }
         );
-
 
         return;
       }
 
 
-      /* =========================
-         PURCHASE
-      ========================= */
+      /* PURCHASE */
 
       firestoreTransaction.set(
         purchaseRef,
+
         {
           userId,
 
@@ -1545,6 +2111,12 @@ async function processProgramPurchase(
 
           licenseType,
 
+          accessType:
+            licenseType,
+
+          priceId:
+            expectedPriceId,
+
           classId:
             licenseType ===
               "class"
@@ -1552,10 +2124,8 @@ async function processProgramPurchase(
               : null,
 
           className:
-            classData
-              ?.name ||
-            classData
-              ?.className ||
+            classData?.name ||
+            classData?.className ||
             null,
 
           amount,
@@ -1604,9 +2174,7 @@ async function processProgramPurchase(
       );
 
 
-      /* =========================
-         PROGRAM ACCESS
-      ========================= */
+      /* ACCESS */
 
       const accessData = {
         programId,
@@ -1625,6 +2193,9 @@ async function processProgramPurchase(
 
         purchaseId:
           transactionId,
+
+        priceId:
+          expectedPriceId,
 
         paymentProvider:
           "paddle",
@@ -1687,18 +2258,16 @@ async function processProgramPurchase(
         accessRef,
         accessData,
         {
-          merge:
-            true,
+          merge: true,
         }
       );
 
 
-      /* =========================
-         UPDATE USER
-      ========================= */
+      /* USER UPDATE */
 
       firestoreTransaction.set(
         userRef,
+
         {
           pendingPurchase:
             FieldValue.delete(),
@@ -1715,18 +2284,16 @@ async function processProgramPurchase(
         },
 
         {
-          merge:
-            true,
+          merge: true,
         }
       );
 
 
-      /* =========================
-         PROGRAM SALES COUNTER
-      ========================= */
+      /* SALES COUNT */
 
       firestoreTransaction.set(
         programRef,
+
         {
           salesCount:
             FieldValue
@@ -1738,18 +2305,16 @@ async function processProgramPurchase(
         },
 
         {
-          merge:
-            true,
+          merge: true,
         }
       );
 
 
-      /* =========================
-         WEBHOOK EVENT
-      ========================= */
+      /* WEBHOOK EVENT */
 
       firestoreTransaction.set(
         eventRef,
+
         {
           eventId:
             event.event_id,
@@ -1765,6 +2330,11 @@ async function processProgramPurchase(
           userId,
 
           programId,
+
+          licenseType,
+
+          priceId:
+            expectedPriceId,
 
           status:
             "processed",
@@ -1785,6 +2355,8 @@ async function processProgramPurchase(
       userId,
       programId,
       licenseType,
+      priceId:
+        expectedPriceId,
     }
   );
 }
@@ -1804,20 +2376,15 @@ async function processPlanPurchase(
     customData
       .techminds_user_id;
 
-
   const planId =
-    customData
-      .plan_id;
-
+    customData.plan_id;
 
   const billingCycle =
     customData
       .billing_cycle;
 
-
   const trackId =
-    customData
-      .track_id ||
+    customData.track_id ||
     null;
 
 
@@ -1845,13 +2412,8 @@ async function processPlanPurchase(
 
   const userRef =
     db
-      .collection(
-        "users"
-      )
-      .doc(
-        userId
-      );
-
+      .collection("users")
+      .doc(userId);
 
   const userSnapshot =
     await userRef.get();
@@ -1869,10 +2431,6 @@ async function processPlanPurchase(
   const userData =
     userSnapshot.data();
 
-
-  /* =========================
-     ROLE / PLAN VALIDATION
-  ========================= */
 
   if (
     userData.role ===
@@ -1918,23 +2476,14 @@ async function processPlanPurchase(
     );
 
 
-  /* =====================================================
-     LIVE PRICE VALIDATION
-  ===================================================== */
-
-  if (
-    !IS_SANDBOX
-  ) {
+  if (!IS_SANDBOX) {
     const billingSnapshot =
       await db
         .collection(
           "platformSettings"
         )
-        .doc(
-          "billing"
-        )
+        .doc("billing")
         .get();
-
 
     if (
       !billingSnapshot.exists
@@ -1944,10 +2493,8 @@ async function processPlanPurchase(
       );
     }
 
-
     const billingData =
       billingSnapshot.data();
-
 
     const expectedPriceId =
       billingData
@@ -1955,15 +2502,11 @@ async function processPlanPurchase(
         ?.[planId]
         ?.[billingCycle];
 
-
-    if (
-      !expectedPriceId
-    ) {
+    if (!expectedPriceId) {
       throw new Error(
         "Plan Paddle Price ID is missing."
       );
     }
-
 
     if (
       !transactionPriceIds.includes(
@@ -1974,7 +2517,6 @@ async function processPlanPurchase(
         "Paddle price does not match the selected plan."
       );
     }
-
 
     if (
       !transactionData
@@ -2006,9 +2548,7 @@ async function processPlanPurchase(
       .collection(
         "subscriptions"
       )
-      .doc(
-        userId
-      );
+      .doc(userId);
 
 
   const paymentRef =
@@ -2016,9 +2556,7 @@ async function processPlanPurchase(
       .collection(
         "subscriptionPayments"
       )
-      .doc(
-        transactionId
-      );
+      .doc(transactionId);
 
 
   await db.runTransaction(
@@ -2052,6 +2590,7 @@ async function processPlanPurchase(
       ) {
         firestoreTransaction.set(
           eventRef,
+
           {
             eventId:
               event.event_id,
@@ -2067,13 +2606,13 @@ async function processPlanPurchase(
           }
         );
 
-
         return;
       }
 
 
       firestoreTransaction.set(
         paymentRef,
+
         {
           userId,
 
@@ -2128,6 +2667,7 @@ async function processPlanPurchase(
 
       firestoreTransaction.set(
         subscriptionRef,
+
         {
           userId,
 
@@ -2174,8 +2714,7 @@ async function processPlanPurchase(
         },
 
         {
-          merge:
-            true,
+          merge: true,
         }
       );
 
@@ -2214,9 +2753,7 @@ async function processPlanPurchase(
       };
 
 
-      if (
-        trackId
-      ) {
+      if (trackId) {
         userUpdate.learningTrack =
           trackId;
 
@@ -2229,14 +2766,14 @@ async function processPlanPurchase(
         userRef,
         userUpdate,
         {
-          merge:
-            true,
+          merge: true,
         }
       );
 
 
       firestoreTransaction.set(
         eventRef,
+
         {
           eventId:
             event.event_id,
@@ -2284,21 +2821,17 @@ async function processPlanPurchase(
 exports.paddleWebhook =
   onRequest(
     {
-      region:
-        "europe-west1",
+      region: "europe-west1",
 
-      cors:
-        false,
+      cors: false,
 
       secrets: [
         paddleWebhookSecret,
       ],
 
-      timeoutSeconds:
-        60,
+      timeoutSeconds: 60,
 
-      memory:
-        "256MiB",
+      memory: "256MiB",
     },
 
     async (
@@ -2316,7 +2849,6 @@ exports.paddleWebhook =
               "Method not allowed"
             );
 
-
           return;
         }
 
@@ -2328,21 +2860,18 @@ exports.paddleWebhook =
             "Paddle raw body missing."
           );
 
-
           response
             .status(400)
             .send(
               "Raw body missing"
             );
 
-
           return;
         }
 
 
         const rawBody =
-          request
-            .rawBody
+          request.rawBody
             .toString(
               "utf8"
             );
@@ -2374,13 +2903,11 @@ exports.paddleWebhook =
             "Invalid Paddle signature."
           );
 
-
           response
             .status(401)
             .send(
               "Invalid signature"
             );
-
 
           return;
         }
@@ -2388,13 +2915,11 @@ exports.paddleWebhook =
 
         let event;
 
-
         try {
           event =
             JSON.parse(
               rawBody
             );
-
         } catch (
           parseError
         ) {
@@ -2403,13 +2928,11 @@ exports.paddleWebhook =
             parseError
           );
 
-
           response
             .status(400)
             .send(
               "Invalid JSON"
             );
-
 
           return;
         }
@@ -2437,16 +2960,13 @@ exports.paddleWebhook =
           response
             .status(200)
             .json({
-              success:
-                true,
+              success: true,
 
-              ignored:
-                true,
+              ignored: true,
 
               eventType:
                 event.event_type,
             });
-
 
           return;
         }
@@ -2464,16 +2984,13 @@ exports.paddleWebhook =
           response
             .status(200)
             .json({
-              success:
-                true,
+              success: true,
 
-              ignored:
-                true,
+              ignored: true,
 
               reason:
                 "Transaction not completed",
             });
-
 
           return;
         }
@@ -2490,29 +3007,33 @@ exports.paddleWebhook =
             .checkout_type;
 
 
-        if (
-          !checkoutType
-        ) {
+        if (!checkoutType) {
           console.log(
             "Transaction has no TechMinds custom data."
           );
 
-
           response
             .status(200)
             .json({
-              success:
-                true,
+              success: true,
 
-              ignored:
-                true,
+              ignored: true,
 
               reason:
                 "No TechMinds checkout data",
             });
 
-
           return;
+        }
+
+
+        const eventId =
+          event.event_id;
+
+        if (!eventId) {
+          throw new Error(
+            "Missing Paddle event ID."
+          );
         }
 
 
@@ -2522,9 +3043,7 @@ exports.paddleWebhook =
               "paddleWebhookEvents"
             )
             .doc(
-              safeId(
-                event.event_id
-              )
+              safeId(eventId)
             );
 
 
@@ -2538,13 +3057,10 @@ exports.paddleWebhook =
           response
             .status(200)
             .json({
-              success:
-                true,
+              success: true,
 
-              duplicate:
-                true,
+              duplicate: true,
             });
-
 
           return;
         }
@@ -2561,12 +3077,10 @@ exports.paddleWebhook =
             eventRef
           );
 
-
           response
             .status(200)
             .json({
-              success:
-                true,
+              success: true,
 
               type:
                 "program",
@@ -2574,7 +3088,6 @@ exports.paddleWebhook =
               transactionId:
                 transactionData.id,
             });
-
 
           return;
         }
@@ -2591,12 +3104,10 @@ exports.paddleWebhook =
             eventRef
           );
 
-
           response
             .status(200)
             .json({
-              success:
-                true,
+              success: true,
 
               type:
                 "plan",
@@ -2605,7 +3116,6 @@ exports.paddleWebhook =
                 transactionData.id,
             });
 
-
           return;
         }
 
@@ -2613,30 +3123,24 @@ exports.paddleWebhook =
         response
           .status(200)
           .json({
-            success:
-              true,
+            success: true,
 
-            ignored:
-              true,
+            ignored: true,
 
             reason:
               "Unknown checkout type",
           });
 
-      } catch (
-        error
-      ) {
+      } catch (error) {
         console.error(
           "Paddle webhook processing error:",
           error
         );
 
-
         response
           .status(500)
           .json({
-            success:
-              false,
+            success: false,
 
             error:
               "Webhook processing failed",

@@ -4,6 +4,8 @@ import {
 
 import "./LegalPages.css";
 
+import { hebrewText } from "../data/hebrewText";
+
 
 function RefundPolicy() {
   const {
@@ -14,11 +16,14 @@ function RefundPolicy() {
 
   const text = (
     english,
-    arabic
+    arabic,
+    hebrew = hebrewText(english)
   ) =>
     language === "ar"
       ? arabic
-      : english;
+      : language === "he"
+        ? hebrew
+        : english;
 
 
   return (
@@ -32,7 +37,7 @@ function RefundPolicy() {
             href="/"
             className="legal-logo"
           >
-            🚀 TechMinds
+            🚀 TeachLearn
           </a>
 
 
@@ -67,6 +72,14 @@ function RefundPolicy() {
               عربي
             </button>
 
+            <button
+              type="button"
+              className={language === "he" ? "active" : ""}
+              onClick={() => setLanguage("he")}
+            >
+              עברית
+            </button>
+
           </div>
 
         </header>
@@ -79,7 +92,7 @@ function RefundPolicy() {
           </div>
 
           <span>
-            TECHMINDS
+            TEACHLEARN
           </span>
 
           <h1>
@@ -119,8 +132,8 @@ function RefundPolicy() {
 
             <p>
               {text(
-                "We want customers to understand exactly what they are purchasing before subscribing to TechMinds. Plan features, prices and billing periods are displayed before payment.",
-                "نريد أن يعرف العملاء بوضوح ما يقومون بشرائه قبل الاشتراك في TechMinds. يتم عرض ميزات الخطة والسعر وفترة الفوترة قبل الدفع."
+                "We want customers to understand exactly what they are purchasing before subscribing to TeachLearn. Plan features, prices and billing periods are displayed before payment.",
+                "نريد أن يعرف العملاء بوضوح ما يقومون بشرائه قبل الاشتراك في TeachLearn. يتم عرض ميزات الخطة والسعر وفترة الفوترة قبل الدفع."
               )}
             </p>
           </section>
@@ -210,8 +223,8 @@ function RefundPolicy() {
 
             <p>
               {text(
-                "If you experience a technical problem that prevents you from using a paid TechMinds service, please contact support so we can investigate and assist you.",
-                "إذا واجهت مشكلة تقنية تمنعك من استخدام خدمة مدفوعة في TechMinds، يرجى التواصل مع الدعم حتى نتمكن من فحص المشكلة ومساعدتك."
+                "If you experience a technical problem that prevents you from using a paid TeachLearn service, please contact support so we can investigate and assist you.",
+                "إذا واجهت مشكلة تقنية تمنعك من استخدام خدمة مدفوعة في TeachLearn، يرجى التواصل مع الدعم حتى نتمكن من فحص المشكلة ومساعدتك."
               )}
             </p>
           </section>
@@ -297,7 +310,7 @@ function LegalFooter({
     <footer className="legal-footer">
 
       <span>
-        © 2026 TechMinds
+        © 2026 TeachLearn
       </span>
 
       <div>

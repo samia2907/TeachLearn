@@ -1,0 +1,255 @@
+/* Site-wide surfaces, controls, and content layouts. Explicit component lists
+   keep lesson content, status colors, and destructive actions independent. */
+:root {
+  --ui-ink: #292136;
+  --ui-muted: #756a83;
+  --ui-brand: #6840d8;
+  --ui-line: #e2dbea;
+  --ui-surface: #ffffff;
+  --ui-canvas: #f6f5fa;
+  --ui-shadow: 0 8px 30px #29213607;
+}
+
+#root :is(
+  .owner-analytics-page, .owner-customers-page, .owner-lesson-builder-page,
+  .owner-plans-page, .owner-program-lessons-page, .owner-programs-page,
+  .owner-sales-page, .owner-settings-page, .teacher-attendance-page,
+  .teacher-class-details, .teacher-classes-page, .teacher-lessons-page,
+  .teacher-settings-page, .teacher-student-portfolio-page,
+  .teacher-student-progress-page, .teacher-students-page,
+  .student-lessons-page, .student-lesson-details-page, .student-portfolio-page,
+  .join-class-page, .program-marketplace, .program-learning-page,
+  .plans-page, .checkout-page, .legal-page
+) { background: var(--ui-canvas); color: var(--ui-ink); }
+
+#root :is(
+  .owner-analytics-header, .owner-customers-header, .owner-builder-header,
+  .owner-plans-header, .owner-lessons-header, .owner-programs-header,
+  .owner-sales-header, .owner-settings-header, .attendance-header,
+  .class-details-header, .teacher-lessons-header, .teacher-settings-header,
+  .teacher-portfolio-header, .teacher-progress-header, .portfolio-header,
+  .student-lessons-topbar, .marketplace-header, .program-learning-header,
+  .program-player-header, .legal-header
+) {
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: 20px;
+  padding: 22px 24px;
+  box-shadow: var(--ui-shadow);
+  gap: 18px;
+}
+#root :is(
+  .owner-analytics-header, .owner-customers-header, .owner-plans-header,
+  .owner-lessons-header, .owner-programs-header, .owner-sales-header,
+  .owner-settings-header, .attendance-header, .class-details-header,
+  .teacher-lessons-header, .teacher-settings-header, .teacher-portfolio-header,
+  .teacher-progress-header, .portfolio-header, .student-lessons-topbar,
+  .marketplace-header, .program-learning-header, .plans-header, .checkout-header
+) :is(h1, h2) { color: var(--ui-ink); letter-spacing: -.5px; line-height: 1.4; }
+
+#root :is(
+  .owner-analytics-card, .owner-customers-panel, .owner-builder-slides-panel,
+  .owner-plan-card, .owner-lessons-panel, .owner-lesson-card, .owner-program-card,
+  .owner-programs-panel, .owner-sales-panel, .owner-settings-card,
+  .settings-card, .attendance-panel, .attendance-history-panel,
+  .students-panel, .class-card, .library-lesson-card, .teacher-lesson-card,
+  .teacher-portfolio-card, .teacher-answer-card, .teacher-progress-lesson-card,
+  .students-main-panel, .students-stat-card, .student-lesson-card,
+  .portfolio-card, .found-class-card, .marketplace-program-card,
+  .program-section-card, .program-final-project-card,
+  .checkout-card, .checkout-summary, .plan-card, .track-card
+) {
+  border: 1px solid var(--ui-line);
+  border-radius: 20px;
+  background: var(--ui-surface);
+  box-shadow: var(--ui-shadow);
+}
+#root :is(.owner-customers-toolbar, .owner-lessons-toolbar, .owner-programs-toolbar,
+  .owner-sales-toolbar, .owner-plans-toolbar, .students-toolbar, .marketplace-toolbar) {
+  gap: 12px;
+  padding: 16px;
+  background: #f0ecf7;
+  border: 1px solid var(--ui-line);
+  border-radius: 14px;
+  flex-wrap: wrap;
+}
+
+/* Form controls retain native selection and validation behavior. */
+#root :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]), select, textarea) {
+  border: 1px solid #d5cce2;
+  border-radius: 11px;
+  background-color: #fdfcfe;
+  color: #34293f;
+  font: inherit;
+  font-size: 14px;
+  max-width: 100%;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+#root :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]), select) { min-height: 44px; }
+#root textarea { line-height: 1.75; }
+#root :is(input, select, textarea):focus-visible {
+  border-color: var(--ui-brand);
+  outline: 2px solid #6840d8;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px #6840d810;
+}
+#root :is(input, textarea)::placeholder { color: #80738e; opacity: 1; }
+#root :is(input, select, textarea):disabled { background: #f0edf4; color: #786b82; }
+
+#root :is(
+  .create-program-button, .owner-builder-save-button, .owner-add-lesson-button,
+  .owner-build-lesson-button, .program-lessons-button, .new-class-button,
+  .open-class-button, .add-student-button, .add-student-main-button,
+  .attendance-save-button, .settings-primary-button, .settings-plan-button,
+  .save-teacher-feedback-button, .find-class-button, .confirm-join-button,
+  .marketplace-buy-button, .marketplace-open-button, .marketplace-class-button,
+  .paid-plan-button, .secure-payment-button, .complete-full-lesson-button,
+  .add-to-portfolio-button, .check-answer-button
+) {
+  background: var(--ui-brand);
+  color: #fff;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  min-height: 44px;
+  padding: 10px 18px;
+  font-weight: 700;
+  box-shadow: 0 4px 10px #6840d814;
+  transition: background .18s ease, box-shadow .18s ease;
+}
+#root :is(.owner-back-button, .marketplace-back, .program-learning-back,
+  .student-lessons-back, .details-back, .checkout-back, .history-back-button,
+  .owner-builder-preview-button, .owner-edit-lesson-button, .program-edit-button,
+  .marketplace-secondary-button, .view-student-progress-button,
+  .view-student-portfolio-button, .free-plan-button) {
+  background: #f1ecfb;
+  color: #6035b8;
+  border: 1px solid #ded1f1;
+  border-radius: 10px;
+  min-height: 40px;
+  box-shadow: none;
+}
+
+/* Tables remain tables so column semantics and existing scrolling are preserved. */
+#root :is(.owner-customers-table, .owner-sales-table, .students-main-panel,
+  .students-panel, .attendance-panel, .attendance-history-panel) th {
+  background: #f0ecf7;
+  color: #746680;
+  font-size: 12px;
+  font-weight: 700;
+  padding-block: 15px;
+  border-bottom: 1px solid var(--ui-line);
+}
+#root :is(.owner-customers-table, .owner-sales-table, .students-main-panel,
+  .students-panel, .attendance-panel, .attendance-history-panel) td {
+  padding-block: 17px;
+  border-bottom-color: #eee8f4;
+}
+#root :is(.owner-customers-table-wrapper, .owner-sales-table-wrapper, .students-list-wrapper) {
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  border-radius: 14px;
+}
+
+/* Program and plan discovery get a stronger hierarchy than management pages. */
+#root .marketplace-program-card { overflow: hidden; transition: box-shadow .2s ease, border-color .2s ease; }
+#root .marketplace-program-top { padding-bottom: 18px; border-bottom: 1px solid #eee8f4; margin-bottom: 18px; }
+#root .marketplace-program-icon { background: #ede5fc; border-radius: 16px; }
+#root .marketplace-price { color: var(--ui-ink); }
+#root .marketplace-license-box { background: #f8f5fc; border: 1px solid #e2dbea; border-radius: 14px; }
+#root .plans-header { padding-block: 24px; }
+#root .plans-header h1 { font-size: clamp(30px, 4vw, 46px); }
+#root .plans-logo, #root .checkout-logo { background: #ece3fa; box-shadow: none; }
+#root .plan-card { border-top: 4px solid #b6a1d5; }
+#root .plan-card:hover { border-color: #6840d8; box-shadow: 0 14px 35px #29213610; }
+#root .checkout-total { color: var(--ui-ink); background: #f1eafa; border-radius: 12px; padding: 16px; }
+#root .legal-hero { background: #eee8f7; border: 1px solid #dacdec; border-radius: 22px; box-shadow: none; }
+#root .legal-hero h1, #root .legal-logo { color: var(--ui-ink); }
+#root .legal-container { line-height: 1.85; }
+
+@media (hover: hover) {
+  #root :is(.marketplace-program-card, .class-card, .student-lesson-card,
+    .portfolio-card, .teacher-portfolio-card, .owner-program-card):hover {
+    border-color: #b8a1d8;
+    box-shadow: 0 12px 32px #29213610;
+  }
+  #root :is(.owner-customers-table, .owner-sales-table, .students-panel) tbody tr:hover { background: #f8f5fc; }
+  #root :is(.create-program-button, .owner-builder-save-button, .new-class-button,
+    .open-class-button, .attendance-save-button, .settings-primary-button,
+    .marketplace-buy-button, .marketplace-open-button, .paid-plan-button,
+    .secure-payment-button):hover:not(:disabled) { background: #5228b7; }
+}
+@media (max-width: 700px) {
+  #root :is(.owner-analytics-header, .owner-customers-header, .owner-builder-header,
+    .owner-plans-header, .owner-lessons-header, .owner-programs-header,
+    .owner-sales-header, .owner-settings-header, .attendance-header,
+    .class-details-header, .teacher-lessons-header, .teacher-settings-header,
+    .teacher-portfolio-header, .teacher-progress-header, .portfolio-header,
+    .student-lessons-topbar, .marketplace-header, .program-learning-header,
+    .legal-header) { padding: 16px; border-radius: 16px; flex-wrap: wrap; gap: 12px; }
+  #root :is(.owner-customers-toolbar, .owner-lessons-toolbar, .owner-programs-toolbar,
+    .owner-sales-toolbar, .owner-plans-toolbar, .students-toolbar, .marketplace-toolbar) { padding: 12px; }
+  #root :is(.marketplace-program-card, .student-lesson-card, .plan-card, .checkout-card) { border-radius: 16px; }
+  #root .program-player-header { padding: 12px; gap: 8px; }
+}
+
+/* Signature details repeat across the workspace, with calm reading surfaces. */
+#root :is(.teacher-sidebar, .owner-sidebar) {
+  background: linear-gradient(180deg, #f1ecf9, #fff 70%);
+  border-inline-end: 1px solid #e0d5ee;
+}
+#root :is(.teacher-nav-item, .owner-nav-item).active {
+  background: #2c223c;
+  color: #e4ff9f;
+  box-shadow: 0 5px 14px #29213616;
+  border-radius: 12px 12px 4px 12px;
+}
+#root :is(.teacher-logo-icon, .owner-brand-icon) {
+  background: #2c223c;
+  border-radius: 14px 14px 4px 14px;
+  box-shadow: none;
+}
+#root :is(.teacher-logo, .owner-brand) h2 { color: #3c2b54; }
+#root :is(.teacher-stat-card, .owner-stat-card, .student-stat) {
+  border-top: 3px solid #b9a1df;
+  background: linear-gradient(140deg, #fff 65%, #f2eafb);
+}
+#root :is(.teacher-stat-card, .owner-stat-card, .student-stat):nth-child(2) {
+  border-top-color: #b1ca66;
+  background: linear-gradient(140deg, #fff 65%, #f0f5e5);
+}
+#root :is(.teacher-stat-card, .owner-stat-card, .student-stat):nth-child(3) {
+  border-top-color: #92b8ce;
+  background: linear-gradient(140deg, #fff 65%, #eaf4fa);
+}
+#root :is(.owner-analytics-header, .owner-customers-header, .owner-plans-header,
+  .owner-lessons-header, .owner-programs-header, .owner-sales-header,
+  .owner-settings-header, .attendance-header, .class-details-header,
+  .teacher-lessons-header, .teacher-settings-header, .teacher-portfolio-header,
+  .teacher-progress-header, .portfolio-header, .student-lessons-topbar,
+  .marketplace-header, .program-learning-header, .legal-header) {
+  border-inline-start: 4px solid #a68acb;
+  border-start-end-radius: 34px;
+  background: radial-gradient(ellipse at 100% 0, #eee5fa80, transparent 65%), #fff;
+}
+#root .marketplace-program-top {
+  background: linear-gradient(120deg, #efe8fa, #f9f6fd);
+  border-radius: 13px;
+  padding: 16px;
+}
+#root .marketplace-program-card:nth-child(3n + 2) .marketplace-program-top {
+  background: #edf3dd;
+}
+#root .marketplace-program-card:nth-child(3n) .marketplace-program-top {
+  background: #e6eff7;
+}
+#root .plan-card { border-radius: 24px 24px 8px 24px; }
+#root .checkout-total { border-inline-start: 3px solid #a9c454; }
+#root .student-hero {
+  background: radial-gradient(ellipse at 85% 20%, #61498980, transparent 65%), #292136;
+  border-end-end-radius: 52px;
+}
+#root .student-hero h1 { color: #e2ff98; }
+#root .legal-hero {
+  background: linear-gradient(115deg, #eee8f7 55%, #e8efd9);
+  border-end-end-radius: 48px;
+}

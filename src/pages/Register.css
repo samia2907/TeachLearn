@@ -290,6 +290,27 @@
   line-height: 1.5;
 }
 
+.phone-register-box {
+  display: block;
+}
+
+.phone-register-box label {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.phone-register-back {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+[dir="rtl"] .phone-register-back,
+html[dir="rtl"] .phone-register-back {
+  text-align: right;
+}
+
 .create-account-button {
   width: 100%;
   min-height: 49px;

@@ -4,13 +4,21 @@ import {
 } from "react";
 
 import {
+  collection,
   doc,
   getDoc,
+  getDocs,
+  query,
+  where,
 } from "firebase/firestore";
 
 import {
   signOut,
 } from "firebase/auth";
+
+import {
+  httpsCallable,
+} from "firebase/functions";
 
 import {
   useNavigate,
@@ -19,6 +27,7 @@ import {
 import {
   auth,
   db,
+  functions,
 } from "../firebase/firebase";
 
 import {
@@ -34,9 +43,43 @@ function StudentDashboard() {
 
   const {
     language,
-    setLanguage,
+    changeLanguage,
   } = useLanguage();
 
+
+  /* =========================
+     TRANSLATION
+  ========================= */
+
+  const text = (
+    en,
+    ar,
+    he
+  ) => {
+    if (
+      language === "ar"
+    ) {
+      return ar;
+    }
+
+    if (
+      language === "he"
+    ) {
+      return he;
+    }
+
+    return en;
+  };
+
+
+  const isRTL =
+    language === "ar" ||
+    language === "he";
+
+
+  /* =========================
+     STUDENT
+  ========================= */
 
   const [
     student,
@@ -48,57 +91,27 @@ function StudentDashboard() {
     setLoading,
   ] = useState(true);
 
+  const [
+    classes,
+    setClasses,
+  ] = useState([]);
 
-  const text = (
-    en,
-    ar
-  ) =>
-    language === "ar"
-      ? ar
-      : en;
+  const [
+    missions,
+    setMissions,
+  ] = useState([]);
 
 
   /* =========================
-     PROGRAM NAMES
+     BADGE CATALOG
   ========================= */
 
-  const programs = {
-    firstGradeCompanion: {
-      icon: "🎒",
-      en: "First Grade Companion",
-      ar: "رفيق الصف الأول",
-    },
-
-    techExplorer: {
-      icon: "🚀",
-      en: "Tech Explorer",
-      ar: "مستكشف التكنولوجيا",
-    },
-
-    giftedChallenge: {
-      icon: "🧠",
-      en: "Gifted Challenge",
-      ar: "تحديات الموهوبين",
-    },
-
-    aiExplorer: {
-      icon: "🤖",
-      en: "AI Explorer",
-      ar: "مستكشف الذكاء الاصطناعي",
-    },
-
-    codeCreator: {
-      icon: "💻",
-      en: "Code Creator",
-      ar: "صانع البرمجيات",
-    },
-
-    digitalCreator: {
-      icon: "🎨",
-      en: "Digital Creator",
-      ar: "المبدع الرقمي",
-    },
-  };
+  const badgeCatalog = [
+    { id: "digitalExplorer", icon: "🚀", en: "Digital Explorer", ar: "مستكشف رقمي", he: "חוקר דיגיטלי" },
+    { id: "bugHunter", icon: "🐞", en: "Bug Hunter", ar: "صياد الأخطاء", he: "צייד באגים" },
+    { id: "patternHunter", icon: "🧩", en: "Pattern Hunter", ar: "صياد الأنماط", he: "צייד תבניות" },
+    { id: "algorithmExplorer", icon: "🧠", en: "Algorithm Explorer", ar: "مستكشف الخوارزميات", he: "חוקר אלגוריתמים" },
+  ];
 
 
   /* =========================
@@ -151,7 +164,26 @@ function StudentDashboard() {
             "student"
           ) {
             navigate(
-              "/teacher"
+              data.role ===
+                "teacher"
+                ? "/teacher"
+                : "/login"
+            );
+
+            return;
+          }
+
+
+          if (
+            data.accountStatus ===
+            "blocked"
+          ) {
+            await signOut(
+              auth
+            );
+
+            navigate(
+              "/login"
             );
 
             return;
@@ -162,14 +194,99 @@ function StudentDashboard() {
             data
           );
 
-        } catch (error) {
+          const membershipSnapshot = await getDocs(
+            query(
+              collection(db, "classMembers"),
+              where("studentId", "==", user.uid),
+              where("status", "==", "active")
+            )
+          );
+
+          const classSnapshots = await Promise.all(
+            membershipSnapshot.docs.map((membership) =>
+              getDoc(doc(db, "classes", membership.data().classId))
+            )
+          );
+
+          setClasses(
+            classSnapshots
+              .filter((classSnapshot) => classSnapshot.exists())
+              .map((classSnapshot) => ({
+                id: classSnapshot.id,
+                ...classSnapshot.data(),
+              }))
+          );
+
+          /* =========================
+             MISSION PATH
+          ========================= */
+
+          if (data.classId) {
+            const missionLessonsSnapshot = await getDocs(
+              query(
+                collection(db, "lessons"),
+                where("classId", "==", data.classId),
+                where("status", "==", "published"),
+                where("activityType", "==", "mission")
+              )
+            );
+
+            const missionLessons = missionLessonsSnapshot.docs
+              .map((lessonSnapshot) => ({ id: lessonSnapshot.id, ...lessonSnapshot.data() }))
+              .sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+
+            const missionStates = await Promise.all(
+              missionLessons.map(async (lesson) => {
+                const [completionSnapshot, progressSnapshot] = await Promise.all([
+                  getDoc(doc(db, "lessonCompletions", `${user.uid}_${lesson.id}`)),
+                  getDoc(doc(db, "lessonProgress", `${user.uid}_${lesson.id}`)),
+                ]);
+
+                const progressDoc = progressSnapshot.exists() ? progressSnapshot.data() : null;
+                const totalScreens = Array.isArray(lesson.sections) ? lesson.sections.length : 0;
+                const passedScreens = progressDoc?.mission?.screens
+                  ? Object.values(progressDoc.mission.screens).filter((screen) => screen?.passed).length
+                  : 0;
+
+                return {
+                  id: lesson.id,
+                  title: lesson.titleI18n || lesson.title || {},
+                  summary: lesson.summaryI18n || lesson.summary || {},
+                  xpReward: Number(lesson.xpReward || 0),
+                  completed: completionSnapshot.exists(),
+                  started: Boolean(progressDoc),
+                  percent: totalScreens > 0 ? Math.round((passedScreens / totalScreens) * 100) : 0,
+                  updatedAt: progressDoc?.updatedAt?.seconds || 0,
+                };
+              })
+            );
+
+            let previousCompleted = true;
+            const missionsWithState = missionStates.map((mission) => {
+              const status = mission.completed
+                ? "completed"
+                : previousCompleted
+                  ? (mission.started ? "active" : "unlocked")
+                  : "locked";
+              previousCompleted = mission.completed;
+              return { ...mission, status };
+            });
+
+            setMissions(missionsWithState);
+          }
+
+        } catch (
+          error
+        ) {
           console.error(
             "Student dashboard error:",
             error
           );
 
         } finally {
-          setLoading(false);
+          setLoading(
+            false
+          );
         }
       };
 
@@ -185,17 +302,49 @@ function StudentDashboard() {
 
   const handleLogout =
     async () => {
-      await signOut(auth);
+      try {
+        await signOut(
+          auth
+        );
 
-      navigate(
-        "/login"
-      );
+        navigate(
+          "/login"
+        );
+
+      } catch (
+        error
+      ) {
+        console.error(
+          "Student logout error:",
+          error
+        );
+      }
+    };
+
+    const handleLeaveClass = async (classId) => {
+      try {
+        await httpsCallable(functions, "leaveClass")({ classId });
+        setClasses((currentClasses) => currentClasses.filter((classData) => classData.id !== classId));
+      } catch (error) {
+        console.error("Leave class error:", error);
+      }
     };
 
 
+  /* =========================
+     LOADING
+  ========================= */
+
   if (loading) {
     return (
-      <div className="student-loading">
+      <div
+        className="student-loading"
+        dir={
+          isRTL
+            ? "rtl"
+            : "ltr"
+        }
+      >
 
         <div>
           🚀
@@ -204,7 +353,10 @@ function StudentDashboard() {
         <p>
           {text(
             "Loading your learning world...",
-            "جارٍ تحميل عالمك التعليمي..."
+
+            "جارٍ تحميل عالمك التعليمي...",
+
+            "טוען את עולם הלמידה שלך..."
           )}
         </p>
 
@@ -218,34 +370,70 @@ function StudentDashboard() {
   }
 
 
-  const program =
-    programs[
-      student.learningTrack ||
-      student.selectedTrack
-    ];
-
+  /* =========================
+     XP + LEVEL
+     Level is derived from xp directly (the stored `level` field is
+     never incremented server-side), so the UI stays correct as xp grows.
+  ========================= */
 
   const xp =
-    student.xp || 0;
+    Number(
+      student.xp ||
+      0
+    );
 
   const level =
-    student.level || 1;
+    Math.floor(xp / 500) + 1;
+
+  const xpIntoLevel =
+    xp % 500;
 
   const xpNeeded =
-    level * 500;
+    500;
+
 
   const progress =
     Math.min(
       100,
+
       Math.round(
-        (xp / xpNeeded) *
+        (xpIntoLevel / xpNeeded) *
           100
       )
     );
 
 
+  /* =========================
+     MISSION / CONTINUE LEARNING
+  ========================= */
+
+  const currentMission =
+    missions.find((mission) => mission.status === "active") ||
+    missions.find((mission) => mission.status === "unlocked");
+
+  const allMissionsCompleted =
+    missions.length > 0 && missions.every((mission) => mission.completed);
+
+  const localized = (value) => {
+    if (!value) return "";
+    if (typeof value === "string") return value;
+    return value[language] || value.en || value.ar || "";
+  };
+
+
+  /* =========================
+     PAGE
+  ========================= */
+
   return (
-    <div className="student-dashboard">
+    <div
+      className="student-dashboard"
+      dir={
+        isRTL
+          ? "rtl"
+          : "ltr"
+      }
+    >
 
       {/* =====================
           TOPBAR
@@ -253,29 +441,41 @@ function StudentDashboard() {
 
       <header className="student-topbar">
 
+        {/* BRAND */}
+
         <div className="student-brand">
+
           <div>
             🚀
           </div>
 
           <h2>
-            TechMinds
+            TeachLearn
           </h2>
+
         </div>
 
 
+        {/* ACTIONS */}
+
         <div className="student-top-actions">
+
+          {/* LANGUAGE */}
 
           <div className="student-language">
 
             <button
+              type="button"
+
               className={
-                language === "en"
+                language ===
+                "en"
                   ? "active"
                   : ""
               }
+
               onClick={() =>
-                setLanguage(
+                changeLanguage(
                   "en"
                 )
               }
@@ -283,14 +483,19 @@ function StudentDashboard() {
               EN
             </button>
 
+
             <button
+              type="button"
+
               className={
-                language === "ar"
+                language ===
+                "ar"
                   ? "active"
                   : ""
               }
+
               onClick={() =>
-                setLanguage(
+                changeLanguage(
                   "ar"
                 )
               }
@@ -298,19 +503,46 @@ function StudentDashboard() {
               عربي
             </button>
 
+
+            <button
+              type="button"
+
+              className={
+                language ===
+                "he"
+                  ? "active"
+                  : ""
+              }
+
+              onClick={() =>
+                changeLanguage(
+                  "he"
+                )
+              }
+            >
+              עברית
+            </button>
+
           </div>
 
 
+          {/* LOGOUT */}
+
           <button
+            type="button"
             className="student-logout"
             onClick={
               handleLogout
             }
           >
             🚪{" "}
+
             {text(
               "Logout",
-              "خروج"
+
+              "تسجيل الخروج",
+
+              "התנתקות"
             )}
           </button>
 
@@ -325,31 +557,40 @@ function StudentDashboard() {
 
       <section className="student-hero">
 
-        <div>
+        <div className="student-hero-text">
 
           <span className="student-hello">
             👋{" "}
-            {text(
-              "Welcome back",
-              "أهلًا بعودتك"
-            )}
+            {text("Welcome back", "أهلًا بعودتك", "ברוכים השבים")}
           </span>
 
-
           <h1>
-            {student.name}! 🌟
+            {text("Hi", "أهلًا", "שלום")}{" "}
+            {student.name || text("Student", "طالب", "תלמיד")} 👋
           </h1>
-
 
           <p>
             {text(
-              "What amazing thing will you discover today?",
-              "شو الشيء المميز اللي رح تكتشفه اليوم؟"
+              "Every mission you finish makes you a stronger thinker.",
+              "كل مهمة تنهيها تجعلك مفكرًا أقوى.",
+              "כל משימה שתשלימו הופכת אתכם לחושבים חזקים יותר."
             )}
           </p>
 
-        </div>
+          <div className="hero-meta-row">
+            <span className="hero-chip">⭐ {text("Level", "المستوى", "רמה")} {level}</span>
+            <span className="hero-chip">⚡ {xp} XP</span>
+          </div>
 
+          <div className="student-progress-bar hero-progress-bar">
+            <div style={{ width: `${progress}%` }} />
+          </div>
+
+          <small className="hero-progress-label">
+            {xpIntoLevel} / {xpNeeded} XP {text("to level", "لبلوغ المستوى", "לרמה")} {level + 1}
+          </small>
+
+        </div>
 
         <div className="student-avatar-large">
           🧑‍🚀
@@ -359,383 +600,272 @@ function StudentDashboard() {
 
 
       {/* =====================
-          STATS
+          MISSION CTA
       ====================== */}
 
-      <section className="student-stats">
+      <section className="mission-cta-card">
 
-        <div className="student-stat purple">
+        {currentMission ? (
+          <>
+            <div className="mission-cta-badge">
+              🚀 {text("YOUR CURRENT MISSION", "مهمتك الحالية", "המשימה הנוכחית שלך")}
+            </div>
 
-          <div>
-            ⭐
-          </div>
+            <h2>{localized(currentMission.title)}</h2>
 
-          <span>
-            XP
-          </span>
+            {localized(currentMission.summary) && (
+              <p className="mission-cta-teaser">{localized(currentMission.summary)}</p>
+            )}
 
-          <strong>
-            {xp}
-          </strong>
+            <div className="mission-cta-progress">
+              <div className="student-progress-bar">
+                <div style={{ width: `${currentMission.percent}%` }} />
+              </div>
+              <strong>{currentMission.percent}%</strong>
+            </div>
 
+            <button
+              type="button"
+              className="mission-cta-button"
+              onClick={() => navigate(`/student/lessons/${currentMission.id}`)}
+            >
+              {text("Continue Mission 🚀", "تابع المهمة 🚀", "המשך במשימה 🚀")}
+            </button>
+          </>
+        ) : allMissionsCompleted ? (
+          <>
+            <div className="mission-cta-badge">🏆 {text("ALL MISSIONS COMPLETE", "أكملت جميع المهمات", "כל המשימות הושלמו")}</div>
+            <h2>{text("You finished every mission!", "أنجزت كل المهمات!", "השלמתם את כל המשימות!")}</h2>
+            <button type="button" className="mission-cta-button" onClick={() => navigate("/student/lessons")}>
+              {text("Explore More Lessons 📚", "استكشف دروسًا أخرى 📚", "גלו עוד שיעורים 📚")}
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="mission-cta-badge">🚀 {text("YOUR FIRST MISSION", "مهمتك الأولى", "המשימה הראשונה שלך")}</div>
+            <h2>{text("Start your first mission", "ابدأ مهمتك الأولى", "התחילו את המשימה הראשונה שלכם")}</h2>
+            <p className="mission-cta-teaser">
+              {text(
+                "Missions appear here as soon as your teacher publishes them.",
+                "تظهر المهمات هنا فور نشرها من معلمك.",
+                "המשימות יופיעו כאן ברגע שהמורה שלכם יפרסם אותן."
+              )}
+            </p>
+            <button type="button" className="mission-cta-button" onClick={() => navigate("/student/lessons")}>
+              {text("Open Lessons 📚", "فتح الدروس 📚", "פתיחת שיעורים 📚")}
+            </button>
+          </>
+        )}
+
+      </section>
+
+
+      {/* =====================
+          QUICK PROGRESS CARDS
+      ====================== */}
+
+      <section className="quick-cards">
+
+        <div className="quick-card purple">
+          <span>⭐</span>
+          <small>{text("Level", "المستوى", "רמה")}</small>
+          <strong>{level}</strong>
         </div>
 
-
-        <div className="student-stat blue">
-
-          <div>
-            🚀
-          </div>
-
-          <span>
-            {text(
-              "Level",
-              "المستوى"
-            )}
-          </span>
-
-          <strong>
-            {level}
-          </strong>
-
+        <div className="quick-card blue">
+          <span>⚡</span>
+          <small>XP</small>
+          <strong>{xp}</strong>
         </div>
 
-
-        <div className="student-stat yellow">
-
-          <div>
-            🏆
-          </div>
-
-          <span>
-            {text(
-              "Badges",
-              "الشارات"
-            )}
-          </span>
-
-          <strong>
-            {student.badges?.length || 0}
-          </strong>
-
-        </div>
-
-
-        <div className="student-stat green">
-
-          <div>
-            🎨
-          </div>
-
-          <span>
-            {text(
-              "Projects",
-              "المشاريع"
-            )}
-          </span>
-
-          <strong>
-            0
-          </strong>
-
+        <div className="quick-card green">
+          <span>🧠</span>
+          <small>{text("Missions", "المهمات المنجزة", "משימות")}</small>
+          <strong>{missions.filter((mission) => mission.completed).length}/{missions.length || "—"}</strong>
         </div>
 
       </section>
 
 
       {/* =====================
-          MAIN
+          MAIN GRID
       ====================== */}
 
       <section className="student-main-grid">
 
-        {/* JOURNEY */}
+        <div className="student-main-col">
 
-        <div className="student-panel journey-panel">
+          {/* MISSION PATH */}
 
-          <div className="panel-title">
+          <div className="student-panel mission-path-panel">
 
-            <div>
-              {program?.icon ||
-                "🚀"}
-            </div>
+            <h3>🗺️ {text("Mission Path", "مسار المهمات", "מסלול המשימות")}</h3>
 
-            <div>
-              <span>
+            {missions.length === 0 ? (
+              <p className="mission-path-empty">
                 {text(
-                  "My Learning Journey",
-                  "رحلتي التعليمية"
-                )}
-              </span>
-
-              <h2>
-                {program
-                  ? text(
-                      program.en,
-                      program.ar
-                    )
-                  : text(
-                      "TechMinds Explorer",
-                      "مستكشف TechMinds"
-                    )}
-              </h2>
-            </div>
-
-          </div>
-
-
-          <div className="student-progress-text">
-
-            <span>
-              {text(
-                "Level progress",
-                "تقدم المستوى"
-              )}
-            </span>
-
-            <strong>
-              {progress}%
-            </strong>
-
-          </div>
-
-
-          <div className="student-progress-bar">
-
-            <div
-              style={{
-                width:
-                  `${progress}%`,
-              }}
-            />
-
-          </div>
-
-
-          <small>
-            {xp} / {xpNeeded} XP
-          </small>
-
-
-          <button>
-            {text(
-              "Continue Learning 🚀",
-              "تابع التعلّم 🚀"
-            )}
-          </button>
-
-        </div>
-
-
-        {/* TODAY CHALLENGE */}
-
-        <div className="student-panel challenge-panel">
-
-          <div className="challenge-badge">
-            🔥{" "}
-            {text(
-              "TODAY'S CHALLENGE",
-              "تحدي اليوم"
-            )}
-          </div>
-
-
-          <div className="challenge-big-icon">
-            🧩
-          </div>
-
-
-          <h2>
-            {text(
-              "Your next challenge is waiting!",
-              "تحديك القادم بانتظارك!"
-            )}
-          </h2>
-
-
-          <p>
-            {text(
-              "Complete challenges to earn XP and unlock new badges.",
-              "أنجز التحديات لتحصل على XP وتفتح شارات جديدة."
-            )}
-          </p>
-
-<button
-  type="button"
-  onClick={() =>
-    navigate(
-      "/student/lessons"
-    )
-  }
->
-  📚{" "}
-  {text(
-    "My Lessons",
-    "دروسي"
-  )}
-</button>
-<button
-  type="button"
-  onClick={() =>
-    navigate(
-      "/student/portfolio"
-    )
-  }
->
-  📁{" "}
-  {text(
-    "My Portfolio",
-    "معرض أعمالي"
-  )}
-</button>
-<button
-  type="button"
-  onClick={() =>
-    navigate(
-      "/student/lessons"
-    )
-  }
->
-  {text(
-    "Continue Learning 🚀",
-    "تابع التعلّم 🚀"
-  )}
-</button>
-          <button>
-            {text(
-              "Start Challenge",
-              "ابدأ التحدي"
-              
-            )}
-
-            {" "}🚀
-          </button>
-
-        </div>
-
-
-        {/* CLASS */}
-
-        <div className="student-panel class-panel">
-
-          <span>
-            🏫{" "}
-            {text(
-              "My Class",
-              "صفي"
-            )}
-          </span>
-
-
-          {student.classCode ? (
-            <>
-
-              <h2>
-                {student.classCode}
-              </h2>
-
-              <p>
-                {text(
-                  "You are connected to your teacher's class.",
-                  "أنت مرتبط بصف المعلّم."
+                  "No missions have been published in your class yet.",
+                  "لم تُنشر أي مهمات في صفك بعد.",
+                  "טרם פורסמו משימות בכיתה שלכם."
                 )}
               </p>
-
-              <div className="connected-badge">
-                ✓{" "}
-                {text(
-                  "Connected",
-                  "متصل"
-                )}
+            ) : (
+              <div className="mission-path">
+                {missions.map((mission, index) => (
+                  <div key={mission.id} className="mission-path-item">
+                    <div className={`mission-path-step ${mission.status}`}>
+                      <span className="mission-path-icon">
+                        {mission.status === "completed" && "✅"}
+                        {mission.status === "active" && "🚀"}
+                        {mission.status === "unlocked" && "🔓"}
+                        {mission.status === "locked" && "🔒"}
+                      </span>
+                      <span className="mission-path-label">
+                        <strong>{text(`Mission ${String(index + 1).padStart(2, "0")}`, `المهمة ${index + 1}`, `משימה ${index + 1}`)}</strong>
+                        <em>{localized(mission.title)}</em>
+                      </span>
+                    </div>
+                    {index < missions.length - 1 && <div className="mission-path-connector" />}
+                  </div>
+                ))}
               </div>
+            )}
 
-            </>
-          ) : (
-           <>
-  <h2>
-    {text(
-      "No class yet",
-      "لست في صف بعد"
-    )}
-  </h2>
+          </div>
 
-  <p>
-    {text(
-      "Join your teacher's class using a class code.",
-      "انضم إلى صف المعلّم باستخدام رمز الصف."
-    )}
-  </p>
 
-  <button
-    className="join-class-dashboard-button"
-    onClick={() =>
-      navigate("/student/join-class")
-    }
-  >
-    🏫{" "}
-    {text(
-      "Join a Class",
-      "الانضمام إلى صف"
-    )}
-  </button>
-</>
-          )}
+          {/* CONTINUE LEARNING */}
+
+          <div className="student-panel continue-learning-panel">
+
+            <div className="continue-learning-badge">
+              🔥 {text("CONTINUE WHERE YOU LEFT OFF", "استمر من حيث توقفت", "המשיכו מהמקום שבו הפסקתם")}
+            </div>
+
+            {currentMission ? (
+              <>
+                <div className="continue-learning-icon">🚀</div>
+                <h2>{localized(currentMission.title)}</h2>
+                <p>{currentMission.percent}% {text("complete", "مكتمل", "הושלם")}</p>
+                <button
+                  type="button"
+                  className="continue-learning-button"
+                  onClick={() => navigate(`/student/lessons/${currentMission.id}`)}
+                >
+                  {text("Resume 🚀", "استئناف 🚀", "המשך 🚀")}
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="continue-learning-icon">📚</div>
+                <h2>{text("Ready for something new?", "جاهز لشيء جديد؟", "מוכנים למשהו חדש?")}</h2>
+                <p>
+                  {text(
+                    "Browse your lessons to keep learning.",
+                    "تصفح دروسك لمواصلة التعلم.",
+                    "עיינו בשיעורים שלכם כדי להמשיך ללמוד."
+                  )}
+                </p>
+                <button type="button" className="continue-learning-button" onClick={() => navigate("/student/lessons")}>
+                  {text("Open Lessons 📚", "فتح الدروس 📚", "פתיחת שיעורים 📚")}
+                </button>
+              </>
+            )}
+
+            <div className="secondary-links">
+              <button type="button" onClick={() => navigate("/student/lessons")}>
+                📚 {text("Lessons", "الدروس", "שיעורים")}
+              </button>
+              <button type="button" onClick={() => navigate("/student/portfolio")}>
+                📁 {text("My Work", "أعمالي", "העבודות שלי")}
+              </button>
+              <button type="button" onClick={() => navigate(classes.length > 0 ? "/student/lessons" : "/student/join-class")}>
+                🏫 {text("My Class", "صفي", "הכיתה שלי")}
+              </button>
+            </div>
+
+          </div>
 
         </div>
 
 
-        {/* BADGES */}
+        <div className="student-main-col">
 
-        <div className="student-panel badges-panel">
+          {/* BADGES */}
 
-          <h3>
-            🏆{" "}
-            {text(
-              "My Badges",
-              "شاراتي"
+          <div className="student-panel badges-panel">
+
+            <h3>🏆 {text("Badges", "الشارات", "תגים")}</h3>
+
+            <div className="badge-cards">
+              {badgeCatalog.map((badge) => {
+                const unlocked = Array.isArray(student.badges) && student.badges.includes(badge.id);
+                return (
+                  <div key={badge.id} className={`badge-card ${unlocked ? "unlocked" : "locked"}`}>
+                    <span className="badge-card-icon">{badge.icon}</span>
+                    <small>{text(badge.en, badge.ar, badge.he)}</small>
+                    {!unlocked && <span className="badge-card-lock">🔒</span>}
+                  </div>
+                );
+              })}
+            </div>
+
+          </div>
+
+
+          {/* CLASS */}
+
+          <div className="student-panel class-panel compact">
+
+            <span>
+              🏫{" "}
+              {text("My Class", "صفي", "הכיתה שלי")}
+            </span>
+
+            {classes.length > 0 || student.classCode ? (
+              <>
+                <h2>
+                  {text(
+                    `${classes.length || 1} active class${classes.length === 1 ? "" : "es"}`,
+                    `${classes.length || 1} صفوف نشطة`,
+                    `${classes.length || 1} כיתות פעילות`
+                  )}
+                </h2>
+
+                <div className="student-class-list">
+                  {classes.map((classData) => (
+                    <div key={classData.id} className="student-class-list-item">
+                      <strong>{classData.name}</strong>
+                      <span>{classData.teacherName || text("Teacher", "المعلّم", "מורה")}</span>
+                      <button type="button" onClick={() => handleLeaveClass(classData.id)}>
+                        {text("Leave", "مغادرة", "עזיבה")}
+                      </button>
+                    </div>
+                  ))}
+                  {classes.length === 0 && <span>{student.className || student.classCode}</span>}
+                </div>
+              </>
+            ) : (
+              <>
+                <h2>{text("No class yet", "لست في صف بعد", "עדיין אינכם בכיתה")}</h2>
+
+                <p>
+                  {text(
+                    "Join your teacher's class using a class code.",
+                    "انضم إلى صف المعلّم باستخدام رمز الصف.",
+                    "הצטרפו לכיתה של המורה באמצעות קוד כיתה."
+                  )}
+                </p>
+
+                <button
+                  type="button"
+                  className="join-class-dashboard-button"
+                  onClick={() => navigate("/student/join-class")}
+                >
+                  🏫 {text("Join a Class", "الانضمام إلى صف", "הצטרפות לכיתה")}
+                </button>
+              </>
             )}
-          </h3>
-
-
-          <div className="badge-list">
-
-            <div>
-              <span>🚀</span>
-
-              <small>
-                {text(
-                  "Explorer",
-                  "مستكشف"
-                )}
-              </small>
-            </div>
-
-
-            <div className="locked">
-              <span>🤖</span>
-
-              <small>
-                AI
-              </small>
-            </div>
-
-
-            <div className="locked">
-              <span>💻</span>
-
-              <small>
-                Code
-              </small>
-            </div>
-
-
-            <div className="locked">
-              <span>🔐</span>
-
-              <small>
-                Cyber
-              </small>
-            </div>
 
           </div>
 

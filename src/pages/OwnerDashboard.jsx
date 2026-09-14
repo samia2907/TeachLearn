@@ -32,6 +32,8 @@ import {
 
 import "./OwnerDashboard.css";
 
+import { hebrewText } from "../data/hebrewText";
+
 
 function OwnerDashboard() {
   const navigate =
@@ -39,7 +41,7 @@ function OwnerDashboard() {
 
   const {
     language,
-    setLanguage,
+    changeLanguage,
   } = useLanguage();
 
 
@@ -84,11 +86,28 @@ function OwnerDashboard() {
 
   const text = (
     english,
-    arabic
-  ) =>
-    language === "ar"
-      ? arabic
-      : english;
+    arabic,
+    hebrew = hebrewText(english)
+  ) => {
+    if (
+      language === "ar"
+    ) {
+      return arabic;
+    }
+
+    if (
+      language === "he"
+    ) {
+      return hebrew;
+    }
+
+    return english;
+  };
+
+
+  const isRTL =
+    language === "ar" ||
+    language === "he";
 
 
   const localized =
@@ -108,6 +127,7 @@ function OwnerDashboard() {
         value[language] ||
         value.en ||
         value.ar ||
+        value.he ||
         ""
       );
     };
@@ -180,6 +200,22 @@ function OwnerDashboard() {
           }
 
 
+          if (
+            data.accountStatus ===
+            "blocked"
+          ) {
+            await signOut(
+              auth
+            );
+
+            navigate(
+              "/login"
+            );
+
+            return;
+          }
+
+
           setOwner({
             uid:
               user.uid,
@@ -199,7 +235,10 @@ function OwnerDashboard() {
           setError(
             text(
               "Could not load Owner Dashboard.",
-              "تعذر تحميل لوحة الإدارة."
+
+              "تعذر تحميل لوحة الإدارة.",
+
+              "לא ניתן לטעון את לוח הניהול."
             )
           );
 
@@ -381,15 +420,6 @@ function OwnerDashboard() {
   ===================================================== */
 
   useEffect(() => {
-    const user =
-      auth.currentUser;
-
-
-    if (!user) {
-      return undefined;
-    }
-
-
     const unsubscribe =
       onSnapshot(
         collection(
@@ -554,20 +584,27 @@ function OwnerDashboard() {
 
   if (loading) {
     return (
-      <div className="owner-loading">
-
+      <div
+        className="owner-loading"
+        dir={
+          isRTL
+            ? "rtl"
+            : "ltr"
+        }
+      >
         <div>
           👑
         </div>
 
-
         <p>
           {text(
             "Loading Owner Dashboard...",
-            "جارٍ تحميل لوحة الإدارة..."
+
+            "جارٍ تحميل لوحة الإدارة...",
+
+            "טוען את לוח הניהול..."
           )}
         </p>
-
       </div>
     );
   }
@@ -575,16 +612,24 @@ function OwnerDashboard() {
 
   if (!owner) {
     return (
-      <div className="owner-loading">
-
+      <div
+        className="owner-loading"
+        dir={
+          isRTL
+            ? "rtl"
+            : "ltr"
+        }
+      >
         <p>
           {error ||
             text(
               "Owner account was not found.",
-              "لم يتم العثور على حساب المالك."
+
+              "لم يتم العثور على حساب المالك.",
+
+              "חשבון הבעלים לא נמצא."
             )}
         </p>
-
       </div>
     );
   }
@@ -595,7 +640,14 @@ function OwnerDashboard() {
   ===================================================== */
 
   return (
-    <div className="owner-dashboard">
+    <div
+      className="owner-dashboard"
+      dir={
+        isRTL
+          ? "rtl"
+          : "ltr"
+      }
+    >
 
       {/* =================================================
           SIDEBAR
@@ -603,25 +655,29 @@ function OwnerDashboard() {
 
       <aside className="owner-sidebar">
 
+        {/* BRAND */}
+
         <div className="owner-brand">
 
           <div className="owner-brand-icon">
             🚀
           </div>
 
-
           <div>
 
             <h2>
-              TechMinds
+              TeachLearn
             </h2>
-
 
             <span>
               👑{" "}
+
               {text(
                 "Owner",
-                "المالك"
+
+                "المالك",
+
+                "בעלים"
               )}
             </span>
 
@@ -633,6 +689,8 @@ function OwnerDashboard() {
         {/* NAVIGATION */}
 
         <nav className="owner-navigation">
+
+          {/* OVERVIEW */}
 
           <button
             type="button"
@@ -649,10 +707,15 @@ function OwnerDashboard() {
 
             {text(
               "Overview",
-              "الرئيسية"
+
+              "الرئيسية",
+
+              "ראשי"
             )}
           </button>
 
+
+          {/* PROGRAMS */}
 
           <button
             type="button"
@@ -669,16 +732,19 @@ function OwnerDashboard() {
 
             {text(
               "Programs",
-              "البرامج"
-            )}
 
+              "البرامج",
+
+              "תוכניות"
+            )}
 
             <b className="owner-nav-count">
               {statistics.programs}
             </b>
-
           </button>
 
+
+          {/* MARKETPLACE */}
 
           <button
             type="button"
@@ -695,59 +761,76 @@ function OwnerDashboard() {
 
             {text(
               "Marketplace",
-              "المتجر"
+
+              "المتجر",
+
+              "חנות התוכניות"
             )}
           </button>
 
 
-         <button
-  type="button"
-  className="owner-nav-item"
-  onClick={() =>
-    navigate(
-      "/owner/customers"
-    )
-  }
->
-  <span>
-    👥
-  </span>
+          {/* CUSTOMERS */}
 
-  {text(
-    "Customers",
-    "العملاء"
-  )}
-
-  <b className="owner-nav-count">
-    {statistics.users}
-  </b>
-</button>
-
-
-          <button
-  type="button"
-  className="owner-nav-item"
-  onClick={() =>
-    navigate(
-      "/owner/sales"
-    )
-  }
->
-  <span>
-    💳
-  </span>
-
-  {text(
-    "Sales",
-    "المبيعات"
-  )}
-</button>
           <button
             type="button"
             className="owner-nav-item"
             onClick={() =>
               navigate(
-                "/plans"
+                "/owner/customers"
+              )
+            }
+          >
+            <span>
+              👥
+            </span>
+
+            {text(
+              "Customers",
+
+              "العملاء",
+
+              "לקוחות"
+            )}
+
+            <b className="owner-nav-count">
+              {statistics.users}
+            </b>
+          </button>
+
+
+          {/* SALES */}
+
+          <button
+            type="button"
+            className="owner-nav-item"
+            onClick={() =>
+              navigate(
+                "/owner/sales"
+              )
+            }
+          >
+            <span>
+              💳
+            </span>
+
+            {text(
+              "Sales",
+
+              "المبيعات",
+
+              "מכירות"
+            )}
+          </button>
+
+
+          {/* MANAGE PLANS */}
+
+          <button
+            type="button"
+            className="owner-nav-item"
+            onClick={() =>
+              navigate(
+                "/owner/plans"
               )
             }
           >
@@ -756,46 +839,64 @@ function OwnerDashboard() {
             </span>
 
             {text(
-              "Plans",
-              "الباقات"
+              "Plans Management",
+
+              "إدارة الباقات",
+
+              "ניהול תוכניות"
             )}
           </button>
-<button
-  type="button"
-  className="owner-nav-item"
-  onClick={() =>
-    navigate(
-      "/owner/analytics"
-    )
-  }
->
-  <span>
-    📊
-  </span>
 
-  {text(
-    "Analytics",
-    "الإحصائيات"
-  )}
-</button>
-<button
-  type="button"
-  className="owner-nav-item"
-  onClick={() =>
-    navigate(
-      "/owner/settings"
-    )
-  }
->
-  <span>
-    ⚙️
-  </span>
 
-  {text(
-    "Settings",
-    "الإعدادات"
-  )}
-</button>
+          {/* ANALYTICS */}
+
+          <button
+            type="button"
+            className="owner-nav-item"
+            onClick={() =>
+              navigate(
+                "/owner/analytics"
+              )
+            }
+          >
+            <span>
+              📊
+            </span>
+
+            {text(
+              "Analytics",
+
+              "الإحصائيات",
+
+              "ניתוחים"
+            )}
+          </button>
+
+
+          {/* SETTINGS */}
+
+          <button
+            type="button"
+            className="owner-nav-item"
+            onClick={() =>
+              navigate(
+                "/owner/settings"
+              )
+            }
+          >
+            <span>
+              ⚙️
+            </span>
+
+            {text(
+              "Settings",
+
+              "الإعدادات",
+
+              "הגדרות"
+            )}
+          </button>
+
         </nav>
 
 
@@ -809,18 +910,24 @@ function OwnerDashboard() {
               👑
             </div>
 
-
             <div>
 
               <strong>
                 {owner.name ||
-                  "Owner"}
+                  text(
+                    "Owner",
+                    "المالك",
+                    "בעלים"
+                  )}
               </strong>
 
               <small>
                 {text(
                   "Platform Owner",
-                  "مالكة المنصة"
+
+                  "مالكة المنصة",
+
+                  "בעלת הפלטפורמה"
                 )}
               </small>
 
@@ -837,9 +944,13 @@ function OwnerDashboard() {
             }
           >
             🚪{" "}
+
             {text(
               "Logout",
-              "تسجيل الخروج"
+
+              "تسجيل الخروج",
+
+              "התנתקות"
             )}
           </button>
 
@@ -863,7 +974,7 @@ function OwnerDashboard() {
           <div>
 
             <small>
-              TECHMINDS ADMINISTRATION
+              TEACHLEARN ADMINISTRATION
             </small>
 
 
@@ -873,7 +984,13 @@ function OwnerDashboard() {
                   owner.name ||
                   "Owner"
                 } 👋`,
+
                 `أهلًا ${
+                  owner.name ||
+                  ""
+                } 👋`,
+
+                `שלום ${
                   owner.name ||
                   ""
                 } 👋`
@@ -883,8 +1000,11 @@ function OwnerDashboard() {
 
             <p>
               {text(
-                "Manage your learning marketplace, content and TechMinds community.",
-                "أديري متجر TechMinds والمحتوى والمستخدمين من مكان واحد."
+                "Manage your learning marketplace, content and TeachLearn community.",
+
+                "أديري متجر TeachLearn والمحتوى والمستخدمين من مكان واحد.",
+
+                "נהלו את החנות, התוכן וקהילת TeachLearn ממקום אחד."
               )}
             </p>
 
@@ -892,6 +1012,8 @@ function OwnerDashboard() {
 
 
           <div className="owner-top-actions">
+
+            {/* LANGUAGE */}
 
             <div className="owner-language">
 
@@ -904,7 +1026,7 @@ function OwnerDashboard() {
                     : ""
                 }
                 onClick={() =>
-                  setLanguage(
+                  changeLanguage(
                     "en"
                   )
                 }
@@ -922,7 +1044,7 @@ function OwnerDashboard() {
                     : ""
                 }
                 onClick={() =>
-                  setLanguage(
+                  changeLanguage(
                     "ar"
                   )
                 }
@@ -930,8 +1052,28 @@ function OwnerDashboard() {
                 عربي
               </button>
 
+
+              <button
+                type="button"
+                className={
+                  language ===
+                  "he"
+                    ? "active"
+                    : ""
+                }
+                onClick={() =>
+                  changeLanguage(
+                    "he"
+                  )
+                }
+              >
+                עברית
+              </button>
+
             </div>
 
+
+            {/* MARKETPLACE PREVIEW */}
 
             <button
               type="button"
@@ -943,12 +1085,18 @@ function OwnerDashboard() {
               }
             >
               👁️{" "}
+
               {text(
                 "View Marketplace",
-                "معاينة المتجر"
+
+                "معاينة المتجر",
+
+                "צפייה בחנות"
               )}
             </button>
 
+
+            {/* PROFILE */}
 
             <div className="owner-profile">
 
@@ -961,13 +1109,20 @@ function OwnerDashboard() {
 
                 <strong>
                   {owner.name ||
-                    "Owner"}
+                    text(
+                      "Owner",
+                      "المالك",
+                      "בעלים"
+                    )}
                 </strong>
 
                 <small>
                   {text(
                     "Platform Owner",
-                    "مالكة المنصة"
+
+                    "مالكة المنصة",
+
+                    "בעלת הפלטפורמה"
                   )}
                 </small>
 
@@ -979,6 +1134,8 @@ function OwnerDashboard() {
 
         </header>
 
+
+        {/* ERROR */}
 
         {error && (
           <div className="owner-dashboard-error">
@@ -993,19 +1150,23 @@ function OwnerDashboard() {
 
         <section className="owner-stats">
 
+          {/* PROGRAMS */}
+
           <div className="owner-stat-card">
 
             <div className="owner-stat-icon purple">
               📦
             </div>
 
-
             <div>
 
               <small>
                 {text(
                   "Programs",
-                  "البرامج"
+
+                  "البرامج",
+
+                  "תוכניות"
                 )}
               </small>
 
@@ -1015,9 +1176,13 @@ function OwnerDashboard() {
 
               <span>
                 {statistics.published}{" "}
+
                 {text(
                   "published",
-                  "منشور"
+
+                  "منشور",
+
+                  "פורסמו"
                 )}
               </span>
 
@@ -1026,19 +1191,23 @@ function OwnerDashboard() {
           </div>
 
 
+          {/* LESSONS */}
+
           <div className="owner-stat-card">
 
             <div className="owner-stat-icon blue">
               📚
             </div>
 
-
             <div>
 
               <small>
                 {text(
                   "Commercial Lessons",
-                  "الدروس التجارية"
+
+                  "الدروس التجارية",
+
+                  "שיעורים מסחריים"
                 )}
               </small>
 
@@ -1049,7 +1218,10 @@ function OwnerDashboard() {
               <span>
                 {text(
                   "Across all programs",
-                  "ضمن جميع البرامج"
+
+                  "ضمن جميع البرامج",
+
+                  "בכל התוכניות"
                 )}
               </span>
 
@@ -1058,19 +1230,23 @@ function OwnerDashboard() {
           </div>
 
 
+          {/* STUDENTS */}
+
           <div className="owner-stat-card">
 
             <div className="owner-stat-icon green">
               🎓
             </div>
 
-
             <div>
 
               <small>
                 {text(
                   "Students",
-                  "الطلاب"
+
+                  "الطلاب",
+
+                  "תלמידים"
                 )}
               </small>
 
@@ -1080,9 +1256,13 @@ function OwnerDashboard() {
 
               <span>
                 {statistics.activeStudents}{" "}
+
                 {text(
                   "active",
-                  "فعّال"
+
+                  "فعّال",
+
+                  "פעילים"
                 )}
               </span>
 
@@ -1091,19 +1271,23 @@ function OwnerDashboard() {
           </div>
 
 
+          {/* TEACHERS */}
+
           <div className="owner-stat-card">
 
             <div className="owner-stat-icon orange">
               👩‍🏫
             </div>
 
-
             <div>
 
               <small>
                 {text(
                   "Teachers",
-                  "المعلمين"
+
+                  "المعلمين",
+
+                  "מורים"
                 )}
               </small>
 
@@ -1114,7 +1298,10 @@ function OwnerDashboard() {
               <span>
                 {text(
                   "Registered teachers",
-                  "معلمون مسجلون"
+
+                  "معلمون مسجلون",
+
+                  "מורים רשומים"
                 )}
               </span>
 
@@ -1131,19 +1318,23 @@ function OwnerDashboard() {
 
         <section className="owner-business-overview">
 
+          {/* SALES */}
+
           <div className="owner-business-stat revenue">
 
             <div>
               💳
             </div>
 
-
             <span>
 
               <small>
                 {text(
                   "TOTAL SALES",
-                  "إجمالي المبيعات"
+
+                  "إجمالي المبيعات",
+
+                  "סה״כ מכירות"
                 )}
               </small>
 
@@ -1154,7 +1345,10 @@ function OwnerDashboard() {
               <p>
                 {text(
                   "Revenue will appear after live payment integration.",
-                  "ستظهر الإيرادات بعد ربط الدفع الحقيقي."
+
+                  "ستظهر الإيرادات بعد ربط الدفع الحقيقي.",
+
+                  "ההכנסות יוצגו לאחר חיבור מערכת התשלומים."
                 )}
               </p>
 
@@ -1163,19 +1357,23 @@ function OwnerDashboard() {
           </div>
 
 
+          {/* PUBLISHED */}
+
           <div className="owner-business-stat">
 
             <div>
               🌍
             </div>
 
-
             <span>
 
               <small>
                 {text(
                   "PUBLISHED",
-                  "البرامج المنشورة"
+
+                  "البرامج المنشورة",
+
+                  "פורסמו"
                 )}
               </small>
 
@@ -1186,7 +1384,10 @@ function OwnerDashboard() {
               <p>
                 {text(
                   "Visible in Marketplace",
-                  "تظهر في المتجر"
+
+                  "تظهر في المتجر",
+
+                  "מוצגות בחנות"
                 )}
               </p>
 
@@ -1195,19 +1396,23 @@ function OwnerDashboard() {
           </div>
 
 
+          {/* DRAFTS */}
+
           <div className="owner-business-stat">
 
             <div>
               📝
             </div>
 
-
             <span>
 
               <small>
                 {text(
                   "DRAFTS",
-                  "المسودات"
+
+                  "المسودات",
+
+                  "טיוטות"
                 )}
               </small>
 
@@ -1218,7 +1423,10 @@ function OwnerDashboard() {
               <p>
                 {text(
                   "Still being prepared",
-                  "ما زالت قيد التجهيز"
+
+                  "ما زالت قيد التجهيز",
+
+                  "עדיין בהכנה"
                 )}
               </p>
 
@@ -1227,19 +1435,23 @@ function OwnerDashboard() {
           </div>
 
 
+          {/* COMMUNITY */}
+
           <div className="owner-business-stat">
 
             <div>
               👥
             </div>
 
-
             <span>
 
               <small>
                 {text(
                   "COMMUNITY",
-                  "المستخدمون"
+
+                  "المستخدمون",
+
+                  "קהילה"
                 )}
               </small>
 
@@ -1250,7 +1462,10 @@ function OwnerDashboard() {
               <p>
                 {text(
                   "Students + teachers",
-                  "طلاب + معلمون"
+
+                  "طلاب + معلمون",
+
+                  "תלמידים + מורים"
                 )}
               </p>
 
@@ -1281,20 +1496,25 @@ function OwnerDashboard() {
                   CONTENT
                 </small>
 
-
                 <h2>
                   📦{" "}
+
                   {text(
                     "Programs for Sale",
-                    "البرامج المعروضة للبيع"
+
+                    "البرامج المعروضة للبيع",
+
+                    "תוכניות למכירה"
                   )}
                 </h2>
-
 
                 <p>
                   {text(
                     "Your latest commercial learning programs.",
-                    "أحدث البرامج التعليمية التجارية."
+
+                    "أحدث البرامج التعليمية التجارية.",
+
+                    "תוכניות הלמידה המסחריות האחרונות שלך."
                   )}
                 </p>
 
@@ -1309,20 +1529,27 @@ function OwnerDashboard() {
                   )
                 }
               >
-                {programs.length >
-                0
+                {programs.length > 0
                   ? text(
                       "Manage Programs",
-                      "إدارة البرامج"
+
+                      "إدارة البرامج",
+
+                      "ניהול תוכניות"
                     )
                   : `+ ${text(
                       "Create Program",
-                      "إنشاء برنامج"
+
+                      "إنشاء برنامج",
+
+                      "יצירת תוכנית"
                     )}`}
               </button>
 
             </div>
 
+
+            {/* EMPTY PROGRAMS */}
 
             {recentPrograms.length ===
             0 ? (
@@ -1333,22 +1560,25 @@ function OwnerDashboard() {
                   📦
                 </div>
 
-
                 <h3>
                   {text(
                     "Create your first program",
-                    "أنشئي برنامجك الأول"
+
+                    "أنشئي برنامجك الأول",
+
+                    "צרו את התוכנית הראשונה"
                   )}
                 </h3>
-
 
                 <p>
                   {text(
                     "Build a complete course with lessons, challenges and a final project.",
-                    "أنشئي برنامجًا متكاملًا يحتوي على دروس وتحديات ومشروع نهائي."
+
+                    "أنشئي برنامجًا متكاملًا يحتوي على دروس وتحديات ومشروع نهائي.",
+
+                    "בנו תוכנית מלאה עם שיעורים, אתגרים ופרויקט מסכם."
                   )}
                 </p>
-
 
                 <button
                   type="button"
@@ -1359,15 +1589,21 @@ function OwnerDashboard() {
                   }
                 >
                   +{" "}
+
                   {text(
                     "Create First Program",
-                    "إنشاء أول برنامج"
+
+                    "إنشاء أول برنامج",
+
+                    "יצירת התוכנית הראשונה"
                   )}
                 </button>
 
               </div>
 
             ) : (
+
+              /* REAL PROGRAMS */
 
               <div className="owner-dashboard-program-list">
 
@@ -1402,11 +1638,17 @@ function OwnerDashboard() {
                             "published"
                               ? text(
                                   "PUBLISHED",
-                                  "منشور"
+
+                                  "منشور",
+
+                                  "פורסם"
                                 )
                               : text(
                                   "DRAFT",
-                                  "مسودة"
+
+                                  "مسودة",
+
+                                  "טיוטה"
                                 )}
                           </small>
 
@@ -1426,7 +1668,10 @@ function OwnerDashboard() {
                           ) ||
                             text(
                               "No description yet.",
-                              "لا يوجد وصف بعد."
+
+                              "لا يوجد وصف بعد.",
+
+                              "עדיין אין תיאור."
                             )}
                         </p>
 
@@ -1435,11 +1680,16 @@ function OwnerDashboard() {
 
                           <span>
                             📚{" "}
+
                             {program.lessonCount ||
                               0}{" "}
+
                             {text(
                               "Lessons",
-                              "دروس"
+
+                              "دروس",
+
+                              "שיעורים"
                             )}
                           </span>
 
@@ -1473,8 +1723,7 @@ function OwnerDashboard() {
 
 
                       <div className="owner-dashboard-program-arrow">
-                        {language ===
-                        "ar"
+                        {isRTL
                           ? "←"
                           : "→"}
                       </div>
@@ -1499,7 +1748,10 @@ function OwnerDashboard() {
                   >
                     {text(
                       `View all ${programs.length} programs`,
-                      `عرض جميع البرامج (${programs.length})`
+
+                      `عرض جميع البرامج (${programs.length})`,
+
+                      `הצגת כל התוכניות (${programs.length})`
                     )}
                   </button>
 
@@ -1528,21 +1780,25 @@ function OwnerDashboard() {
                   ⚡
                 </span>
 
-
                 <div>
 
                   <h3>
                     {text(
                       "Quick Actions",
-                      "إجراءات سريعة"
+
+                      "إجراءات سريعة",
+
+                      "פעולות מהירות"
                     )}
                   </h3>
 
-
                   <p>
                     {text(
-                      "Manage TechMinds",
-                      "إدارة TechMinds"
+                      "Manage TeachLearn",
+
+                      "إدارة TeachLearn",
+
+                      "ניהול TeachLearn"
                     )}
                   </p>
 
@@ -1552,6 +1808,8 @@ function OwnerDashboard() {
 
 
               <div className="owner-quick-actions">
+
+                {/* CREATE PROGRAM */}
 
                 <button
                   type="button"
@@ -1570,24 +1828,34 @@ function OwnerDashboard() {
                     <strong>
                       {text(
                         "Create Program",
-                        "إنشاء برنامج"
+
+                        "إنشاء برنامج",
+
+                        "יצירת תוכנית"
                       )}
                     </strong>
 
                     <small>
                       {text(
                         "Create a new program for sale",
-                        "أنشئي برنامجًا جديدًا للبيع"
+
+                        "أنشئي برنامجًا جديدًا للبيع",
+
+                        "צרו תוכנית חדשה למכירה"
                       )}
                     </small>
 
                   </div>
 
                   <b>
-                    ›
+                    {isRTL
+                      ? "‹"
+                      : "›"}
                   </b>
                 </button>
 
+
+                {/* MARKETPLACE */}
 
                 <button
                   type="button"
@@ -1606,30 +1874,40 @@ function OwnerDashboard() {
                     <strong>
                       {text(
                         "Preview Marketplace",
-                        "معاينة المتجر"
+
+                        "معاينة المتجر",
+
+                        "תצוגה מקדימה של החנות"
                       )}
                     </strong>
 
                     <small>
                       {text(
                         "See published programs",
-                        "شاهدي البرامج المنشورة"
+
+                        "شاهدي البرامج المنشورة",
+
+                        "צפו בתוכניות שפורסמו"
                       )}
                     </small>
 
                   </div>
 
                   <b>
-                    ›
+                    {isRTL
+                      ? "‹"
+                      : "›"}
                   </b>
                 </button>
 
+
+                {/* MANAGE PLANS */}
 
                 <button
                   type="button"
                   onClick={() =>
                     navigate(
-                      "/plans"
+                      "/owner/plans"
                     )
                   }
                 >
@@ -1641,22 +1919,76 @@ function OwnerDashboard() {
 
                     <strong>
                       {text(
-                        "Plans & Pricing",
-                        "الباقات والأسعار"
+                        "Manage Plans & Pricing",
+
+                        "إدارة الباقات والأسعار",
+
+                        "ניהול תוכניות ומחירים"
                       )}
                     </strong>
 
                     <small>
                       {text(
-                        "Review subscription plans",
-                        "راجعي باقات الاشتراك"
+                        "Change prices, features and availability",
+
+                        "غيّري الأسعار والمميزات وتوفر الباقات",
+
+                        "שנו מחירים, תכונות וזמינות"
                       )}
                     </small>
 
                   </div>
 
                   <b>
-                    ›
+                    {isRTL
+                      ? "‹"
+                      : "›"}
+                  </b>
+                </button>
+
+
+                {/* PREVIEW PLANS */}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate(
+                      "/plans"
+                    )
+                  }
+                >
+                  <span>
+                    👁️
+                  </span>
+
+                  <div>
+
+                    <strong>
+                      {text(
+                        "Preview Plans",
+
+                        "معاينة الباقات",
+
+                        "תצוגה מקדימה של התוכניות"
+                      )}
+                    </strong>
+
+                    <small>
+                      {text(
+                        "See what customers see",
+
+                        "شاهدي ما يراه المستخدمون",
+
+                        "ראו מה הלקוחות רואים"
+                      )}
+                    </small>
+
+                  </div>
+
+                  <b>
+                    {isRTL
+                      ? "‹"
+                      : "›"}
                   </b>
                 </button>
 
@@ -1675,19 +2007,20 @@ function OwnerDashboard() {
                   🚀
                 </span>
 
-
                 <div>
 
                   <h3>
                     {text(
                       "Platform Status",
-                      "حالة المنصة"
+
+                      "حالة المنصة",
+
+                      "מצב הפלטפורמה"
                     )}
                   </h3>
 
-
                   <p>
-                    TechMinds
+                    TeachLearn
                   </p>
 
                 </div>
@@ -1702,20 +2035,25 @@ function OwnerDashboard() {
                   <span className="owner-status-dot active">
                   </span>
 
-
                   <div>
 
                     <strong>
                       {text(
                         "Owner System",
-                        "نظام المالك"
+
+                        "نظام المالك",
+
+                        "מערכת בעלים"
                       )}
                     </strong>
 
                     <small>
                       {text(
                         "Active",
-                        "فعّال"
+
+                        "فعّال",
+
+                        "פעיל"
                       )}
                     </small>
 
@@ -1732,21 +2070,26 @@ function OwnerDashboard() {
 
                   <span className="owner-status-dot active">
                   </span>
-
 
                   <div>
 
                     <strong>
                       {text(
                         "Programs",
-                        "البرامج"
+
+                        "البرامج",
+
+                        "תוכניות"
                       )}
                     </strong>
 
                     <small>
                       {text(
                         "Active",
-                        "فعّال"
+
+                        "فعّال",
+
+                        "פעיל"
                       )}
                     </small>
 
@@ -1764,20 +2107,61 @@ function OwnerDashboard() {
                   <span className="owner-status-dot active">
                   </span>
 
-
                   <div>
 
                     <strong>
                       {text(
                         "Lesson Builder",
-                        "محرر الدروس"
+
+                        "محرر الدروس",
+
+                        "עורך שיעורים"
                       )}
                     </strong>
 
                     <small>
                       {text(
                         "Active",
-                        "فعّال"
+
+                        "فعّال",
+
+                        "פעיל"
+                      )}
+                    </small>
+
+                  </div>
+
+                  <b>
+                    ✓
+                  </b>
+
+                </div>
+
+
+                <div>
+
+                  <span className="owner-status-dot active">
+                  </span>
+
+                  <div>
+
+                    <strong>
+                      {text(
+                        "Plans Management",
+
+                        "إدارة الباقات",
+
+                        "ניהול תוכניות"
+                      )}
+                    </strong>
+
+                    <small>
+                      {text(
+                        "Active",
+
+                        "فعّال",
+
+                        "פעיל"
                       )}
                     </small>
 
@@ -1795,20 +2179,25 @@ function OwnerDashboard() {
                   <span className="owner-status-dot pending">
                   </span>
 
-
                   <div>
 
                     <strong>
                       {text(
                         "Live Payments",
-                        "الدفع الحقيقي"
+
+                        "الدفع الحقيقي",
+
+                        "תשלומים חיים"
                       )}
                     </strong>
 
                     <small>
                       {text(
                         "Setup pending",
-                        "بانتظار الربط"
+
+                        "بانتظار الربط",
+
+                        "ממתין לחיבור"
                       )}
                     </small>
 
@@ -1843,19 +2232,23 @@ function OwnerDashboard() {
                 BUSINESS
               </small>
 
-
               <h2>
                 {text(
-                  "TechMinds Commerce",
-                  "تجارة TechMinds"
+                  "TeachLearn Commerce",
+
+                  "تجارة TeachLearn",
+
+                  "מסחר TeachLearn"
                 )}
               </h2>
-
 
               <p>
                 {text(
                   "The commercial foundation is ready. These features will activate as we connect the payment system.",
-                  "الأساس التجاري أصبح جاهزًا. سيتم تفعيل هذه الميزات مع ربط نظام الدفع."
+
+                  "الأساس التجاري أصبح جاهزًا. سيتم تفعيل هذه الميزات مع ربط نظام الدفع.",
+
+                  "התשתית המסחרית מוכנה. התכונות הבאות יופעלו עם חיבור מערכת התשלומים."
                 )}
               </p>
 
@@ -1865,6 +2258,8 @@ function OwnerDashboard() {
 
 
           <div className="owner-roadmap-grid">
+
+            {/* PROGRAMS */}
 
             <div className="owner-roadmap-card ready">
 
@@ -1881,14 +2276,20 @@ function OwnerDashboard() {
                 <strong>
                   {text(
                     "Programs",
-                    "البرامج"
+
+                    "البرامج",
+
+                    "תוכניות"
                   )}
                 </strong>
 
                 <p>
                   {text(
                     "Create, price and publish programs.",
-                    "إنشاء البرامج وتسعيرها ونشرها."
+
+                    "إنشاء البرامج وتسعيرها ونشرها.",
+
+                    "יצירה, תמחור ופרסום תוכניות."
                   )}
                 </p>
 
@@ -1896,6 +2297,8 @@ function OwnerDashboard() {
 
             </div>
 
+
+            {/* LESSONS */}
 
             <div className="owner-roadmap-card ready">
 
@@ -1912,14 +2315,20 @@ function OwnerDashboard() {
                 <strong>
                   {text(
                     "Commercial Lessons",
-                    "الدروس التجارية"
+
+                    "الدروس التجارية",
+
+                    "שיעורים מסחריים"
                   )}
                 </strong>
 
                 <p>
                   {text(
                     "Build complete interactive lessons.",
-                    "بناء دروس تفاعلية متكاملة."
+
+                    "بناء دروس تفاعلية متكاملة.",
+
+                    "בניית שיעורים אינטראקטיביים מלאים."
                   )}
                 </p>
 
@@ -1927,6 +2336,8 @@ function OwnerDashboard() {
 
             </div>
 
+
+            {/* MARKETPLACE */}
 
             <div className="owner-roadmap-card ready">
 
@@ -1941,13 +2352,22 @@ function OwnerDashboard() {
                 </small>
 
                 <strong>
-                  Marketplace
+                  {text(
+                    "Marketplace",
+
+                    "المتجر",
+
+                    "חנות"
+                  )}
                 </strong>
 
                 <p>
                   {text(
                     "Programs can be shown to customers.",
-                    "يمكن عرض البرامج للعملاء."
+
+                    "يمكن عرض البرامج للعملاء.",
+
+                    "ניתן להציג תוכניות ללקוחות."
                   )}
                 </p>
 
@@ -1956,29 +2376,37 @@ function OwnerDashboard() {
             </div>
 
 
-            <div className="owner-roadmap-card pending">
+            {/* PLANS */}
+
+            <div className="owner-roadmap-card ready">
 
               <span>
-                4
+                ✓
               </span>
 
               <div>
 
                 <small>
-                  NEXT
+                  READY
                 </small>
 
                 <strong>
                   {text(
-                    "Payments",
-                    "الدفع"
+                    "Plans Management",
+
+                    "إدارة الباقات",
+
+                    "ניהול תוכניות"
                   )}
                 </strong>
 
                 <p>
                   {text(
-                    "Connect real payment processing.",
-                    "ربط نظام الدفع الحقيقي."
+                    "Manage prices and subscription plans.",
+
+                    "إدارة الأسعار وباقات الاشتراك.",
+
+                    "ניהול מחירים ותוכניות מנוי."
                   )}
                 </p>
 
@@ -1986,6 +2414,8 @@ function OwnerDashboard() {
 
             </div>
 
+
+            {/* PAYMENTS */}
 
             <div className="owner-roadmap-card pending">
 
@@ -2001,15 +2431,21 @@ function OwnerDashboard() {
 
                 <strong>
                   {text(
-                    "Sales",
-                    "المبيعات"
+                    "Payments",
+
+                    "الدفع",
+
+                    "תשלומים"
                   )}
                 </strong>
 
                 <p>
                   {text(
-                    "Orders, revenue and payment history.",
-                    "الطلبات والإيرادات وسجل المدفوعات."
+                    "Connect real payment processing.",
+
+                    "ربط نظام الدفع الحقيقي.",
+
+                    "חיבור מערכת תשלומים אמיתית."
                   )}
                 </p>
 
@@ -2017,6 +2453,8 @@ function OwnerDashboard() {
 
             </div>
 
+
+            {/* SALES */}
 
             <div className="owner-roadmap-card pending">
 
@@ -2032,15 +2470,60 @@ function OwnerDashboard() {
 
                 <strong>
                   {text(
+                    "Sales",
+
+                    "المبيعات",
+
+                    "מכירות"
+                  )}
+                </strong>
+
+                <p>
+                  {text(
+                    "Orders, revenue and payment history.",
+
+                    "الطلبات والإيرادات وسجل المدفوعات.",
+
+                    "הזמנות, הכנסות והיסטוריית תשלומים."
+                  )}
+                </p>
+
+              </div>
+
+            </div>
+
+
+            {/* CUSTOMERS */}
+
+            <div className="owner-roadmap-card pending">
+
+              <span>
+                7
+              </span>
+
+              <div>
+
+                <small>
+                  NEXT
+                </small>
+
+                <strong>
+                  {text(
                     "Customers",
-                    "العملاء"
+
+                    "العملاء",
+
+                    "לקוחות"
                   )}
                 </strong>
 
                 <p>
                   {text(
                     "Manage purchased program access.",
-                    "إدارة وصول العملاء للبرامج."
+
+                    "إدارة وصول العملاء للبرامج.",
+
+                    "ניהול גישה לתוכניות שנרכשו."
                   )}
                 </p>
 

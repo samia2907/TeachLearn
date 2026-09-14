@@ -2105,3 +2105,299 @@
   }
 
 }
+
+
+/* =========================================================
+   RESET PASSWORD BUTTON
+========================================================= */
+
+.student-reset-password-button {
+  width: 100%;
+
+  min-height: 76px;
+
+  padding: 13px 15px;
+
+  display: grid;
+
+  grid-template-columns: 43px 1fr 20px;
+
+  align-items: center;
+
+  gap: 12px;
+
+  border-radius: 14px;
+
+  font-family: inherit;
+
+  text-align: start;
+
+  cursor: pointer;
+
+  transition: 0.17s ease;
+
+  border: 1px solid #bfdbfe;
+
+  background: #eff6ff;
+
+  color: #1d4ed8;
+}
+
+.student-reset-password-button > span {
+  width: 43px;
+  height: 43px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.75);
+
+  font-size: 20px;
+}
+
+.student-reset-password-button strong {
+  display: block;
+
+  margin-bottom: 3px;
+
+  font-size: 11px;
+}
+
+.student-reset-password-button small {
+  display: block;
+
+  font-size: 9px;
+
+  line-height: 1.5;
+}
+
+.student-reset-password-button > b {
+  font-size: 21px;
+}
+
+.student-reset-password-button:hover {
+  transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   RESET PASSWORD MODAL
+========================================================= */
+
+.student-generate-password-button {
+  width: 100%;
+
+  margin-top: 4px;
+
+  padding: 10px 14px;
+
+  border-radius: 12px;
+
+  border: 1px dashed #94a3b8;
+
+  background: #f8fafc;
+
+  color: #334155;
+
+  font-family: inherit;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.student-generate-password-button:hover {
+  background: #eef2f6;
+}
+
+.student-reset-success {
+  padding: 12px 14px;
+
+  border-radius: 12px;
+
+  background: #ecfdf5;
+
+  border: 1px solid #a7f3d0;
+
+  color: #047857;
+
+  font-weight: 700;
+}
+
+.student-password-display {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin-top: 6px;
+
+  padding: 10px 14px;
+
+  border-radius: 12px;
+
+  border: 1px solid #e2e8f0;
+
+  background: #f8fafc;
+}
+
+.student-password-display code {
+  flex: 1;
+
+  font-size: 15px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.5px;
+
+  color: #1e293b;
+}
+
+.student-password-display button {
+  padding: 7px 12px;
+
+  border-radius: 9px;
+
+  border: 1px solid #cbd5e1;
+
+  background: #ffffff;
+
+  cursor: pointer;
+
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   PRINT TOOLBAR
+========================================================= */
+
+.students-print-toolbar {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  flex-wrap: wrap;
+}
+
+.students-print-toolbar select {
+  padding: 8px 10px;
+
+  border-radius: 10px;
+
+  border: 1px solid #cbd5e1;
+
+  font-family: inherit;
+}
+
+.students-print-button {
+  padding: 8px 14px;
+
+  border-radius: 10px;
+
+  border: 1px solid #cbd5e1;
+
+  background: #ffffff;
+
+  color: #334155;
+
+  font-weight: 700;
+
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.students-print-button:hover {
+  background: #f1f5f9;
+}
+
+
+/* =========================================================
+   PRINT SHEET
+========================================================= */
+
+.print-sheet {
+  display: none;
+}
+
+.print-sheet-header {
+  text-align: center;
+
+  margin-bottom: 18px;
+}
+
+.print-sheet-header h1 {
+  font-size: 20px;
+
+  margin: 0 0 4px;
+}
+
+.print-sheet-header h2 {
+  font-size: 15px;
+
+  margin: 10px 0 0;
+}
+
+.print-sheet-header p {
+  margin: 2px 0;
+
+  font-size: 12px;
+}
+
+.print-sheet-table {
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+.print-sheet-table th,
+.print-sheet-table td {
+  border: 1px solid #333;
+
+  padding: 6px 8px;
+
+  font-size: 12px;
+
+  text-align: start;
+}
+
+.print-sheet-table thead {
+  display: table-header-group;
+}
+
+.print-sheet-table tr {
+  page-break-inside: avoid;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print-sheet,
+  .print-sheet * {
+    visibility: visible;
+  }
+
+  .print-sheet {
+    display: block;
+
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+  }
+}

@@ -1,0 +1,228 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "classes",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "teacherId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "programs",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "createdBy", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "programs",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "createdBy", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "programId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "lessonType", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "teacherId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "classId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "programId", "order": "ASCENDING" },
+        { "fieldPath": "lessonType", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "classId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "role", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "classId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "teacherId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "role", "order": "ASCENDING" },
+        { "fieldPath": "classId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "teacherId", "order": "ASCENDING" },
+        { "fieldPath": "role", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "density": "SPARSE_ANY",
+      "fields": [
+        { "fieldPath": "usernameNormalized", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "density": "SPARSE_ANY",
+    
+      "fields": [
+        { "fieldPath": "studentCode", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "portfolio",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "studentId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "portfolio",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "teacherId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "attendance",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "teacherId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "lessonProgress",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "teacherId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "lessonProgress",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "studentId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "classMembers",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "studentId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "classMembers",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "teacherId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "classAssignments",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [
+        { "fieldPath": "classId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "studentLoginRateLimits",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    }
+  ]
+}

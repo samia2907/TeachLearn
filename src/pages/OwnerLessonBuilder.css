@@ -1822,3 +1822,750 @@
 .owner-builder-preview-modal footer > span {
   font-size: 14px;
 }
+
+/* =========================================================
+   OWNER LESSON BUILDER - STUDENT PREVIEW BACKGROUND
+   Add this block to the END of OwnerLessonBuilder.css
+========================================================= */
+
+.owner-builder-preview-modal {
+  overflow: hidden;
+}
+
+.owner-builder-preview-hero {
+  position: relative;
+
+  margin: 0 0 18px;
+
+  overflow: hidden;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--preview-theme),
+      var(--preview-accent)
+    );
+
+  box-shadow:
+    0 14px 32px
+    rgba(15, 23, 42, 0.14);
+}
+
+.owner-builder-preview-modal.has-lesson-cover
+.owner-builder-preview-hero {
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(15, 23, 42, 0.88) 0%,
+      rgba(15, 23, 42, 0.68) 48%,
+      rgba(15, 23, 42, 0.18) 100%
+    ),
+    var(--preview-cover);
+
+  background-size: cover;
+  background-position: center;
+}
+
+.owner-builder-preview-hero-overlay {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.03),
+      rgba(15, 23, 42, 0.08)
+    );
+
+  pointer-events: none;
+}
+
+.owner-builder-preview-hero-content {
+  position: relative;
+  z-index: 1;
+
+  min-height: 220px;
+
+  padding: 26px;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(170px, 250px);
+
+  gap: 22px;
+
+  align-items: center;
+}
+
+.owner-builder-preview-hero-content > div {
+  color: #ffffff;
+}
+
+.owner-builder-preview-hero-content small {
+  display: inline-block;
+
+  margin-bottom: 8px;
+
+  color:
+    rgba(255, 255, 255, 0.85);
+
+  font-size: 9px;
+  font-weight: 900;
+
+  letter-spacing: 0.08em;
+}
+
+.owner-builder-preview-hero-content h1 {
+  margin: 0;
+
+  color: #ffffff;
+
+  font-size: 28px;
+  line-height: 1.15;
+
+  text-shadow:
+    0 4px 16px
+    rgba(0, 0, 0, 0.2);
+}
+
+.owner-builder-preview-hero-content p {
+  margin: 10px 0 0;
+
+  color:
+    rgba(255, 255, 255, 0.9);
+
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.owner-builder-preview-hero-meta {
+  margin-top: 15px;
+
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 7px;
+}
+
+.owner-builder-preview-hero-meta span {
+  padding: 6px 9px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.18);
+
+  border-radius: 999px;
+
+  background:
+    rgba(255, 255, 255, 0.12);
+
+  color: #ffffff;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  backdrop-filter: blur(6px);
+}
+
+.owner-builder-preview-hero-content img {
+  width: 100%;
+  height: 150px;
+
+  display: block;
+
+  object-fit: cover;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.24);
+
+  border-radius: 16px;
+
+  box-shadow:
+    0 14px 28px
+    rgba(0, 0, 0, 0.24);
+}
+
+.owner-builder-preview-slide {
+  position: relative;
+
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(
+        in srgb,
+        var(--preview-surface) 78%,
+        white 22%
+      ),
+      #ffffff
+    );
+}
+
+
+/* TABLET */
+
+@media (max-width: 760px) {
+
+  .owner-builder-preview-hero-content {
+    grid-template-columns: 1fr;
+  }
+
+  .owner-builder-preview-hero-content img {
+    height: 190px;
+  }
+
+}
+
+
+/* PHONE */
+
+@media (max-width: 520px) {
+
+  .owner-builder-preview-hero-content {
+    padding: 20px;
+  }
+
+  .owner-builder-preview-hero-content h1 {
+    font-size: 23px;
+  }
+
+}
+
+
+/* =========================================================
+   PREVIEW NAVIGATION — KEEP VISIBLE
+========================================================= */
+
+.owner-builder-preview-modal {
+  max-height: calc(100vh - 50px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.owner-builder-preview-modal > footer {
+  position: sticky;
+  bottom: -16px;
+  z-index: 20;
+
+  margin: 14px -16px -16px;
+  padding: 13px 16px;
+
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+
+  border-top: 1px solid #e5e7eb;
+
+  background:
+    rgba(255, 255, 255, 0.97);
+
+  box-shadow:
+    0 -10px 28px
+    rgba(15, 23, 42, 0.08);
+
+  backdrop-filter: blur(10px);
+}
+
+.owner-builder-preview-modal > footer button {
+  min-width: 120px;
+  min-height: 44px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  font-size: 14px;
+}
+
+.owner-builder-preview-modal > footer button:first-child {
+  justify-self: start;
+}
+
+.owner-builder-preview-modal > footer button:last-child {
+  justify-self: end;
+}
+
+.owner-builder-preview-modal > footer > span {
+  min-width: 72px;
+
+  padding: 7px 10px;
+
+  border-radius: 999px;
+
+  background: #f5f3ff;
+
+  color: #6d28d9;
+
+  text-align: center;
+
+  font-size: 13px;
+  font-weight: 900;
+}
+
+@media (max-width: 520px) {
+
+  .owner-builder-preview-modal > footer {
+    grid-template-columns: 1fr auto 1fr;
+    gap: 7px;
+  }
+
+  .owner-builder-preview-modal > footer button {
+    min-width: 0;
+    width: 100%;
+
+    padding: 8px;
+
+    font-size: 12px;
+  }
+
+  .owner-builder-preview-modal > footer > span {
+    min-width: 58px;
+
+    padding-inline: 7px;
+
+    font-size: 11px;
+  }
+
+}
+
+
+/* =========================================================
+   SLIDE COLOR PICKER
+========================================================= */
+
+.owner-builder-color-panel {
+  margin-bottom: 14px;
+  padding: 14px;
+
+  border: 1px solid #e7eaf2;
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #faf8ff
+    );
+}
+
+.owner-builder-color-panel-heading {
+  margin-bottom: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+}
+
+.owner-builder-color-panel-heading small {
+  color: #7c3aed;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.owner-builder-color-panel-heading h3 {
+  margin: 2px 0 0;
+  color: #334155;
+  font-size: 14px;
+}
+
+.owner-builder-color-panel-heading button {
+  padding: 7px 10px;
+  border: 1px solid #ddd6fe;
+  border-radius: 9px;
+  background: #faf5ff;
+  color: #6d28d9;
+  font-size: 9px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.owner-builder-color-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.owner-builder-color-fields label {
+  padding: 9px;
+  border: 1px solid #e8ebf2;
+  border-radius: 11px;
+  background: #ffffff;
+}
+
+.owner-builder-color-fields label > span {
+  display: block;
+  margin-bottom: 7px;
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.owner-builder-color-fields label > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.owner-builder-color-fields input[type="color"] {
+  width: 46px;
+  height: 38px;
+  padding: 2px;
+  border: 1px solid #dce3ed;
+  border-radius: 9px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.owner-builder-color-fields code {
+  color: #475569;
+  font-size: 9px;
+}
+
+.owner-builder-canvas {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--builder-slide-theme, #7c3aed) 18%,
+      #e2e8f0
+    );
+
+  background:
+    radial-gradient(
+      circle at 95% 5%,
+      color-mix(
+        in srgb,
+        var(--builder-slide-accent, #4f46e5) 12%,
+        transparent
+      ),
+      transparent 28%
+    ),
+    linear-gradient(
+      145deg,
+      #ffffff,
+      color-mix(
+        in srgb,
+        var(--builder-slide-surface, #f5f3ff) 65%,
+        white
+      )
+    );
+}
+
+.owner-builder-canvas::after {
+  background:
+    linear-gradient(
+      90deg,
+      var(--builder-slide-theme, #7c3aed),
+      var(--builder-slide-accent, #4f46e5)
+    );
+}
+
+.owner-builder-canvas-top small {
+  color: var(--builder-slide-theme, #7c3aed);
+}
+
+.owner-builder-preview-slide {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--preview-theme, #7c3aed) 20%,
+      #e2e8f0
+    );
+}
+
+@media (max-width: 760px) {
+  .owner-builder-color-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =========================================================
+   VISUAL SLIDE EDITOR
+========================================================= */
+
+.owner-builder-visual-panel {
+  margin-bottom: 14px;
+  padding: 14px;
+
+  border: 1px solid #e7eaf2;
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #f8fbff
+    );
+}
+
+.owner-builder-visual-panel-heading {
+  margin-bottom: 12px;
+}
+
+.owner-builder-visual-panel-heading small {
+  color: #0ea5e9;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.owner-builder-visual-panel-heading h3 {
+  margin: 2px 0 0;
+
+  color: #334155;
+
+  font-size: 14px;
+}
+
+.owner-builder-visual-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+}
+
+.owner-builder-visual-grid label {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+
+  color: #64748b;
+
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.owner-builder-visual-grid label > span {
+  color: #475569;
+}
+
+.owner-builder-visual-grid input,
+.owner-builder-visual-grid textarea {
+  width: 100%;
+
+  padding: 10px 11px;
+
+  border: 1px solid #dce3ed;
+  border-radius: 9px;
+
+  outline: none;
+
+  background: #ffffff;
+
+  color: #172033;
+
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.owner-builder-visual-grid label > small {
+  color: #94a3b8;
+
+  font-size: 7px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.owner-builder-visual-full {
+  grid-column: 1 / -1;
+}
+
+.owner-builder-live-visual {
+  margin-bottom: 18px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+}
+
+.owner-builder-live-emoji,
+.preview-big-emoji {
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--builder-slide-surface, #f5f3ff),
+      #ffffff
+    );
+
+  box-shadow:
+    0 10px 24px rgba(15,23,42,.08);
+}
+
+.owner-builder-live-emoji {
+  width: 72px;
+  height: 72px;
+
+  font-size: 38px;
+}
+
+.owner-builder-live-visual img {
+  width: min(420px, 100%);
+  height: 190px;
+
+  object-fit: cover;
+
+  border-radius: 16px;
+
+  box-shadow:
+    0 12px 26px rgba(15,23,42,.1);
+}
+
+.owner-builder-info-box,
+.owner-builder-challenge-box,
+.preview-info-box,
+.preview-challenge-box {
+  width: 100%;
+
+  margin: 14px 0;
+
+  padding: 14px 16px;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 11px;
+
+  border-radius: 14px;
+}
+
+.owner-builder-info-box,
+.preview-info-box {
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.owner-builder-challenge-box,
+.preview-challenge-box {
+  border: 1px solid #fdba74;
+  background:
+    linear-gradient(
+      135deg,
+      #fff7ed,
+      #fff1f2
+    );
+
+  color: #c2410c;
+}
+
+.owner-builder-info-box > span,
+.owner-builder-challenge-box > span,
+.preview-info-box > span,
+.preview-challenge-box > span {
+  font-size: 23px;
+}
+
+.owner-builder-info-box strong,
+.owner-builder-challenge-box strong,
+.preview-info-box strong,
+.preview-challenge-box strong {
+  display: block;
+
+  margin-bottom: 3px;
+
+  font-size: 10px;
+}
+
+.owner-builder-info-box p,
+.owner-builder-challenge-box p,
+.preview-info-box p,
+.preview-challenge-box p {
+  margin: 0;
+
+  font-size: 10px;
+  line-height: 1.65;
+}
+
+.preview-big-emoji {
+  width: 84px;
+  height: 84px;
+
+  margin-bottom: 14px;
+
+  font-size: 46px;
+}
+
+.preview-slide-image {
+  width: min(620px, 100%);
+  max-height: 280px;
+
+  margin: 0 0 18px;
+
+  object-fit: cover;
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 16px 35px rgba(15,23,42,.12);
+}
+
+
+/* Type-specific builder canvas */
+
+.owner-builder-canvas.slide-content {
+  --builder-slide-theme: #6d28d9;
+}
+
+.owner-builder-canvas.slide-question {
+  --builder-slide-theme: #7c3aed;
+}
+
+.owner-builder-canvas.slide-multipleChoice {
+  --builder-slide-theme: #059669;
+}
+
+.owner-builder-canvas.slide-task {
+  --builder-slide-theme: #ea580c;
+}
+
+.owner-builder-canvas.slide-challenge {
+  --builder-slide-theme: #e11d48;
+}
+
+.owner-builder-canvas.slide-summary {
+  --builder-slide-theme: #0891b2;
+}
+
+.owner-builder-canvas.slide-reflection {
+  --builder-slide-theme: #9333ea;
+}
+
+
+@media (max-width: 760px) {
+  .owner-builder-visual-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .owner-builder-visual-full {
+    grid-column: auto;
+  }
+
+  .owner-builder-live-visual {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .owner-builder-live-emoji {
+    width: 100%;
+  }
+}

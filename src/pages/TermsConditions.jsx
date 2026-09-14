@@ -4,6 +4,8 @@ import {
 
 import "./LegalPages.css";
 
+import { hebrewText } from "../data/hebrewText";
+
 
 function TermsConditions() {
   const {
@@ -14,11 +16,14 @@ function TermsConditions() {
 
   const text = (
     english,
-    arabic
+    arabic,
+    hebrew = hebrewText(english)
   ) =>
     language === "ar"
       ? arabic
-      : english;
+      : language === "he"
+        ? hebrew
+        : english;
 
 
   return (
@@ -32,7 +37,7 @@ function TermsConditions() {
             href="/"
             className="legal-logo"
           >
-            🚀 TechMinds
+            🚀 TeachLearn
           </a>
 
 
@@ -67,6 +72,14 @@ function TermsConditions() {
               عربي
             </button>
 
+            <button
+              type="button"
+              className={language === "he" ? "active" : ""}
+              onClick={() => setLanguage("he")}
+            >
+              עברית
+            </button>
+
           </div>
 
         </header>
@@ -79,7 +92,7 @@ function TermsConditions() {
           </div>
 
           <span>
-            TECHMINDS
+            TEACHLEARN
           </span>
 
           <h1>
@@ -91,8 +104,8 @@ function TermsConditions() {
 
           <p>
             {text(
-              "The terms governing access to and use of the TechMinds platform.",
-              "الشروط التي تنظّم الوصول إلى منصة TechMinds واستخدامها."
+              "The terms governing access to and use of the TeachLearn platform.",
+              "الشروط التي تنظّم الوصول إلى منصة TeachLearn واستخدامها."
             )}
           </p>
 
@@ -119,8 +132,8 @@ function TermsConditions() {
 
             <p>
               {text(
-                "By creating an account, accessing TechMinds or purchasing a subscription, you agree to these Terms and Conditions and the applicable Privacy and Refund Policies.",
-                "من خلال إنشاء حساب أو استخدام TechMinds أو شراء اشتراك، فإنك توافق على هذه الشروط والأحكام وسياسة الخصوصية وسياسة الاسترجاع."
+                "By creating an account, accessing TeachLearn or purchasing a subscription, you agree to these Terms and Conditions and the applicable Privacy and Refund Policies.",
+                "من خلال إنشاء حساب أو استخدام TeachLearn أو شراء اشتراك، فإنك توافق على هذه الشروط والأحكام وسياسة الخصوصية وسياسة الاسترجاع."
               )}
             </p>
           </section>
@@ -137,8 +150,8 @@ function TermsConditions() {
 
             <p>
               {text(
-                "TechMinds provides educational programs and digital learning tools including lessons, activities, classroom management, progress tracking, attendance and student portfolios.",
-                "توفر TechMinds برامج تعليمية وأدوات تعلم رقمية تشمل الدروس والأنشطة وإدارة الصفوف وتتبع التقدم والحضور وملفات أعمال الطلاب."
+                "TeachLearn provides educational programs and digital learning tools including lessons, activities, classroom management, progress tracking, attendance and student portfolios.",
+                "توفر TeachLearn برامج تعليمية وأدوات تعلم رقمية تشمل الدروس والأنشطة وإدارة الصفوف وتتبع التقدم والحضور وملفات أعمال الطلاب."
               )}
             </p>
           </section>
@@ -368,7 +381,7 @@ function TermsConditions() {
 
             <p>
               <strong>
-                TechMinds
+                TeachLearn
               </strong>
             </p>
 
@@ -408,7 +421,7 @@ function LegalFooter({
     <footer className="legal-footer">
 
       <span>
-        © 2026 TechMinds
+        © 2026 TeachLearn
       </span>
 
       <div>

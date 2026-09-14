@@ -24,6 +24,8 @@ import {
 
 import "./OwnerAnalytics.css";
 
+import { hebrewText } from "../data/hebrewText";
+
 
 function OwnerAnalytics() {
   const navigate =
@@ -72,6 +74,8 @@ function OwnerAnalytics() {
   ) =>
     language === "ar"
       ? arabic
+      : language === "he"
+        ? hebrewText(english)
       : english;
 
 
@@ -667,12 +671,14 @@ function OwnerAnalytics() {
           >
             {language === "ar"
               ? "↩ العودة للرئيسية"
-              : "← Back to Dashboard"}
+              : language === "he"
+                ? "→ חזרה ללוח הבקרה"
+                : "← Back to Dashboard"}
           </button>
 
 
           <small>
-            TECHMINDS INSIGHTS
+            TEACHLEARN INSIGHTS
           </small>
 
 
@@ -688,7 +694,7 @@ function OwnerAnalytics() {
           <p>
             {text(
               "Understand your users, content and commercial performance.",
-              "تابعي أداء المستخدمين والمحتوى والمبيعات في TechMinds."
+              "تابعي أداء المستخدمين والمحتوى والمبيعات في TeachLearn."
             )}
           </p>
 
@@ -732,6 +738,10 @@ function OwnerAnalytics() {
               }
             >
               عربي
+            </button>
+
+            <button type="button" className={language === "he" ? "active" : ""} onClick={() => setLanguage("he")}>
+              עברית
             </button>
 
           </div>

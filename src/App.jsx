@@ -10,6 +10,7 @@ import ProtectedRoute
 
 import Login
   from "./pages/Login";
+import AboutUs from "./pages/AboutUs";
 
 import Register
   from "./pages/Register";
@@ -31,7 +32,9 @@ import TeacherStudents
 
 import TeacherClasses
   from "./pages/TeacherClasses";
-
+import TeacherClassDetail
+  from "./pages/TeacherClassDetail";
+import OwnerPlans from "./pages/OwnerPlans";
 import TeacherLessons
   from "./pages/TeacherLessons";
 
@@ -56,6 +59,8 @@ import StudentLessonDetails
 
 import StudentPortfolio
   from "./pages/StudentPortfolio";
+import StudentJoinClass
+  from "./pages/StudentJoinClass";
 
 import ProgramsMarketplace
   from "./pages/ProgramsMarketplace";
@@ -100,6 +105,7 @@ function App() {
     <BrowserRouter>
 
       <Routes>
+        <Route path="/about" element={<AboutUs />} />
 
         {/* =================================================
             DEFAULT
@@ -175,7 +181,10 @@ function App() {
           }
         />
 
-
+<Route
+  path="/owner/plans"
+  element={<OwnerPlans />}
+/>
         <Route
           path="/checkout"
           element={
@@ -260,6 +269,17 @@ function App() {
           }
         />
 
+        <Route
+          path="/teacher/classes/:classId"
+          element={
+            <ProtectedRoute
+              allowedRole="teacher"
+            >
+              <TeacherClassDetail />
+            </ProtectedRoute>
+          }
+        />
+
 
         <Route
           path="/teacher/students"
@@ -314,6 +334,7 @@ function App() {
           element={
             <ProtectedRoute
               allowedRole="teacher"
+              requiredPlan="teacherPro"
             >
               <TeacherLessons />
             </ProtectedRoute>
@@ -380,6 +401,17 @@ function App() {
               allowedRole="student"
             >
               <StudentPortfolio />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/join-class"
+          element={
+            <ProtectedRoute
+              allowedRole="student"
+            >
+              <StudentJoinClass />
             </ProtectedRoute>
           }
         />

@@ -31,6 +31,7 @@ import lessonTemplates
   from "../data/lessonTemplates";
 
 import "./TeacherLessons.css";
+import CodingConfigFields from "../components/code/CodingConfigFields";
 
 
 /* =====================================================
@@ -105,13 +106,67 @@ function TeacherLessons() {
   } = useLanguage();
 
 
+  const hebrewLabels = {
+    "Loading lessons...": "השיעורים נטענים...",
+    "Back to Dashboard": "חזרה ללוח הבקרה",
+    "My Lessons": "השיעורים שלי",
+    Lessons: "שיעורים",
+    "Create and manage your classroom lessons.": "יצירה וניהול של שיעורי הכיתה שלך.",
+    "TechMinds Library": "ספריית TechMinds",
+    "Create Custom Lesson": "יצירת שיעור מותאם אישית",
+    "YOUR CONTENT": "התוכן שלך",
+    "Published & Draft Lessons": "שיעורים שפורסמו וטיוטות",
+    "Add Lesson": "הוספת שיעור",
+    "Choose a ready lesson from the library or create your own.": "בחרו שיעור מוכן מהספרייה או צרו שיעור משלכם.",
+    "Create Lesson": "יצירת שיעור",
+    "Published": "פורסם",
+    "Draft": "טיוטה",
+    "Preview": "תצוגה מקדימה",
+    "Edit": "עריכה",
+    "Delete": "מחיקה",
+    "No lessons yet": "עדיין אין שיעורים",
+    "Create your first lesson to start teaching.": "צרו את השיעור הראשון שלכם כדי להתחיל ללמד.",
+    "Create New Lesson": "יצירת שיעור חדש",
+    "Lesson Title": "כותרת השיעור",
+    "Lesson Description": "תיאור השיעור",
+    "Choose a class": "בחירת כיתה",
+    "Select a class": "בחירת כיתה",
+    "Choose lesson type": "בחירת סוג שיעור",
+    "Add Slide": "הוספת שקופית",
+    "Remove Slide": "הסרת שקופית",
+    "Save Lesson": "שמירת שיעור",
+    "Saving...": "שומר...",
+    "Cancel": "ביטול",
+    "Lesson": "שיעור",
+    "Slide": "שקופית",
+    "Slides": "שקופיות",
+    "Content": "תוכן",
+    "Question": "שאלה",
+    "Multiple Choice": "בחירה מרובה",
+    "Task": "משימה",
+    "Challenge": "אתגר",
+    "Summary": "סיכום",
+    "Reflection": "רפלקציה",
+    "Write your answer:": "כתבו את תשובתכם:",
+    "Write your work here:": "כתבו את העבודה שלכם כאן:",
+    "Write your solution:": "כתבו את הפתרון שלכם:",
+    "A lesson must contain at least one slide.": "שיעור חייב להכיל לפחות שקופית אחת.",
+    "Please select a class.": "בחרו כיתה.",
+    "Lesson title is required.": "יש להזין כותרת לשיעור.",
+    "Add at least one slide.": "הוסיפו לפחות שקופית אחת.",
+    "This lesson does not contain presentation slides.": "השיעור הזה אינו מכיל שקופיות להצגה.",
+  };
+
   const text = (
     english,
-    arabic
+    arabic,
+    hebrew = hebrewLabels[english] || english
   ) =>
     language === "ar"
       ? arabic
-      : english;
+      : language === "he"
+        ? hebrew
+        : english;
 
 
   const localized =
@@ -871,6 +926,7 @@ function TeacherLessons() {
         ) => {
 
           const common = {
+            ...(slide.codingConfig ? { codingConfig: slide.codingConfig } : {}),
             id:
               slide.id,
 
@@ -2801,7 +2857,9 @@ function TeacherLessons() {
             {language ===
             "ar"
               ? "↩ لوحة التحكم"
-              : "← Dashboard"}
+              : language === "he"
+                ? "→ לוח הבקרה"
+                : "← Dashboard"}
 
           </button>
 
@@ -2822,7 +2880,8 @@ function TeacherLessons() {
 
             {text(
               "Use ready-made TechMinds lessons or build your own interactive presentation.",
-              "استخدمي دروس TechMinds الجاهزة أو ابنِي درسًا تفاعليًا خاصًا بك."
+              "استخدمي دروس TechMinds الجاهزة أو ابنِي درسًا تفاعليًا خاصًا بك.",
+              "השתמשו בשיעורים מוכנים של TechMinds או בנו מצגת אינטראקטיבית משלכם."
             )}
 
           </p>
@@ -2865,6 +2924,21 @@ function TeacherLessons() {
             }
           >
             عربي
+          </button>
+
+
+          <button
+            type="button"
+            className={
+              language === "he"
+                ? "active"
+                : ""
+            }
+            onClick={() =>
+              setLanguage("he")
+            }
+          >
+            עברית
           </button>
 
         </div>
@@ -2933,8 +3007,8 @@ function TeacherLessons() {
           🚀{" "}
 
           {text(
-            "TechMinds Library",
-            "مكتبة TechMinds"
+            "TeachLearn Library",
+            "مكتبة TeachLearn"
           )}
 
         </button>
@@ -3145,7 +3219,7 @@ function TeacherLessons() {
 
                         {lesson.sourceType ===
                         "library"
-                          ? "🚀 TechMinds"
+                          ? "🚀 TeachLearn"
                           : text(
                               "✏️ Custom Lesson",
                               "✏️ درس خاص"
@@ -3300,7 +3374,7 @@ function TeacherLessons() {
 
 
       {/* =================================================
-          TECHMINDS LIBRARY
+          TEACHLEARN LIBRARY
       ================================================= */}
 
       {activeTab ===
@@ -3318,7 +3392,7 @@ function TeacherLessons() {
             <div>
 
               <small>
-                TECHMINDS
+                TEACHLEARN
               </small>
 
 
@@ -4523,6 +4597,8 @@ function TeacherLessons() {
                             )}
 
 
+                            <CodingConfigFields value={slide.codingConfig} onChange={config => updateCustomSlide(slide.id, "codingConfig", config)} />
+
                             <label className="custom-slide-full">
 
                               {text(
@@ -5371,7 +5447,7 @@ function TeacherLessons() {
 
 
             <small>
-              TECHMINDS LIBRARY
+              TEACHLEARN LIBRARY
             </small>
 
 

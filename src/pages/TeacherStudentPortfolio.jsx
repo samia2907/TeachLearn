@@ -28,6 +28,8 @@ import {
 
 import "./TeacherStudentPortfolio.css";
 
+import { hebrewText } from "../data/hebrewText";
+
 
 function TeacherStudentPortfolio() {
   const navigate =
@@ -75,6 +77,8 @@ function TeacherStudentPortfolio() {
   ) =>
     language === "ar"
       ? arabic
+      : language === "he"
+        ? hebrewText(english)
       : english;
 
 
@@ -436,8 +440,8 @@ function TeacherStudentPortfolio() {
           <p>
 
             {text(
-              "View projects and work saved by the student from TechMinds lessons.",
-              "شاهد المشاريع والأعمال التي حفظها الطالب من دروس TechMinds."
+              "View projects and work saved by the student from TeachLearn lessons.",
+              "شاهد المشاريع والأعمال التي حفظها الطالب من دروس TeachLearn."
             )}
 
           </p>
