@@ -678,7 +678,7 @@ function OwnerAnalytics() {
 
 
           <small>
-            TEACHLEARN INSIGHTS
+            TechMinds INSIGHTS
           </small>
 
 
@@ -694,7 +694,7 @@ function OwnerAnalytics() {
           <p>
             {text(
               "Understand your users, content and commercial performance.",
-              "تابعي أداء المستخدمين والمحتوى والمبيعات في TeachLearn."
+              "تابعي أداء المستخدمين والمحتوى والمبيعات في TechMinds."
             )}
           </p>
 

@@ -39,9 +39,9 @@ const DEFAULT_PLANS = [
     },
 
     description: {
-      en: "Explore TeachLearn before choosing a complete program.",
-      ar: "جرّب TeachLearn قبل الاشتراك ببرنامج كامل.",
-      he: "התנסו ב-TeachLearn לפני בחירת תוכנית מלאה.",
+      en: "Explore TechMinds before choosing a complete program.",
+      ar: "جرّب TechMinds قبل الاشتراك ببرنامج كامل.",
+      he: "התנסו ב-TechMinds לפני בחירת תוכנית מלאה.",
     },
 
     features: {
@@ -1171,9 +1171,9 @@ function OwnerPlans() {
 
           <p>
             {text(
-              "Create the current TeachLearn plans in Firestore.",
-              "أنشئي خطط TeachLearn الحالية داخل Firestore.",
-              "צרו את תוכניות TeachLearn ב-Firestore."
+              "Create the current TechMinds plans in Firestore.",
+              "أنشئي خطط TechMinds الحالية داخل Firestore.",
+              "צרו את תוכניות TechMinds ב-Firestore."
             )}
           </p>
 

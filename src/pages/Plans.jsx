@@ -1,3 +1,4 @@
+import { manualAccessMode } from '../access/programFlow.mjs';
 import {
   useEffect,
   useState,
@@ -26,6 +27,7 @@ import {
 import "./Plans.css";
 
 import { hebrewText } from "../data/hebrewText";
+import { whatsappAccessLink } from "../access/accessText";
 
 function Plans() {
   const navigate =
@@ -69,6 +71,11 @@ function Plans() {
     billingCycle,
     setBillingCycle,
   ] = useState("monthly");
+
+  const [
+    publicSettings,
+    setPublicSettings,
+  ] = useState({});
 
   /* ==============================
      TRANSLATION
@@ -207,7 +214,15 @@ function Plans() {
     // eslint-disable-next-line
   }, []);
 
-  /* ==============================
+  useEffect(() => {
+    getDoc(doc(db, "platformSettings", "public"))
+      .then((snapshot) => {
+        setPublicSettings(snapshot.exists() ? snapshot.data() : {});
+      })
+      .catch(() => setPublicSettings({}));
+  }, []);
+
+    /* ==============================
      STUDENT LEARNING TRACKS
   ============================== */
 
@@ -410,10 +425,10 @@ function Plans() {
         0,
 
       descriptionEn:
-        "Explore TeachLearn before choosing a complete program.",
+        "Explore TechMinds before choosing a complete program.",
 
       descriptionAr:
-        "جرّب TeachLearn قبل الاشتراك بمسار كامل.",
+        "جرّب TechMinds قبل الاشتراك بمسار كامل.",
 
       featuresEn: [
         "Level assessment",
@@ -1017,9 +1032,115 @@ function Plans() {
       ? studentPlans
       : teacherPlans;
 
-  /* ==============================
+  const plansWhatsAppNumber =
+    publicSettings.whatsapp ||
+    publicSettings.supportPhone ||
+    import.meta.env.VITE_WHATSAPP_NUMBER ||
+    "";
+
+  const plansWhatsApp = whatsappAccessLink(plansWhatsAppNumber, {
+    name: userData?.name || userData?.displayName || userData?.username || "",
+    email:
+      userData?.email ||
+      auth.currentUser?.email ||
+      text("No email", "بدون بريد إلكتروني"),
+    programName: text(
+      "TechMinds services and additional options",
+      "خدمات TechMinds والخدمات الإضافية"
+    ),
+    language,
+  });
+
+    /* ==============================
      PAGE
   ============================== */
+
+  if (manualAccessMode) {
+    return (
+      <main className="plans-page" dir={language === "en" ? "ltr" : "rtl"}>
+        <div className="plans-language">
+          <button type="button" className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>English</button>
+          <button type="button" className={language === "ar" ? "active" : ""} onClick={() => setLanguage("ar")}>العربية</button>
+          <button type="button" className={language === "he" ? "active" : ""} onClick={() => setLanguage("he")}>עברית</button>
+        </div>
+
+        <section className="plans-header" style={{ maxWidth: "760px", margin: "48px auto 24px" }}>
+          <div className="plans-logo">💬</div>
+          <h1>
+            {text(
+              "Subscriptions & payments are currently unavailable",
+              "الاشتراك والدفع غير متاحين حاليًا"
+            )}
+          </h1>
+          <p>
+            {text(
+              "We are preparing the in-platform subscription and payment experience. In the meantime, contact us directly for program access, private lessons, courses, custom packages, or any additional service.",
+              "نعمل حاليًا على تجهيز الاشتراك والدفع داخل المنصة. في الوقت الحالي يمكنك التواصل معنا مباشرة للاستفسار عن فتح البرامج، الدروس الخاصة، الدورات، الباقات أو أي خدمات إضافية."
+            )}
+          </p>
+        </section>
+
+        <section
+          className="plans-section"
+          style={{
+            maxWidth: "760px",
+            margin: "0 auto",
+            textAlign: "center",
+          }}
+        >
+          <div
+            className="plan-card recommended-plan"
+            style={{ maxWidth: "620px", margin: "0 auto" }}
+          >
+            <div className="plan-icon">✨</div>
+            <h3>
+              {text(
+                "Need help choosing the right option?",
+                "بدك تعرف أي خدمة أنسب إلك؟"
+              )}
+            </h3>
+            <p className="plan-description">
+              {text(
+                "Message us on WhatsApp and ask about available programs, private lessons, group courses, teacher services, or other learning options.",
+                "ابعث لنا على واتساب واستفسر عن البرامج المتاحة، الدروس الخاصة، الدورات الجماعية، خدمات المعلمين أو أي خيارات تعليمية إضافية."
+              )}
+            </p>
+
+            {plansWhatsApp ? (
+              <a
+                className="plan-button paid-plan-button"
+                href={plansWhatsApp}
+                target="_blank"
+                rel="noreferrer"
+                style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", textDecoration: "none" }}
+              >
+                {text(
+                  "💬 Contact us on WhatsApp",
+                  "💬 تواصل معنا عبر واتساب"
+                )}
+              </a>
+            ) : (
+              <p className="plans-message">
+                {text(
+                  "WhatsApp contact is not configured yet.",
+                  "رقم واتساب للتواصل غير مُعدّ بعد."
+                )}
+              </p>
+            )}
+
+            <button
+              type="button"
+              className="plan-button free-plan-button"
+              onClick={() => navigate(userData?.role === "teacher" ? "/teacher" : "/student")}
+              style={{ marginTop: "12px" }}
+            >
+              {text("Back to dashboard", "العودة للصفحة الرئيسية")}
+            </button>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <div className="plans-page">

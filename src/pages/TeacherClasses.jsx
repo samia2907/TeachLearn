@@ -77,7 +77,7 @@ function TeacherClasses() {
   const [
     grade,
     setGrade,
-  ] = useState("");
+  ] = useState([]);
 
   const [
     learningTrack,
@@ -113,7 +113,7 @@ function TeacherClasses() {
     "Copy code": "העתקת קוד",
     "Open Class": "פתיחת כיתה",
     "No classes yet": "עדיין אין כיתות",
-    "Create your first class and start your TeachLearn learning journey.": "צרו את הכיתה הראשונה שלכם והתחילו את מסע הלמידה שלכם ב-TeachLearn.",
+    "Create your first class and start your TechMinds learning journey.": "צרו את הכיתה הראשונה שלכם והתחילו את מסע הלמידה שלכם ב-TechMinds.",
     "Create Your First Class": "יצירת הכיתה הראשונה",
     "Create New Class": "יצירת כיתה חדשה",
     "Choose the class details and learning program.": "בחרו את פרטי הכיתה ותוכנית הלמידה.",
@@ -284,6 +284,29 @@ function TeacherClasses() {
         "تصميم، صور، عروض ومشاريع رقمية.",
     },
   ];
+
+
+  const gradeOptions = [
+    { value: "Kindergarten", en: "Kindergarten", ar: "بستان / روضة", he: "גן ילדים" },
+    ...Array.from({ length: 12 }, (_, index) => {
+      const value = String(index + 1);
+
+      return {
+        value,
+        en: `Grade ${value}`,
+        ar: `الصف ${value}`,
+        he: `כיתה ${value}`,
+      };
+    }),
+  ];
+
+  const toggleGrade = (value) => {
+    setGrade((current) =>
+      current.includes(value)
+        ? current.filter((item) => item !== value)
+        : [...current, value]
+    );
+  };
 
 
   /* ==================================
@@ -504,7 +527,7 @@ function TeacherClasses() {
 
       if (
         !className.trim() ||
-        !grade ||
+        grade.length === 0 ||
         !learningTrack
       ) {
         setError(
@@ -593,7 +616,8 @@ function TeacherClasses() {
             name:
               className.trim(),
 
-            grade,
+            grade:
+              grade.join(", "),
 
             learningTrack,
 
@@ -650,7 +674,7 @@ function TeacherClasses() {
 
         setClassName("");
 
-        setGrade("");
+        setGrade([]);
 
         setLearningTrack("");
 
@@ -959,8 +983,8 @@ function TeacherClasses() {
 
           <p>
             {text(
-              "Create your first class and start your TeachLearn learning journey.",
-              "أنشئ صفك الأول وابدأ رحلتك التعليمية في TeachLearn."
+              "Create your first class and start your TechMinds learning journey.",
+              "أنشئ صفك الأول وابدأ رحلتك التعليمية في TechMinds."
             )}
           </p>
 
@@ -1064,7 +1088,11 @@ function TeacherClasses() {
                       </span>
 
                       <strong>
-                        {classItem.grade}
+                        {String(classItem.grade || "")
+                          .split(",")
+                          .map((item) => item.trim())
+                          .filter(Boolean)
+                          .join(language === "ar" ? "، " : ", ")}
                       </strong>
 
                     </div>
@@ -1276,96 +1304,94 @@ function TeacherClasses() {
               </label>
 
 
-              <select
-                value={grade}
-                onChange={(event) =>
-                  setGrade(
-                    event.target.value
-                  )
-                }
-                required
+              <div
+                role="group"
+                aria-label={text(
+                  "Choose one or more grades",
+                  "اختر صفًا واحدًا أو أكثر"
+                )}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+                  gap: "8px",
+                  marginTop: "6px",
+                }}
               >
+                {gradeOptions.map((option) => {
+                  const selected =
+                    grade.includes(option.value);
 
-                <option value="">
-                  {text(
-                    "Choose grade",
-                    "اختر الصف"
-                  )}
-                </option>
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() =>
+                        toggleGrade(option.value)
+                      }
+                      style={{
+                        minHeight: "42px",
+                        padding: "9px 8px",
+                        borderRadius: "11px",
+                        border: selected
+                          ? "2px solid #7c3aed"
+                          : "1px solid #ddd6e8",
+                        background: selected
+                          ? "linear-gradient(135deg, #ede9fe, #dbeafe)"
+                          : "#fff",
+                        color: selected
+                          ? "#5b21b6"
+                          : "#4b5563",
+                        fontWeight: selected
+                          ? 850
+                          : 700,
+                        cursor: "pointer",
+                        boxShadow: selected
+                          ? "0 6px 16px rgba(124, 58, 237, 0.12)"
+                          : "none",
+                      }}
+                    >
+                      {text(
+                        option.en,
+                        option.ar,
+                        option.he
+                      )}
 
+                      {selected && (
+                        <span
+                          aria-hidden="true"
+                          style={{
+                            marginInlineStart: "5px",
+                          }}
+                        >
+                          ✓
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
 
-                <option value="Kindergarten">
-                  {text(
-                    "Kindergarten",
-                    "بستان / روضة"
-                  )}
-                </option>
-
-
-                <option value="1">
-                  {text(
-                    "Grade 1",
-                    "الصف الأول"
-                  )}
-                </option>
-
-                <option value="2">
-                  {text(
-                    "Grade 2",
-                    "الصف الثاني"
-                  )}
-                </option>
-
-                <option value="3">
-                  {text(
-                    "Grade 3",
-                    "الصف الثالث"
-                  )}
-                </option>
-
-                <option value="4">
-                  {text(
-                    "Grade 4",
-                    "الصف الرابع"
-                  )}
-                </option>
-
-                <option value="5">
-                  {text(
-                    "Grade 5",
-                    "الصف الخامس"
-                  )}
-                </option>
-
-                <option value="6">
-                  {text(
-                    "Grade 6",
-                    "الصف السادس"
-                  )}
-                </option>
-
-                <option value="7">
-                  {text(
-                    "Grade 7",
-                    "الصف السابع"
-                  )}
-                </option>
-
-                <option value="8">
-                  {text(
-                    "Grade 8",
-                    "الصف الثامن"
-                  )}
-                </option>
-
-                <option value="9">
-                  {text(
-                    "Grade 9",
-                    "الصف التاسع"
-                  )}
-                </option>
-
-              </select>
+              <small
+                style={{
+                  display: "block",
+                  marginTop: "8px",
+                  color: "#7c8598",
+                  lineHeight: 1.6,
+                }}
+              >
+                {grade.length > 0
+                  ? text(
+                      `Selected: ${grade.join(", ")}`,
+                      `المختار: ${grade.join("، ")}`,
+                      `נבחרו: ${grade.join(", ")}`
+                    )
+                  : text(
+                      "You can choose more than one grade.",
+                      "يمكنك اختيار أكثر من صف.",
+                      "אפשר לבחור יותר מכיתה אחת."
+                    )}
+              </small>
 
 
               {/* LEARNING TRACK */}

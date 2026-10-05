@@ -1,0 +1,10 @@
+{
+  "icons": "4 PNG files with correct dimensions, served and precached",
+  "manifest": "valid",
+  "appleTouchIcon": "linked",
+  "serviceWorker": "active and controlling",
+  "installabilityErrors": [],
+  "offlineSPAShell": "passed",
+  "cacheEntries": 19,
+  "physicalDevicesTested": false
+}

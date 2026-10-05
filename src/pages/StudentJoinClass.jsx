@@ -204,20 +204,6 @@ function StudentJoinClass() {
         }
 
 
-        if (
-          student.classId
-        ) {
-          setError(
-            text(
-              "You are already connected to a class.",
-              "أنت منضم إلى صف بالفعل."
-            )
-          );
-
-          return;
-        }
-
-
         const normalized =
           normalizeCode(
             classCode

@@ -508,7 +508,7 @@ function OwnerSales() {
 
 
           <small>
-            TEACHLEARN COMMERCE
+            TechMinds COMMERCE
           </small>
 
 
@@ -1470,8 +1470,8 @@ function OwnerSales() {
               🔒{" "}
 
               {text(
-                "Payment card numbers and CVV are never stored in TeachLearn.",
-                "لا يتم حفظ رقم البطاقة أو CVV داخل TeachLearn."
+                "Payment card numbers and CVV are never stored in TechMinds.",
+                "لا يتم حفظ رقم البطاقة أو CVV داخل TechMinds."
               )}
 
             </div>

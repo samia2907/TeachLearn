@@ -1,0 +1,685 @@
+
+.courses-page {
+  min-height: 100vh;
+  padding: clamp(24px, 4vw, 56px);
+  background:
+    radial-gradient(circle at top right, rgba(124, 77, 255, 0.10), transparent 30%),
+    linear-gradient(180deg, #ac99d0 0%, #fbfaff 100%);
+  color: #2f2538;
+  font-family: inherit;
+}
+
+.courses-page * {
+  box-sizing: border-box;
+}
+
+.courses-hero {
+  max-width: 1180px;
+  margin: 0 auto 48px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
+  gap: 28px;
+  align-items: stretch;
+}
+
+.courses-hero-content,
+.courses-hero-card {
+  border-radius: 28px;
+  border: 1px solid rgba(124, 77, 255, 0.12);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 22px 60px rgba(57, 36, 83, 0.07);
+}
+
+.courses-hero-content {
+  padding: clamp(30px, 5vw, 58px);
+}
+
+.courses-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  background: #f1eaff;
+  color: #272032;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.courses-hero h1 {
+  margin: 0;
+  max-width: 760px;
+  font-size: clamp(34px, 5vw, 62px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: #24192f;
+}
+
+.courses-hero-content > p {
+  max-width: 720px;
+  margin: 22px 0 0;
+  font-size: clamp(16px, 1.8vw, 19px);
+  line-height: 1.9;
+  color: #3b145f;
+}
+
+.courses-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.courses-primary-btn,
+.courses-secondary-btn,
+.course-card-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 20px;
+  border-radius: 15px;
+  text-decoration: none;
+  font: inherit;
+  font-weight: 900;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.courses-primary-btn {
+  color: #fff;
+  background: linear-gradient(135deg, #6d28d9, #8b5cf6);
+  box-shadow: 0 12px 26px rgba(109, 40, 217, 0.18);
+}
+
+.courses-secondary-btn {
+  color: #5f3aa8;
+  border: 1px solid #ddcff0;
+  background: #fff;
+}
+
+.courses-primary-btn:hover,
+.courses-secondary-btn:hover,
+.course-card-btn:hover {
+  transform: translateY(-2px);
+}
+
+.courses-hero-card {
+  padding: 34px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background:
+    linear-gradient(145deg, rgba(64, 38, 104, 0.98), rgba(35, 27, 58, 0.98));
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.courses-hero-card::after {
+  content: "";
+  position: absolute;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  inset-inline-end: -70px;
+  top: -60px;
+  background: rgba(188, 164, 255, 0.15);
+}
+
+.hero-card-icon {
+  position: relative;
+  z-index: 1;
+  display: inline-grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin-bottom: 22px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.10);
+  font-size: 28px;
+}
+
+.courses-hero-card strong,
+.courses-hero-card p {
+  position: relative;
+  z-index: 1;
+}
+
+.courses-hero-card strong {
+  font-size: 24px;
+}
+
+.courses-hero-card p {
+  margin: 12px 0 0;
+  color: rgba(255, 255, 255, 0.80);
+  line-height: 1.8;
+}
+
+.courses-section,
+.zoom-section,
+.registration-preview,
+.courses-footer {
+  max-width: 1180px;
+  margin-inline: auto;
+}
+
+.courses-section {
+  margin-bottom: 44px;
+}
+
+.courses-section-heading {
+  margin-bottom: 22px;
+}
+
+.courses-section-heading > span,
+.registration-copy > span {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: #7c4dff;
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.courses-section-heading h2,
+.registration-copy h2,
+.zoom-section h2 {
+  margin: 0;
+  color: #2c2138;
+  font-size: clamp(27px, 3.6vw, 40px);
+}
+
+.courses-section-heading p,
+.registration-copy p,
+.zoom-section p {
+  margin: 10px 0 0;
+  color: #756a7f;
+  line-height: 1.8;
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.course-card {
+  padding: 24px;
+  border: 1px solid #ebe4f1;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 16px 42px rgba(57, 36, 83, 0.055);
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.course-card:hover {
+  transform: translateY(-4px);
+  border-color: #d8c6ed;
+  box-shadow: 0 22px 48px rgba(57, 36, 83, 0.09);
+}
+
+.course-badge {
+  width: fit-content;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #f3edff;
+  color: #6d28d9;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.course-card h3 {
+  margin: 18px 0 10px;
+  font-size: 23px;
+  color: #2d2038;
+}
+
+.course-card > p {
+  margin: 0;
+  color: #746879;
+  line-height: 1.8;
+}
+
+.course-meta {
+  margin: 20px 0 22px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 9px;
+  color: #5d5267;
+}
+
+.course-meta li {
+  position: relative;
+  padding-inline-start: 20px;
+}
+
+.course-meta li::before {
+  content: "•";
+  position: absolute;
+  inset-inline-start: 0;
+  color: #7c4dff;
+  font-weight: 900;
+}
+
+.course-card-btn {
+  margin-top: auto;
+  width: 100%;
+  border: 0;
+  cursor: pointer;
+  background: #f1eaff;
+  color: #6d28d9;
+}
+
+.course-card-btn:hover {
+  background: #e8ddff;
+  box-shadow: 0 12px 24px rgba(109, 40, 217, 0.08);
+}
+
+.zoom-section {
+  margin-bottom: 44px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  align-items: center;
+  padding: 26px;
+  border-radius: 24px;
+  background: #292039;
+  color: #fff;
+  box-shadow: 0 18px 44px rgba(41, 32, 57, 0.14);
+}
+
+.zoom-icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.10);
+  font-size: 28px;
+}
+
+.zoom-section h2 {
+  color: #fff;
+}
+
+.zoom-section p {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.registration-preview {
+  margin-bottom: 44px;
+  display: grid;
+  grid-template-columns: minmax(250px, 0.65fr) minmax(0, 1.35fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.registration-copy {
+  padding-top: 18px;
+  position: sticky;
+  top: 100px;
+}
+
+/* Modern course registration form */
+
+.course-registration-form {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: clamp(24px, 4vw, 38px);
+  border: 1px solid rgba(124, 77, 255, 0.12);
+  border-radius: 28px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.98),
+      rgba(252, 250, 255, 0.98)
+    );
+  box-shadow:
+    0 24px 70px rgba(57, 36, 83, 0.08),
+    0 4px 16px rgba(57, 36, 83, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.course-registration-form::before {
+  content: "";
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  top: -90px;
+  inset-inline-end: -70px;
+  background: rgba(124, 77, 255, 0.08);
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.course-registration-form::after {
+  content: "";
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  bottom: -80px;
+  inset-inline-start: -55px;
+  background: rgba(214, 197, 255, 0.18);
+  pointer-events: none;
+}
+
+.course-form-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.course-registration-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+}
+
+.course-registration-form label > span {
+  font-size: 14px;
+  font-weight: 800;
+  color: #463857;
+  letter-spacing: -0.01em;
+}
+
+.course-registration-form input,
+.course-registration-form select,
+.course-registration-form textarea {
+  width: 100%;
+  min-height: 50px;
+  box-sizing: border-box;
+  border: 1px solid #e3dbea;
+  border-radius: 16px;
+  padding: 13px 15px;
+  font: inherit;
+  font-size: 15px;
+  color: #2f2538;
+  background: rgba(255, 255, 255, 0.92);
+  outline: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    background 180ms ease;
+}
+
+.course-registration-form textarea {
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.7;
+}
+
+.course-registration-form input:hover,
+.course-registration-form select:hover,
+.course-registration-form textarea:hover {
+  border-color: #cab7de;
+  background: #fff;
+}
+
+.course-registration-form input:focus,
+.course-registration-form select:focus,
+.course-registration-form textarea:focus {
+  border-color: #7c4dff;
+  background: #fff;
+  box-shadow:
+    0 0 0 4px rgba(124, 77, 255, 0.10),
+    0 8px 24px rgba(124, 77, 255, 0.06);
+  transform: translateY(-1px);
+}
+
+.course-form-notes {
+  position: relative;
+  z-index: 1;
+  margin-top: 18px;
+}
+
+.course-form-message {
+  position: relative;
+  z-index: 1;
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.6;
+  border: 1px solid transparent;
+}
+
+.course-form-message.success {
+  background: #ecfdf3;
+  color: #067647;
+  border-color: #c7eed8;
+}
+
+.course-form-message.error {
+  background: #fff1f2;
+  color: #b42318;
+  border-color: #ffd0d5;
+}
+
+.course-submit-btn {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  margin-top: 20px;
+  min-height: 54px;
+  border: 0;
+  border-radius: 17px;
+  padding: 14px 20px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  color: #fff;
+  background:
+    linear-gradient(
+      135deg,
+      #6d28d9 0%,
+      #7c4dff 58%,
+      #8f63ff 100%
+    );
+  box-shadow: 0 14px 28px rgba(109, 40, 217, 0.20);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    opacity 180ms ease;
+}
+
+.course-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px rgba(109, 40, 217, 0.26);
+}
+
+.course-submit-btn:disabled {
+  opacity: 0.62;
+  cursor: wait;
+}
+
+#registration {
+  scroll-margin-top: 100px;
+}
+
+.courses-footer {
+  padding: 26px 0 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid #e9e2ef;
+  color: #75697e;
+}
+
+.courses-footer strong {
+  color: #352641;
+}
+
+@media (max-width: 900px) {
+  .courses-hero,
+  .registration-preview {
+    grid-template-columns: 1fr;
+  }
+
+  .courses-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .registration-copy {
+    position: static;
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 820px) {
+  .courses-page {
+    padding: 18px;
+  }
+
+  .courses-hero-content,
+  .courses-hero-card,
+  .course-registration-form {
+    border-radius: 22px;
+  }
+
+  .course-form-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 520px) {
+  .courses-hero h1 {
+    font-size: 36px;
+  }
+
+  .courses-hero-actions {
+    flex-direction: column;
+  }
+
+  .courses-primary-btn,
+  .courses-secondary-btn {
+    width: 100%;
+  }
+
+  .zoom-section {
+    grid-template-columns: 1fr;
+  }
+
+  .course-registration-form {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .courses-footer {
+    flex-direction: column;
+  }
+}
+
+/* WhatsApp contact */
+
+.courses-whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 12px 20px;
+  border-radius: 15px;
+  text-decoration: none;
+  font-weight: 900;
+  color: #0f6b3d;
+  background: #eafbf2;
+  border: 1px solid #bfead1;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.courses-whatsapp-btn:hover {
+  transform: translateY(-2px);
+  background: #ddf8e9;
+  box-shadow: 0 12px 24px rgba(15, 107, 61, 0.10);
+}
+
+.course-whatsapp-contact {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 52px;
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 17px;
+  text-decoration: none;
+  font-weight: 900;
+  color: #0f6b3d;
+  background: #eafbf2;
+  border: 1px solid #bfead1;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.course-whatsapp-contact:hover {
+  transform: translateY(-2px);
+  background: #ddf8e9;
+  box-shadow: 0 14px 26px rgba(15, 107, 61, 0.12);
+}
+
+.courses-whatsapp-floating {
+  position: fixed;
+  inset-inline-end: 22px;
+  bottom: 22px;
+  z-index: 2500;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  text-decoration: none;
+  background: #25d366;
+  color: #fff;
+  font-size: 27px;
+  box-shadow: 0 14px 34px rgba(37, 211, 102, 0.30);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.courses-whatsapp-floating:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 18px 38px rgba(37, 211, 102, 0.38);
+}
+
+@media (max-width: 520px) {
+  .courses-whatsapp-btn {
+    width: 100%;
+  }
+
+  .courses-whatsapp-floating {
+    width: 54px;
+    height: 54px;
+    inset-inline-end: 16px;
+    bottom: 16px;
+  }
+}
+

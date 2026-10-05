@@ -1,7 +1,16 @@
-import mission01 from './missions/mission01';
-
+import mission01 from "./missions/computer-science-modern-technology/mission01";
+import mission02 from "./missions/computer-science-modern-technology/mission-02-dead-computer";
+import mission03 from "./missions/computer-science-modern-technology/mission-03-secret-message";
+import mission04 from "./missions/computer-science-modern-technology/mission-04-data-packet-journey";
+import mission05 from "./missions/computer-science-modern-technology/mission-05-lab-intrusion";
+import mission06 from "./missions/computer-science-modern-technology/mission-06-save-the-lab";
 const lessonTemplates = [
   mission01,
+  mission02,
+  mission03,
+  mission04,
+  mission05,
+  mission06,
   {
     id: "tech-ai-intro-01",
 

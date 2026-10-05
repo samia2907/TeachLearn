@@ -32,6 +32,8 @@ import lessonTemplates
 
 import "./TeacherLessons.css";
 import CodingConfigFields from "../components/code/CodingConfigFields";
+import { subscribeProgramContent } from "../access/programAccessClient";
+import { programContentType } from "../../functions/programContent.mjs";
 
 
 /* =====================================================
@@ -233,6 +235,11 @@ function TeacherLessons() {
   const [
     lessons,
     setLessons,
+  ] = useState([]);
+
+  const [
+    programLessons,
+    setProgramLessons,
   ] = useState([]);
 
 
@@ -635,6 +642,113 @@ function TeacherLessons() {
     language,
   ]);
 
+
+
+  /* =====================================================
+     PROGRAM ACCESS LESSONS
+  ===================================================== */
+
+  useEffect(() => {
+    const currentUser = auth.currentUser;
+
+    if (!currentUser) {
+      return undefined;
+    }
+
+    let contentStops = [];
+
+    const accessQuery = query(
+      collection(db, "programAccess"),
+      where("userId", "==", currentUser.uid)
+    );
+
+    const stopAccess = onSnapshot(
+      accessQuery,
+      (snapshot) => {
+        contentStops.forEach((stop) => stop());
+        contentStops = [];
+
+        const now = Date.now();
+
+        const programIds = [
+          ...new Set(
+            snapshot.docs
+              .map((item) => item.data())
+              .filter((access) => {
+                if (access.active !== true || !access.programId) return false;
+
+                const expiresAt = access.expiresAt?.toMillis?.();
+                return !expiresAt || expiresAt > now;
+              })
+              .map((access) => access.programId)
+          ),
+        ];
+
+        if (programIds.length === 0) {
+          setProgramLessons([]);
+          return;
+        }
+
+        const lessonsByProgram = new Map();
+
+        const publishProgramLessons = () => {
+          setProgramLessons(
+            Array.from(lessonsByProgram.values()).flat()
+          );
+        };
+
+        programIds.forEach((programId) => {
+          const stop = subscribeProgramContent(
+            programId,
+            (result) => {
+              const programTitle = localized(
+                result?.program?.titleI18n ||
+                result?.program?.title
+              );
+
+              const allowedLessons = (result?.lessons || [])
+                .filter(
+                  (lesson) =>
+                    lesson.status === "published" &&
+                    !lesson.locked &&
+                    programContentType(lesson) === "lesson"
+                )
+                .map((lesson) => ({
+                  ...lesson,
+                  _programId: programId,
+                  _programTitle: programTitle,
+                  _programAccessLesson: true,
+                }));
+
+              lessonsByProgram.set(programId, allowedLessons);
+              publishProgramLessons();
+            },
+            (listenerError) => {
+              console.error(
+                "Teacher program lessons listener error:",
+                listenerError
+              );
+              lessonsByProgram.set(programId, []);
+              publishProgramLessons();
+            }
+          );
+
+          contentStops.push(stop);
+        });
+      },
+      (listenerError) => {
+        console.error(
+          "Teacher program access listener error:",
+          listenerError
+        );
+      }
+    );
+
+    return () => {
+      stopAccess();
+      contentStops.forEach((stop) => stop());
+    };
+  }, [language]);
 
   /* =====================================================
      HELPERS
@@ -2978,7 +3092,7 @@ function TeacherLessons() {
           )}
 
           <span>
-            {lessons.length}
+            {lessons.length + programLessons.length}
           </span>
 
         </button>
@@ -3007,8 +3121,8 @@ function TeacherLessons() {
           🚀{" "}
 
           {text(
-            "TeachLearn Library",
-            "مكتبة TeachLearn"
+            "TechMinds Library",
+            "مكتبة TechMinds"
           )}
 
         </button>
@@ -3126,8 +3240,7 @@ function TeacherLessons() {
           </div>
 
 
-          {lessons.length ===
-          0 ? (
+          {lessons.length === 0 && programLessons.length === 0 ? (
 
             <div className="teacher-lessons-empty">
 
@@ -3219,7 +3332,7 @@ function TeacherLessons() {
 
                         {lesson.sourceType ===
                         "library"
-                          ? "🚀 TeachLearn"
+                          ? "🚀 TechMinds"
                           : text(
                               "✏️ Custom Lesson",
                               "✏️ درس خاص"
@@ -3369,12 +3482,134 @@ function TeacherLessons() {
             </div>
           )}
 
+          {programLessons.length > 0 && (
+            <div style={{ marginTop: "32px" }}>
+              <div className="lessons-section-title">
+                <div>
+                  <small>
+                    {text(
+                      "YOUR UNLOCKED TECHMINDS CONTENT",
+                      "المحتوى المفتوح لك"
+                    )}
+                  </small>
+
+                  <h2>
+                    {text(
+                      "Lessons from your unlocked programs",
+                      "دروس البرامج المفتوحة لك"
+                    )}
+                  </h2>
+                </div>
+
+                <span
+                  style={{
+                    minWidth: "34px",
+                    height: "34px",
+                    padding: "0 10px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "999px",
+                    background: "#ede9fe",
+                    color: "#6d28d9",
+                    fontWeight: 900,
+                  }}
+                >
+                  {programLessons.length}
+                </span>
+              </div>
+
+              <div className="teacher-lessons-grid">
+                {programLessons.map((lesson) => {
+                  const activity =
+                    activityTypes[lesson.activityType] ||
+                    activityTypes.lesson;
+
+                  return (
+                    <article
+                      className="teacher-lesson-card"
+                      key={`program-${lesson._programId}-${lesson.id}`}
+                    >
+                      <div className="teacher-lesson-card-top">
+                        <div className="teacher-lesson-icon">
+                          {activity.icon}
+                        </div>
+
+                        <span className="lesson-status published">
+                          {text("Unlocked", "مفتوح")}
+                        </span>
+                      </div>
+
+                      <div className="lesson-source">
+                        🚀 TechMinds
+                      </div>
+
+                      <small
+                        style={{
+                          display: "block",
+                          marginBottom: "6px",
+                          color: "#7c3aed",
+                          fontWeight: 800,
+                        }}
+                      >
+                        {lesson._programTitle ||
+                          text("TechMinds Program", "برنامج TechMinds")}
+                      </small>
+
+                      <h3>{getLessonTitle(lesson)}</h3>
+
+                      <p>
+                        {getLessonDescription(lesson) ||
+                          text(
+                            "This lesson is included in a program unlocked for your account.",
+                            "هذا الدرس ضمن برنامج تم فتحه لحسابك."
+                          )}
+                      </p>
+
+                      <div className="teacher-lesson-info">
+                        <span>
+                          ⏱ {lesson.estimatedMinutes || 0}{" "}
+                          {text("min", "د")}
+                        </span>
+
+                        <span>
+                          ⭐ +{lesson.xpReward || 0} XP
+                        </span>
+
+                        {Array.isArray(lesson.sections) && (
+                          <span>
+                            🖥 {lesson.sections.length}{" "}
+                            {text("slides", "شرائح")}
+                          </span>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        className="preview-my-lesson-button"
+                        onClick={() =>
+                          navigate(`/programs/${lesson._programId}`)
+                        }
+                      >
+                        🚀{" "}
+                        {text(
+                          "Open program lesson",
+                          "فتح الدرس من البرنامج"
+                        )}
+                      </button>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
         </section>
       )}
 
 
       {/* =================================================
-          TEACHLEARN LIBRARY
+          TechMinds LIBRARY
       ================================================= */}
 
       {activeTab ===
@@ -3392,7 +3627,7 @@ function TeacherLessons() {
             <div>
 
               <small>
-                TEACHLEARN
+                TechMinds
               </small>
 
 
@@ -3455,12 +3690,8 @@ function TeacherLessons() {
                       <span>
 
                         {text(
-                          `Grades ${template.grades.join(
-                            ", "
-                          )}`,
-                          `الصفوف ${template.grades.join(
-                            "، "
-                          )}`
+                          `Grades ${(Array.isArray(template.grades) ? template.grades : []).join(", ")}`,
+                          `الصفوف ${(Array.isArray(template.grades) ? template.grades : []).join("، ")}`
                         )}
 
                       </span>
@@ -5447,7 +5678,7 @@ function TeacherLessons() {
 
 
             <small>
-              TEACHLEARN LIBRARY
+              TechMinds LIBRARY
             </small>
 
 

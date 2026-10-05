@@ -1,0 +1,5 @@
+{
+  "score": 5,
+  "summary": "Scoped static review of users/{uid} self-profile creation/update rules after this change. UID ownership and immutable role/identity checks are retained. Personal updates have an exact changed-field allowlist, bounded name/photo/phone values, a server timestamp, and an en/ar/he language enum. Changed phone values must match the Firebase Auth phone_number claim. Other update branches do not permit self-assignment of role, admin fields, XP, purchases or class permissions. Existing plan-selection/pending-purchase paths remain requests rather than entitlement grants. No new unresolved issue found in this scoped static review. This is not a complete audit of all collections, and rules-engine execution remains unverified because the remote test was previously rejected by approval review and Java is unavailable for the local emulator.",
+  "findings": []
+}

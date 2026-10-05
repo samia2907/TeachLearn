@@ -1,3 +1,4 @@
+import { manualAccessMode, programDestination } from '../access/programFlow.mjs';
 import {
   useEffect,
   useState,
@@ -20,6 +21,7 @@ import {
 import {
   auth,
   db,
+  functions,
 } from "../firebase/firebase";
 
 import {
@@ -28,11 +30,16 @@ import {
 
 import "./Checkout.css";
 import { readPaddleConfig, selectPaddlePrice, programLicenseForRole } from "../firebase/paddleConfig";
+import { studentHasProgramAccess } from "../firebase/studentProgramAccess";
 import { httpsCallable } from "firebase/functions";
-import { functions } from "../firebase/firebase";
 
 import { hebrewText } from "../data/hebrewText";
+import { whatsappAccessLink } from "../access/accessText";
 
+const checkProgramAccess = httpsCallable(
+  functions,
+  "checkProgramAccess"
+);
 
 function Checkout() {
   const [programAccessReady, setProgramAccessReady] = useState(false);
@@ -72,6 +79,16 @@ function Checkout() {
   ] = useState(null);
 
   const [
+    paddleInitialized,
+    setPaddleInitialized,
+  ] = useState(false);
+
+  const [
+    paddleInitializationFailed,
+    setPaddleInitializationFailed,
+  ] = useState(false);
+
+  const [
     userData,
     setUserData,
   ] = useState(null);
@@ -100,6 +117,11 @@ function Checkout() {
     message,
     setMessage,
   ] = useState("");
+
+  const [
+    publicSettings,
+    setPublicSettings,
+  ] = useState({});
 
 
   /* =====================================================
@@ -313,11 +335,20 @@ function Checkout() {
   };
 
 
-  /* =====================================================
+  useEffect(() => {
+    getDoc(doc(db, "platformSettings", "public"))
+      .then((snapshot) => {
+        setPublicSettings(snapshot.exists() ? snapshot.data() : {});
+      })
+      .catch(() => setPublicSettings({}));
+  }, []);
+
+    /* =====================================================
      INITIALIZE PADDLE
   ===================================================== */
 
   useEffect(() => {
+    if (manualAccessMode || !userData) return;
     let active =
       true;
 
@@ -334,6 +365,14 @@ function Checkout() {
             console.error(
               "Missing VITE_PADDLE_CLIENT_TOKEN"
             );
+
+            if (
+              active
+            ) {
+              setPaddleInitializationFailed(
+                true
+              );
+            }
 
             setMessage(
               text(
@@ -421,13 +460,30 @@ function Checkout() {
                 },
             });
 
+          if (
+            !paddleInstance?.Checkout?.open
+          ) {
+            throw new Error(
+                "Paddle did not return a checkout instance."
+            );
+          }
+
 
           if (
             active &&
             paddleInstance
           ) {
             setPaddle(
-              paddleInstance
+                paddleInstance
+            );
+
+            setPaddleInitialized(
+                true
+            );
+
+            console.log(
+                "[Paddle checkout debug] Paddle initialized:",
+                true
             );
           }
 
@@ -438,6 +494,14 @@ function Checkout() {
             "Paddle initialization error:",
             paddleError
           );
+
+          if (
+            active
+          ) {
+            setPaddleInitializationFailed(
+              true
+            );
+          }
 
 
           setMessage(
@@ -458,7 +522,7 @@ function Checkout() {
         false;
     };
 
-  }, []);
+  }, [checkoutType, userData?.role]);
 
 
   /* =====================================================
@@ -505,6 +569,26 @@ function Checkout() {
 
           const data =
             userSnapshot.data();
+
+          if (manualAccessMode) {
+            setUserData(data);
+
+            const programId =
+              searchParams.get("programId") ||
+              data.pendingPurchase?.programId;
+
+            if (programId && !programId.includes("/")) {
+              const snapshot = await getDoc(doc(db, "programs", programId));
+              if (snapshot.exists()) {
+                setProgramData({
+                  id: snapshot.id,
+                  ...snapshot.data(),
+                });
+              }
+            }
+
+            return;
+          }
 
 
           /* =================================================
@@ -678,9 +762,9 @@ function Checkout() {
     let attempts = 0;
     const confirm = async () => {
       try {
-        const response = await httpsCallable(functions, "getPurchasedProgram")({ programId: pendingPurchase.programId, accessOnly: true });
+        const response = await checkProgramAccess({ programId: pendingPurchase.programId });
         if (cancelled) return;
-        if (response.data?.access?.status === "active") {
+        if (response.data?.hasAccess === true) {
           setProgramAccessReady(true);
           return;
         }
@@ -812,20 +896,54 @@ function Checkout() {
   ===================================================== */
 
   const handleSecurePayment =
-    () => {
+    async () => {
       try {
         setMessage("");
+        if (manualAccessMode && checkoutType === "program" && userData?.role === "student") {
+          const hasAccess = await studentHasProgramAccess(
+            httpsCallable(functions, "checkProgramAccess"), pendingPurchase?.programId,
+          );
+          if (hasAccess) navigate(`/programs/${pendingPurchase.programId}`);
+          else setMessage(language === "ar" ? "الدفع قريبًا" : language === "he" ? "התשלום יתווסף בקרוב" : "Payment coming soon");
+          return;
+        }
+
+        console.log(
+          "[Paddle checkout debug] Final payment button clicked:",
+          {
+            checkoutType,
+          }
+        );
+
+        console.log(
+          "[Paddle checkout debug] programId:",
+          pendingPurchase
+            ?.programId ||
+            ""
+        );
+
+        console.log(
+          "[Paddle checkout debug] Paddle initialized:",
+          paddleInitialized
+        );
 
 
         /* =========================
            PADDLE READY?
         ========================= */
 
-        if (!paddle) {
+        if (
+          !paddleInitialized ||
+          !paddle?.Checkout?.open
+        ) {
           setMessage(
             text(
-              "Paddle is still loading. Please try again in a moment.",
-              "نظام الدفع ما زال قيد التحميل. حاولي مرة أخرى بعد لحظة."
+              paddleInitializationFailed
+                ? "Could not initialize Paddle. Please refresh the page and try again."
+                : "Paddle is still loading. Please try again in a moment.",
+              paddleInitializationFailed
+                ? "تعذر تشغيل نظام الدفع Paddle. يرجى تحديث الصفحة والمحاولة مرة أخرى."
+                : "نظام الدفع ما زال قيد التحميل. حاولي مرة أخرى بعد لحظة."
             )
           );
 
@@ -842,7 +960,7 @@ function Checkout() {
 
 
         console.log(
-          "Paddle Price ID:",
+          "[Paddle checkout debug] priceId:",
           priceId
         );
 
@@ -964,6 +1082,25 @@ function Checkout() {
         /* =================================================
            OPEN PADDLE CHECKOUT
         ================================================= */
+
+        if (checkoutType === "program" && userData.role === "student" &&
+            await studentHasProgramAccess(
+              checkProgramAccess, pendingPurchase?.programId,
+            )) {
+          setPaymentLoading(false);
+          navigate(`/programs/${pendingPurchase.programId}`);
+          return;
+        }
+
+        console.log(
+          "[Paddle checkout debug] Opening Paddle.Checkout.open:",
+          {
+            programId: pendingPurchase
+              ?.programId ||
+              "",
+            priceId,
+          }
+        );
 
         paddle.Checkout.open({
           items: [
@@ -1129,6 +1266,140 @@ function Checkout() {
     return null;
   }
 
+  const checkoutWhatsAppNumber =
+    publicSettings.whatsapp ||
+    publicSettings.supportPhone ||
+    import.meta.env.VITE_WHATSAPP_NUMBER ||
+    "";
+
+  const checkoutWhatsApp = whatsappAccessLink(checkoutWhatsAppNumber, {
+    name:
+      userData?.name ||
+      userData?.displayName ||
+      userData?.username ||
+      "",
+    email:
+      userData?.email ||
+      auth.currentUser?.email ||
+      text("No email", "بدون بريد إلكتروني"),
+    programName:
+      localized(programData?.title) ||
+      text(
+        "TechMinds services and additional options",
+        "خدمات TechMinds والخدمات الإضافية"
+      ),
+    language,
+  });
+
+  if (manualAccessMode) {
+    return (
+      <main
+        className="checkout-page"
+        dir={language === "en" ? "ltr" : "rtl"}
+      >
+        <div className="checkout-language">
+          <button type="button" className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>English</button>
+          <button type="button" className={language === "ar" ? "active" : ""} onClick={() => setLanguage("ar")}>العربية</button>
+          <button type="button" className={language === "he" ? "active" : ""} onClick={() => setLanguage("he")}>עברית</button>
+        </div>
+
+        <div className="checkout-header">
+          <div className="checkout-logo">💬</div>
+          <h1>
+            {text(
+              "Online payment is currently unavailable",
+              "الدفع الإلكتروني غير متاح حاليًا"
+            )}
+          </h1>
+          <p>
+            {text(
+              "You can contact us directly to ask about program access, registration, private lessons, courses, custom packages, or other services.",
+              "يمكنك التواصل معنا مباشرة للاستفسار عن فتح البرامج، التسجيل، الدروس الخاصة، الدورات، الباقات أو أي خدمات إضافية."
+            )}
+          </p>
+        </div>
+
+        <div className="checkout-wrapper">
+          <section className="checkout-card">
+            <div className="checkout-plan-title">
+              <div className="checkout-plan-icon">
+                {programData?.icon || "✨"}
+              </div>
+
+              <div>
+                <span>
+                  {text(
+                    "Contact TechMinds",
+                    "تواصل مع TechMinds"
+                  )}
+                </span>
+
+                <h2>
+                  {localized(programData?.title) ||
+                    text(
+                      "Ask about our services",
+                      "استفسر عن خدماتنا"
+                    )}
+                </h2>
+              </div>
+            </div>
+
+            <p>
+              {text(
+                "Send us a WhatsApp message and we’ll help you choose the right option.",
+                "ابعث لنا رسالة على واتساب وسنساعدك باختيار الخيار المناسب."
+              )}
+            </p>
+
+            {checkoutWhatsApp ? (
+              <a
+                className="secure-payment-button"
+                href={checkoutWhatsApp}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  textDecoration: "none",
+                }}
+              >
+                {text(
+                  "💬 Contact us on WhatsApp",
+                  "💬 تواصل معنا عبر واتساب"
+                )}
+              </a>
+            ) : (
+              <div className="checkout-message">
+                {text(
+                  "WhatsApp contact is not configured yet.",
+                  "رقم واتساب للتواصل غير مُعدّ بعد."
+                )}
+              </div>
+            )}
+
+            <button
+              type="button"
+              className="checkout-back"
+              onClick={() =>
+                navigate(
+                  userData?.role === "teacher"
+                    ? "/teacher"
+                    : "/student"
+                )
+              }
+              style={{ marginTop: "14px" }}
+            >
+              {text(
+                "Back to dashboard",
+                "العودة للصفحة الرئيسية"
+              )}
+            </button>
+          </section>
+        </div>
+      </main>
+    );
+  }
 
   /* =====================================================
      INVALID PLAN
@@ -1514,7 +1785,7 @@ function Checkout() {
 
               {userData.name ||
                 userData.username ||
-                "TeachLearn User"}
+                "TechMinds User"}
 
             </strong>
 
@@ -1686,8 +1957,8 @@ function Checkout() {
             🔐{" "}
 
             {text(
-                "Payment is processed securely by Paddle. TeachLearn never stores card numbers or CVV.",
-              "تتم معالجة الدفع بشكل آمن بواسطة Paddle، ولا يقوم TeachLearn بحفظ أرقام البطاقات أو CVV."
+                "Payment is processed securely by Paddle. TechMinds never stores card numbers or CVV.",
+              "تتم معالجة الدفع بشكل آمن بواسطة Paddle، ولا يقوم TechMinds بحفظ أرقام البطاقات أو CVV."
             )}
 
           </div>

@@ -1,17 +1,16 @@
+import { useProgramProgress } from '../progress/useProgramProgress';
+import ProgramContinueCard from '../progress/ProgramContinueCard';
+import ProgressNotice from '../progress/ProgressNotice';
+import { contentPresentation, programContentType } from '../../functions/programContent.mjs';
+import { subscribeProgramContent } from '../access/programAccessClient';
+import './ProgramAccess.css';
 import {
   useEffect,
   useMemo,
   useState,
 } from "react";
 
-import {
-  getApp,
-} from "firebase/app";
 
-import {
-  getFunctions,
-  httpsCallable,
-} from "firebase/functions";
 
 import {
   useNavigate,
@@ -25,11 +24,6 @@ import {
 import "./ProgramLearning.css";
 
 
-const functions =
-  getFunctions(
-    getApp(),
-    "europe-west1"
-  );
 
 
 function ProgramLearning() {
@@ -45,6 +39,7 @@ function ProgramLearning() {
   const {
     language,
     setLanguage,
+    t: translations,
   } = useLanguage();
 
 
@@ -89,10 +84,13 @@ function ProgramLearning() {
     setSelectedLessonId,
   ] = useState("");
 
-  const [
-    upgradeRequired,
-    setUpgradeRequired,
-  ] = useState(false);
+  const upgradeRequired = false;
+  const savedProgress = useProgramProgress(programId, role === 'student');
+  const progressById = new Map(savedProgress.records.map(record => [record.contentId, record]));
+  const lastProgress = [...savedProgress.records]
+    .filter(record => record.status !== 'not_started' && lessons.some(item => item.id === record.contentId))
+    .sort((a, b) => Date.parse(b.updatedAt || 0) - Date.parse(a.updatedAt || 0))[0];
+
 
 
   /* =====================================================
@@ -148,229 +146,25 @@ function ProgramLearning() {
   ===================================================== */
 
   useEffect(() => {
-    let active =
-      true;
-
-
-    const loadProgram =
-      async () => {
-        if (
-          !programId
-        ) {
-          setError(
-            text(
-              "Program ID is missing.",
-              "معرّف البرنامج غير موجود.",
-              "מזהה התוכנית חסר."
-            )
-          );
-
-          setLoading(
-            false
-          );
-
-          return;
-        }
-
-
-        try {
-          setLoading(
-            true
-          );
-
-          setError("");
-          setUpgradeRequired(false);
-
-
-          const getPurchasedProgram =
-            httpsCallable(
-              functions,
-              "getPurchasedProgram"
-            );
-
-
-          const result =
-            await getPurchasedProgram({
-              programId,
-            });
-
-
-          if (
-            !active
-          ) {
-            return;
-          }
-
-
-          const data =
-            result.data;
-
-
-          if (
-            !data?.success
-          ) {
-            throw new Error(
-              "Program could not be loaded."
-            );
-          }
-
-
-          const loadedProgram =
-            data.program ||
-            null;
-
-
-          const loadedLessons =
-            Array.isArray(
-              data.lessons
-            )
-              ? data.lessons
-              : [];
-
-
-          setProgram(
-            loadedProgram
-          );
-
-
-          setLessons(
-            loadedLessons
-          );
-
-
-          setAccess(
-            data.access ||
-            null
-          );
-
-
-          setRole(
-            data.role ||
-            ""
-          );
-
-
-          if (
-            loadedLessons.length >
-            0
-          ) {
-            setSelectedLessonId(
-              loadedLessons[0].id
-            );
-          }
-
-        } catch (
-          loadError
-        ) {
-          console.error(
-            "Secure program load error:",
-            loadError
-          );
-
-
-          if (
-            !active
-          ) {
-            return;
-          }
-
-
-          const code =
-            loadError?.code ||
-            "";
-
-
-          if (
-            code ===
-            "functions/permission-denied"
-          ) {
-            const requiresUpgrade =
-              String(loadError?.message || "")
-                .toLowerCase()
-                .includes("upgrade");
-
-            setUpgradeRequired(
-              requiresUpgrade
-            );
-
-            setError(
-              requiresUpgrade
-                ? text(
-                    "Purchase this program to get access.",
-                    "اشترِ هذا البرنامج للحصول على الوصول.",
-                    "רכשו את התוכנית כדי לקבל גישה."
-                  )
-                : text(
-                    "You do not have access to this program.",
-                    "لا يوجد لديك وصول إلى هذا البرنامج.",
-                    "אין לך גישה לתוכנית הזו."
-                  )
-            );
-
-          } else if (
-            code ===
-            "functions/unauthenticated"
-          ) {
-            setError(
-              text(
-                "Please sign in again.",
-                "يرجى تسجيل الدخول من جديد.",
-                "יש להתחבר מחדש."
-              )
-            );
-
-          } else if (
-            code ===
-            "functions/not-found"
-          ) {
-            setError(
-              text(
-                "This program could not be found.",
-                "لم يتم العثور على هذا البرنامج.",
-                "לא ניתן למצוא את התוכנית הזו."
-              )
-            );
-
-          } else {
-            setError(
-              text(
-                "Could not load the program. Please try again.",
-                "تعذر تحميل البرنامج. حاول مرة أخرى.",
-                "לא ניתן לטעון את התוכנית. נסו שוב."
-              )
-            );
-          }
-
-        } finally {
-          if (
-            active
-          ) {
-            setLoading(
-              false
-            );
-          }
-        }
-      };
-
-
-    loadProgram();
-
-
-    return () => {
-      active =
-        false;
-    };
-
-  }, [
-    programId,
-    language,
-  ]);
+    setLoading(true); setError('');
+    return subscribeProgramContent(programId, data => {
+      setProgram(data.program); setLessons(data.lessons || []); setAccess(data.access);
+      setRole(data.role || ''); setLoading(false); setError('');
+      setSelectedLessonId(current => data.lessons?.some(lesson => lesson.id === current) ? current : data.lessons?.[0]?.id || '');
+    }, failure => {
+      console.error('Program access load failed', failure.code, failure.message);
+      setProgram(null); setLessons([]); setLoading(false);
+      setError(text('Could not load the program. Please try again.', 'تعذر تحميل البرنامج. حاول مجددًا.', 'לא ניתן לטעון את התוכנית. נסו שוב.'));
+    });
+  }, [programId, language]);
 
 
   /* =====================================================
      CURRENT LESSON
   ===================================================== */
 
+  const presentation = contentPresentation(lessons);
+  const selectedMission = programContentType(lessons.find(item => item.id === selectedLessonId)) === 'mission';
   const selectedLesson =
     useMemo(
       () =>
@@ -579,8 +373,7 @@ function ProgramLearning() {
 
   if (
     error ||
-    !program ||
-    !access
+    !program
   ) {
     return (
       <div className="program-learning-denied">
@@ -685,7 +478,7 @@ function ProgramLearning() {
   ===================================================== */
 
   return (
-    <div className="program-learning-page">
+    <div className="program-learning-page" dir={language === "en" ? "ltr" : "rtl"}>
 
       {/* =================================================
           HEADER
@@ -727,7 +520,7 @@ function ProgramLearning() {
             <div>
 
               <strong>
-                TeachLearn
+                TechMinds
               </strong>
 
 
@@ -812,34 +605,11 @@ function ProgramLearning() {
 
             <span>
 
-              {access
-                .licenseType ===
-              "class"
-                ? text(
-                    "Class Access",
-                    "ترخيص صف",
-                    "גישה כיתתית"
-                  )
-                : access
-                    .licenseType ===
-                  "teacher"
-                ? text(
-                    "Teacher Access",
-                    "وصول معلّم",
-                    "גישה למורה"
-                  )
-                : access
-                    .licenseType ===
-                  "student"
-                ? text(
-                    "Student Access",
-                    "وصول طالب"
-                  )
-                : text(
-                    "Owner Preview",
-                    "معاينة المالك",
-                    "תצוגה מקדימה לבעלים"
-                  )}
+              {!access ? text('Preview access', 'وصول للمعاينة', 'גישת התנסות')
+                : role === 'owner' ? text('Owner access', 'وصول المالك', 'גישת בעלים')
+                  : access.classId ? text('Class access', 'وصول الصف', 'גישה כיתתית')
+                    : access.accessScope === 'selected' ? text('Selected lessons', 'دروس محددة', 'שיעורים נבחרים')
+                    : text('Full access', 'وصول كامل', 'גישה מלאה')}
 
             </span>
 
@@ -867,7 +637,7 @@ function ProgramLearning() {
         <div className="program-learning-hero-content">
 
           <small>
-            TEACHLEARN PROGRAM
+            TechMinds PROGRAM
           </small>
 
 
@@ -880,9 +650,9 @@ function ProgramLearning() {
 
             {programDescription ||
               text(
-                "An interactive TeachLearn learning journey.",
-                "رحلة تعليمية تفاعلية من TeachLearn.",
-                "מסע למידה אינטראקטיבי של TeachLearn."
+                "An interactive TechMinds learning journey.",
+                "رحلة تعليمية تفاعلية من TechMinds.",
+                "מסע למידה אינטראקטיבי של TechMinds."
               )}
 
           </p>
@@ -892,15 +662,14 @@ function ProgramLearning() {
 
             <span>
               📚{" "}
-              {lessons.length}{" "}
+              {presentation.lessonNumbers.size}{" "}
 
               {text(
                 "Lessons",
                 "دروس",
                 "שיעורים"
-              )}
+              )} • {lessons.filter(item => programContentType(item) === 'mission').length} {text('Missions', 'مهمات', 'משימות')}
             </span>
-
 
             {program.level && (
               <span>
@@ -948,6 +717,10 @@ function ProgramLearning() {
           CONTENT
       ================================================= */}
 
+      {!access && program.accessType === 'paid' && <div className="access-preview-notice"><button onClick={() => navigate(`/programs/${programId}/access`)}>{text('Unlock the full program · Request access', 'افتح البرنامج كاملًا · طلب الوصول', 'פתחו את התוכנית המלאה · בקשת גישה')}</button></div>}
+      {role === 'student' && <ProgressNotice progress={savedProgress} />}
+      {role === 'student' && lastProgress && <ProgramContinueCard programId={programId} record={lastProgress}
+        title={getLessonTitle(lessons.find(item => item.id === lastProgress.contentId))} />}
       <section className="program-learning-layout">
 
         {/* =================================================
@@ -969,9 +742,9 @@ function ProgramLearning() {
 
             <h2>
               {text(
-                "Lessons",
-                "الدروس",
-                "שיעורים"
+                "Program content",
+                "محتوى البرنامج",
+                "תוכן התוכנית"
               )}
             </h2>
 
@@ -1051,13 +824,10 @@ function ProgramLearning() {
                           lesson.surfaceColor ||
                           "#f5f3ff",
                       }}
-                      onClick={() =>
-                        setSelectedLessonId(
-                          lesson.id
-                        )
-                      }
+                      onClick={() => lesson.locked ? navigate(`/programs/${programId}/access`) : setSelectedLessonId(lesson.id)}
                     >
 
+                      {lesson.preview && <span className="access-badge">{text('Free preview', 'معاينة مجانية', 'התנסות חינם')}</span>}
                       <div className={`program-lesson-number ${
                         lesson.coverImage
                           ? "has-cover"
@@ -1065,6 +835,7 @@ function ProgramLearning() {
                       }`}>
                         {lesson.coverImage && (
                           <img
+                            loading="lazy" decoding="async"
                             src={lesson.coverImage}
                             alt={localized(
                               lesson.imageAlt
@@ -1073,16 +844,16 @@ function ProgramLearning() {
                         )}
 
                         <span>
-                          {index +
-                            1}
+                          {lesson.locked ? '🔒' : presentation.lessonNumbers.get(lesson.id) || '🎯'}
                         </span>
                       </div>
 
 
                       <div className="program-lesson-item-info">
+                        {role === 'student' && savedProgress.ready && !savedProgress.error && <small className="program-content-status">{translations.progress[progressById.get(lesson.id)?.status || 'not_started']}</small>}
 
                         <strong>
-                          {getLessonTitle(
+                          {programContentType(lesson) === 'mission' && <small>{text('Mission', 'مهمة', 'משימה')} · </small>}{getLessonTitle(
                             lesson
                           )}
                         </strong>
@@ -1158,26 +929,9 @@ function ProgramLearning() {
 
         <main className="program-lesson-view">
 
-          {!selectedLesson ? (
+          {selectedLesson?.locked ? <div className="program-select-lesson"><h2>🔒 {getLessonTitle(selectedLesson)}</h2><button className="program-start-lesson" onClick={() => navigate(`/programs/${programId}/access`)}>{text('Request access', 'طلب الوصول', 'בקשת גישה')}</button></div> : !selectedLesson ? (
 
             <div className="program-select-lesson">
-<button
-  type="button"
-  className="program-start-lesson"
-  onClick={() =>
-    navigate(
-      `/programs/${programId}/lessons/${selectedLesson.id}`
-    )
-  }
->
-  ▶️{" "}
-
-  {text(
-    "Start Lesson",
-    "ابدأ الدرس",
-    "התחלת שיעור"
-  )}
-</button>
               <div>
                 🚀
               </div>
@@ -1206,6 +960,13 @@ function ProgramLearning() {
 
             <>
 
+              <button
+                type="button"
+                className="program-start-lesson"
+                onClick={() => navigate(`/programs/${programId}/lessons/${selectedLesson.id}`)}
+              >
+                ▶️ {selectedMission ? text('Start Mission', 'ابدأ المهمة', 'התחלת משימה') : text('Start Lesson', 'ابدأ الدرس', 'התחלת שיעור')}
+              </button>
               <div
                 className="program-current-lesson"
                 style={{
@@ -1244,7 +1005,7 @@ function ProgramLearning() {
                 <div>
 
                   <small>
-                    {text(
+                    {selectedMission ? text("MISSION", "مهمة", "משימה") : text(
                       "CURRENT LESSON",
                       "الدرس الحالي",
                       "השיעור הנוכחי"

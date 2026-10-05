@@ -1080,8 +1080,8 @@ function OwnerSettings() {
 
               <p>
                 {text(
-                  "Basic public information used across TeachLearn.",
-                  "المعلومات الأساسية المستخدمة في منصة TeachLearn."
+                  "Basic public information used across TechMinds.",
+                  "المعلومات الأساسية المستخدمة في منصة TechMinds."
                 )}
               </p>
 
@@ -1117,7 +1117,7 @@ function OwnerSettings() {
                       event.target.value,
                   })
                 }
-                placeholder="TeachLearn"
+                placeholder="TechMinds"
               />
 
             </label>

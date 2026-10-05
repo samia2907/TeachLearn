@@ -1560,7 +1560,7 @@ function OwnerLessonBuilder() {
 
 
               <small>
-                TEACHLEARN
+                TechMinds
               </small>
 
 

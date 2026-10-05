@@ -10,8 +10,12 @@ named Firestore Enterprise database `default` in project `techminds-63e30`.
 - An active owner can manage catalog documents and customer account status.
 - An active teacher can manage only classes, students, lessons, attendance,
   progress feedback, and portfolio records whose `teacherId` is their UID.
-- An active student can write only their own progress, completion, and
-  portfolio records for a published lesson assigned to their class.
+- An active student can write only their own in-progress learning records and
+  portfolio records for a published lesson with an active class membership.
+- `classMembers/{classId}_{studentId}` is the sole class-entitlement source;
+  legacy `users/{uid}.classId` is profile metadata only.
+- The `completeLesson` callable validates completion state against trusted
+  lesson content, then atomically writes the completion receipt and XP.
 - Payment, subscription, purchase, and program-access writes are denied to all
   web clients. The Admin SDK in Cloud Functions is the only trusted writer.
 - Student codes are resolved by a rate-limited Callable Function. It verifies
@@ -23,7 +27,7 @@ named Firestore Enterprise database `default` in project `techminds-63e30`.
 
 | Collection | Reads | Browser writes |
 | --- | --- | --- |
-| `users` | self, owner, assigned teacher | constrained registration/profile/plan/class/XP/status workflows |
+| `users` | self, owner, assigned teacher | constrained registration/profile/plan/status workflows; XP is server-only |
 | `studentLoginIndex` | denied; Cloud Functions only | validated create-only records during student registration |
 | `studentLoginRateLimits` | denied; Cloud Functions only | denied; Cloud Functions only |
 | `classes`, `classCodes` | owner/assigned teacher; students can resolve an active class | owning teacher; immutable IDs and ownership |
@@ -31,7 +35,7 @@ named Firestore Enterprise database `default` in project `techminds-63e30`.
 | `lessons` | owner, owning teacher, assigned student | owner or owning teacher |
 | `attendance` | owner or owning teacher | owning teacher |
 | `lessonProgress` | owner, student self, assigned teacher | student-owned progress or teacher feedback-only |
-| `lessonCompletions` | owner, student self, assigned teacher | immutable student completion receipt |
+| `lessonCompletions` | owner, student self, assigned teacher | denied; `completeLesson` Cloud Function only |
 | `portfolio` | owner, student self, assigned teacher | student self for an assigned lesson |
 | `platformSettings/public` | public | owner only |
 | billing/access collections | owner or record owner where needed | denied; Cloud Functions only |
@@ -42,11 +46,15 @@ named Firestore Enterprise database `default` in project `techminds-63e30`.
 - A web client cannot create an `owner` profile or change any user's role.
 - A user cannot self-activate a paid subscription or grant program access.
 - Teacher access is always tied to the existing record's `teacherId`.
-- XP increments require an immutable `lessonCompletions` document created in
-  the same atomic transaction. The completion ID is `{studentUid}_{lessonId}`,
-  preventing a second reward for the same lesson.
-- Student and class identity fields are immutable outside the explicit join and
-  teacher-management workflows.
+- `completeLesson` validates mission answers against the trusted lesson before
+  atomically creating the immutable completion receipt and incrementing XP.
+  The completion ID is `{studentUid}_{lessonId}`, preventing a second reward.
+- Active `classMembers` records, not student profile `classId`, authorize all
+  class lesson, assignment, and class-license access. A revoked membership
+  cannot fall back to profile metadata.
+- Student profile `classId` cannot be changed by browser clients. Teachers
+  provision an active membership atomically with a new managed student; join,
+  assignment, and revocation flows use trusted callables.
 - Document IDs, field allowlists, timestamps, collection sizes, and common text
   lengths are validated before client writes are accepted.
 
@@ -82,7 +90,7 @@ named Firestore Enterprise database `default` in project `techminds-63e30`.
 | teacher queries or updates another teacher's students | deny |
 | teacher moves a student they do not manage | deny |
 | student submits progress for another student or unassigned lesson | deny |
-| student increments XP without a matching completion receipt | deny |
+| student directly writes XP or a completion receipt | deny; `completeLesson` validates and writes atomically |
 | client writes a purchase, subscription, access, or webhook event | deny |
 | owner reads sales and manages catalog/account status | allow |
 | legitimate student completion transaction | allow |

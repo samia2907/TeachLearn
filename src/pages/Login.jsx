@@ -1,3 +1,4 @@
+import { useAuthNavigation } from '../auth/useAuthNavigation';
 import {
   useEffect,
   useState,
@@ -5,27 +6,22 @@ import {
 
 import {
   GoogleAuthProvider,
-  RecaptchaVerifier,
-  sendPasswordResetEmail,
   signInWithEmailAndPassword,
-  signInWithPhoneNumber,
   signInWithPopup,
   signOut,
 } from "firebase/auth";
 
-import {
-  doc,
-  getDoc,
-} from "firebase/firestore";
+import { loadUserProfile } from "../firebase/userProfile";
+import { requestPasswordReset } from "../firebase/passwordReset";
+import { authMessage } from "../firebase/authMessages";
 
 import {
   Link,
-  useNavigate,
+  useLocation,
 } from "react-router-dom";
 
 import {
   auth,
-  db,
 } from "../firebase/firebase";
 
 import {
@@ -40,7 +36,25 @@ import "./Login.css";
 import WelcomeHero from "../components/WelcomeHero";
 
 function Login() {
-  const navigate = useNavigate();
+  const { navigate } = useAuthNavigation();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash !== "#login-section") {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      document
+        .getElementById("login-section")
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+    }, 80);
+
+    return () => window.clearTimeout(timer);
+  }, [location.hash]);
 
   const {
     language,
@@ -70,35 +84,6 @@ function Login() {
 
   const [showPassword, setShowPassword] =
     useState(false);
-
-  // =========================
-  // PHONE LOGIN
-  // =========================
-
-  const [
-    showPhoneLogin,
-    setShowPhoneLogin,
-  ] = useState(false);
-
-  const [
-    phoneNumber,
-    setPhoneNumber,
-  ] = useState("");
-
-  const [
-    verificationCode,
-    setVerificationCode,
-  ] = useState("");
-
-  const [
-    confirmationResult,
-    setConfirmationResult,
-  ] = useState(null);
-
-  const [
-    codeSent,
-    setCodeSent,
-  ] = useState(false);
 
   // =========================
   // STUDENT LOGIN
@@ -143,65 +128,20 @@ function Login() {
   };
 
   // =========================
-  // CLEANUP RECAPTCHA
-  // =========================
 
-  useEffect(() => {
-    return () => {
-      if (
-        window.recaptchaVerifier
-      ) {
-        try {
-          window.recaptchaVerifier.clear();
-        } catch (
-          cleanupError
-        ) {
-          console.warn(
-            "reCAPTCHA cleanup error:",
-            cleanupError
-          );
-        }
+  const whatsappMessage = text(
+    "Hello, I would like to ask about TechMinds courses and private lessons.",
+    "مرحبًا، أريد الاستفسار عن دورات ودروس TechMinds.",
+    "שלום, אשמח לקבל פרטים על הקורסים והשיעורים של TechMinds."
+  );
 
-        window.recaptchaVerifier =
-          null;
-      }
-    };
-  }, []);
-
-  // =========================
-  // HELPERS
-  // =========================
+  const whatsappUrl =
+    `https://wa.me/972549308793?text=${encodeURIComponent(whatsappMessage)}`;
 
   const clearMessages = () => {
     setError("");
     setSuccess("");
   };
-
-  const resetPhoneLogin = () => {
-    setPhoneNumber("");
-    setVerificationCode("");
-    setConfirmationResult(null);
-    setCodeSent(false);
-
-    if (
-      window.recaptchaVerifier
-    ) {
-      try {
-        window.recaptchaVerifier.clear();
-      } catch (
-        cleanupError
-      ) {
-        console.warn(
-          "reCAPTCHA cleanup error:",
-          cleanupError
-        );
-      }
-
-      window.recaptchaVerifier =
-        null;
-    }
-  };
-
   const openMode = (
     selectedMode
   ) => {
@@ -218,9 +158,6 @@ function Login() {
     setStudentPassword("");
     setStudentLoginMethod("class");
 
-    setShowPhoneLogin(false);
-
-    resetPhoneLogin();
   };
 
   const goBack = () => {
@@ -228,78 +165,18 @@ function Login() {
 
     clearMessages();
 
-    setShowPhoneLogin(false);
-
-    resetPhoneLogin();
   };
 
-  // =========================
-  // PHONE NORMALIZATION
-  // =========================
-
-  const normalizePhoneNumber = (
-    value
-  ) => {
-    const cleaned = value
-      .trim()
-      .replace(
-        /[\s\-()]/g,
-        ""
-      );
-
-    // Israeli format:
-    // 0501234567
-    if (
-      /^05\d{8}$/.test(
-        cleaned
-      )
-    ) {
-      return (
-        "+972" +
-        cleaned.slice(1)
-      );
-    }
-
-    // 972501234567
-    if (
-      /^9725\d{8}$/.test(
-        cleaned
-      )
-    ) {
-      return "+" + cleaned;
-    }
-
-    // International format
-    if (
-      /^\+\d{8,15}$/.test(
-        cleaned
-      )
-    ) {
-      return cleaned;
-    }
-
-    return null;
-  };
-
-  // =========================
-  // VERIFY TEACHER OR OWNER PROFILE
   // =========================
 
   const verifyTeacherProfile =
     async (
       firebaseUser
     ) => {
-      const userSnap =
-        await getDoc(
-          doc(
-            db,
-            "users",
-            firebaseUser.uid
-          )
-        );
+      const userData = await loadUserProfile(firebaseUser);
 
       if (
-        !userSnap.exists()
+        !userData
       ) {
         await signOut(auth);
 
@@ -307,9 +184,6 @@ function Login() {
           "teacher-profile-not-found"
         );
       }
-
-      const userData =
-        userSnap.data();
 
       if (
         userData.role !== "teacher" &&
@@ -336,7 +210,8 @@ function Login() {
       navigate(
         userData.role === "owner"
           ? "/owner"
-          : "/teacher"
+          : "/teacher",
+        { replace: true }
       );
     };
 
@@ -359,11 +234,11 @@ function Login() {
       ) {
         setError(
           text(
-            "No TeachLearn teacher profile is linked to this login method. Create your teacher account first.",
+            "No TechMinds teacher profile is linked to this login method. Create your teacher account first.",
 
-            "لا يوجد حساب معلّم في TeachLearn مرتبط بطريقة الدخول هذه. أنشئ حساب المعلّم أولًا.",
+            "لا يوجد حساب معلّم في TechMinds مرتبط بطريقة الدخول هذه. أنشئ حساب المعلّم أولًا.",
 
-            "לא קיים חשבון מורה ב-TeachLearn המקושר לשיטת ההתחברות הזו. יש ליצור קודם חשבון מורה."
+            "לא קיים חשבון מורה ב-TechMinds המקושר לשיטת ההתחברות הזו. יש ליצור קודם חשבון מורה."
           )
         );
 
@@ -493,22 +368,7 @@ function Login() {
         return;
       }
 
-      if (
-        authError.code ===
-        "auth/invalid-phone-number"
-      ) {
-        setError(
-          text(
-            "The phone number is invalid.",
 
-            "رقم الهاتف غير صحيح.",
-
-            "מספר הטלפון אינו תקין."
-          )
-        );
-
-        return;
-      }
 
       if (
         authError.code ===
@@ -527,41 +387,9 @@ function Login() {
         return;
       }
 
-      if (
-        authError.code ===
-          "auth/invalid-verification-code" ||
-        authError.code ===
-          "auth/code-expired"
-      ) {
-        setError(
-          text(
-            "The verification code is incorrect or expired.",
 
-            "رمز التحقق غير صحيح أو انتهت صلاحيته.",
 
-            "קוד האימות שגוי או שפג תוקפו."
-          )
-        );
 
-        return;
-      }
-
-      if (
-        authError.code ===
-        "auth/captcha-check-failed"
-      ) {
-        setError(
-          text(
-            "reCAPTCHA verification failed. Please try again.",
-
-            "فشل التحقق من reCAPTCHA. حاول مرة أخرى.",
-
-            "אימות reCAPTCHA נכשל. נסו שוב."
-          )
-        );
-
-        return;
-      }
 
       setError(
         text(
@@ -616,100 +444,19 @@ function Login() {
   // RESET PASSWORD
   // =========================
 
-  const handleResetPassword =
-    async () => {
-      clearMessages();
-
-      const normalizedEmail =
-        email
-          .trim()
-          .toLowerCase();
-
-      if (
-        !normalizedEmail
-      ) {
-        setError(
-          text(
-            "Enter your email first, then click Forgot password.",
-
-            "أدخل بريدك الإلكتروني أولًا ثم اضغط نسيت كلمة المرور.",
-
-            "יש להזין תחילה את כתובת האימייל ולאחר מכן ללחוץ על שכחתי סיסמה."
-          )
-        );
-
-        return;
-      }
-
-      setLoading(true);
-
-      try {
-        auth.languageCode =
-          language;
-
-        await sendPasswordResetEmail(
-          auth,
-          normalizedEmail
-        );
-
-        setSuccess(
-          text(
-            "Password reset email sent. Check your inbox and spam folder.",
-
-            "تم إرسال رابط إعادة تعيين كلمة المرور. افحص البريد الوارد ومجلد الرسائل غير المرغوب فيها.",
-
-            "נשלח קישור לאיפוס הסיסמה. בדקו את תיבת הדואר הנכנס ואת תיקיית הספאם."
-          )
-        );
-      } catch (
-        resetError
-      ) {
-        console.error(
-          "Password reset error:",
-          resetError
-        );
-
-        if (
-          resetError.code ===
-          "auth/invalid-email"
-        ) {
-          setError(
-            text(
-              "Please enter a valid email address.",
-
-              "أدخل بريدًا إلكترونيًا صحيحًا.",
-
-              "יש להזין כתובת אימייל תקינה."
-            )
-          );
-        } else if (
-          resetError.code ===
-          "auth/too-many-requests"
-        ) {
-          setError(
-            text(
-              "Too many attempts. Please try again later.",
-
-              "عدد المحاولات كبير جدًا. حاول مرة أخرى لاحقًا.",
-
-              "בוצעו יותר מדי ניסיונות. נסו שוב מאוחר יותר."
-            )
-          );
-        } else {
-          setError(
-            text(
-              "Could not send the reset email. Please try again.",
-
-              "تعذر إرسال رابط إعادة تعيين كلمة المرور. حاول مرة أخرى.",
-
-              "לא ניתן לשלוח את הודעת איפוס הסיסמה. נסו שוב."
-            )
-          );
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleResetPassword = async () => {
+    if (loading) return;
+    clearMessages();
+    setLoading(true);
+    try {
+      await requestPasswordReset(email, language);
+      setSuccess(authMessage('reset-sent', language));
+    } catch (error) {
+      setError(authMessage(error, language, 'reset-failed'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // =========================
   // GOOGLE LOGIN
@@ -736,207 +483,6 @@ function Login() {
           await signInWithPopup(
             auth,
             provider
-          );
-
-        await verifyTeacherProfile(
-          result.user
-        );
-      } catch (
-        authError
-      ) {
-        handleTeacherAuthError(
-          authError
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-  // =========================
-  // RECAPTCHA
-  // =========================
-
-  const setupRecaptcha = () => {
-    if (
-      window.recaptchaVerifier
-    ) {
-      try {
-        window.recaptchaVerifier.clear();
-      } catch (
-        cleanupError
-      ) {
-        console.warn(
-          "reCAPTCHA cleanup error:",
-          cleanupError
-        );
-      }
-
-      window.recaptchaVerifier =
-        null;
-    }
-
-    auth.languageCode =
-      language;
-
-    window.recaptchaVerifier =
-      new RecaptchaVerifier(
-        auth,
-        "recaptcha-container",
-        {
-          size: "normal",
-
-          "expired-callback":
-            () => {
-              setError(
-                text(
-                  "reCAPTCHA expired. Please verify again.",
-
-                  "انتهت صلاحية reCAPTCHA. يرجى التحقق مرة أخرى.",
-
-                  "תוקף אימות reCAPTCHA פג. יש לבצע אימות מחדש."
-                )
-              );
-            },
-        }
-      );
-
-    return window
-      .recaptchaVerifier;
-  };
-
-  // =========================
-  // SEND PHONE CODE
-  // =========================
-
-  const handleSendPhoneCode =
-    async () => {
-      clearMessages();
-
-      const normalizedPhone =
-        normalizePhoneNumber(
-          phoneNumber
-        );
-
-      if (
-        !normalizedPhone
-      ) {
-        setError(
-          text(
-            "Enter a valid phone number, for example 0501234567.",
-
-            "أدخل رقم هاتف صحيحًا، مثل 0501234567.",
-
-            "יש להזין מספר טלפון תקין, לדוגמה 0501234567."
-          )
-        );
-
-        return;
-      }
-
-      setLoading(true);
-
-      try {
-        const appVerifier =
-          setupRecaptcha();
-
-        const result =
-          await signInWithPhoneNumber(
-            auth,
-            normalizedPhone,
-            appVerifier
-          );
-
-        setConfirmationResult(
-          result
-        );
-
-        setCodeSent(true);
-
-        setSuccess(
-          text(
-            "A verification code was sent by SMS.",
-
-            "تم إرسال رمز التحقق برسالة SMS.",
-
-            "קוד אימות נשלח בהודעת SMS."
-          )
-        );
-      } catch (
-        authError
-      ) {
-        handleTeacherAuthError(
-          authError
-        );
-
-        if (
-          window.recaptchaVerifier
-        ) {
-          try {
-            window.recaptchaVerifier.clear();
-          } catch (
-            cleanupError
-          ) {
-            console.warn(
-              "reCAPTCHA cleanup error:",
-              cleanupError
-            );
-          }
-
-          window.recaptchaVerifier =
-            null;
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-  // =========================
-  // VERIFY PHONE CODE
-  // =========================
-
-  const handleVerifyPhoneCode =
-    async () => {
-      clearMessages();
-
-      if (
-        !confirmationResult
-      ) {
-        setError(
-          text(
-            "Send the SMS code first.",
-
-            "أرسل رمز SMS أولًا.",
-
-            "יש לשלוח תחילה קוד SMS."
-          )
-        );
-
-        return;
-      }
-
-      if (
-        verificationCode.trim()
-          .length !== 6
-      ) {
-        setError(
-          text(
-            "Enter the 6-digit verification code.",
-
-            "أدخل رمز التحقق المكوّن من 6 أرقام.",
-
-            "יש להזין קוד אימות בן 6 ספרות."
-          )
-        );
-
-        return;
-      }
-
-      setLoading(true);
-
-      try {
-        const result =
-          await confirmationResult.confirm(
-            verificationCode.trim()
           );
 
         await verifyTeacherProfile(
@@ -991,9 +537,7 @@ function Login() {
             studentPassword,
         });
 
-        navigate(
-          "/student"
-        );
+        navigate("/student", { replace: true });
       } catch (
         authError
       ) {
@@ -1088,16 +632,12 @@ function Login() {
 
   const verifyIndependentStudentProfile =
     async (firebaseUser) => {
-      const userSnap = await getDoc(
-        doc(db, "users", firebaseUser.uid)
-      );
+      const userData = await loadUserProfile(firebaseUser);
 
-      if (!userSnap.exists()) {
+      if (!userData) {
         await signOut(auth);
         throw new Error("student-profile-not-found");
       }
-
-      const userData = userSnap.data();
       const belongsToClass =
         userData.studentAccountType === "class" ||
         (!userData.studentAccountType &&
@@ -1119,7 +659,7 @@ function Login() {
         throw new Error("class-student-use-code");
       }
 
-      navigate("/student");
+      navigate("/student", { replace: true });
     };
 
   const handleIndependentStudentLogin =
@@ -1297,91 +837,6 @@ function Login() {
         : 1,
     };
 
-  const phoneBoxStyle =
-    {
-      width: "100%",
-
-      boxSizing:
-        "border-box",
-
-      marginTop:
-        "12px",
-
-      padding: "16px",
-
-      border:
-        "1px solid #e8e2ed",
-
-      borderRadius:
-        "14px",
-
-      background:
-        "#faf9fc",
-    };
-
-  const phoneInputStyle =
-    {
-      width: "100%",
-
-      boxSizing:
-        "border-box",
-
-      minHeight:
-        "44px",
-
-      margin:
-        "7px 0 12px",
-
-      padding:
-        "10px 12px",
-
-      border:
-        "1px solid #d7d0de",
-
-      borderRadius:
-        "10px",
-
-      fontSize:
-        "14px",
-
-      outline:
-        "none",
-    };
-
-  const phoneActionStyle =
-    {
-      width: "100%",
-
-      minHeight:
-        "44px",
-
-      border:
-        "none",
-
-      borderRadius:
-        "10px",
-
-      background:
-        "#6d28d9",
-
-      color:
-        "#ffffff",
-
-      fontSize:
-        "14px",
-
-      fontWeight:
-        "800",
-
-      cursor: loading
-        ? "not-allowed"
-        : "pointer",
-
-      opacity: loading
-        ? 0.6
-        : 1,
-    };
-
   const successStyle =
     {
       width: "100%",
@@ -1415,59 +870,7 @@ function Login() {
   // LANGUAGE BUTTONS
   // =========================
 
-  const languageBarStyle =
-    {
-      display: "flex",
-
-      justifyContent:
-        "center",
-
-      alignItems:
-        "center",
-
-      flexWrap:
-        "wrap",
-
-      gap: "8px",
-
-      marginBottom:
-        "20px",
-    };
-
-  const languageButtonStyle =
-    (
-      selectedLanguage
-    ) => ({
-      padding:
-        "7px 12px",
-
-      borderRadius:
-        "20px",
-
-      border:
-        language ===
-        selectedLanguage
-          ? "2px solid #6d28d9"
-          : "1px solid #ded7e5",
-
-      background:
-        language ===
-        selectedLanguage
-          ? "#f3e8ff"
-          : "#ffffff",
-
-      color:
-        language ===
-        selectedLanguage
-          ? "#6d28d9"
-          : "#4b5563",
-
-      fontWeight:
-        "700",
-
-      cursor:
-        "pointer",
-    });
+  
 
   // =========================
   // JSX
@@ -1477,53 +880,64 @@ function Login() {
     <div className="login-page">
 
       {/* LANGUAGE SWITCHER */}
-
       <div
-        style={
-          languageBarStyle
-        }
+        style={{
+          position: "fixed",
+          top: "18px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "8px",
+          padding: "4px",
+          borderRadius: "999px",
+          background: "rgba(255,255,255,0.96)",
+          boxShadow: "0 6px 20px rgba(50, 35, 70, 0.08)",
+          zIndex: 99999,
+          direction: "ltr",
+          pointerEvents: "auto",
+        }}
       >
-        <button
-          type="button"
-          style={languageButtonStyle(
-            "en"
-          )}
-          onClick={() =>
-            changeLanguage(
-              "en"
-            )
-          }
-        >
-          English
-        </button>
+        {[
+          { code: "en", label: "English" },
+          { code: "ar", label: "العربية" },
+          { code: "he", label: "עברית" },
+        ].map((item) => {
+          const active = language === item.code;
 
-        <button
-          type="button"
-          style={languageButtonStyle(
-            "ar"
-          )}
-          onClick={() =>
-            changeLanguage(
-              "ar"
-            )
-          }
-        >
-          العربية
-        </button>
-
-        <button
-          type="button"
-          style={languageButtonStyle(
-            "he"
-          )}
-          onClick={() =>
-            changeLanguage(
-              "he"
-            )
-          }
-        >
-          עברית
-        </button>
+          return (
+            <button
+              key={item.code}
+              type="button"
+              onClick={() => changeLanguage(item.code)}
+              aria-pressed={active}
+              style={{
+                minWidth: "84px",
+                minHeight: "38px",
+                padding: "8px 14px",
+                borderRadius: "999px",
+                border: active
+                  ? "2px solid #6d28d9"
+                  : "1px solid #ddd6e8",
+                background: active
+                  ? "#f3e8ff"
+                  : "#ffffff",
+                color: active
+                  ? "#6d28d9"
+                  : "#4b5563",
+                fontWeight: 800,
+                cursor: "pointer",
+                position: "relative",
+                zIndex: 100000,
+                pointerEvents: "auto",
+                touchAction: "manipulation",
+              }}
+            >
+              {item.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* BRAND */}
@@ -1534,7 +948,7 @@ function Login() {
         </div>
 
         <h1>
-          TeachLearn
+          TechMinds
         </h1>
 
         <p>
@@ -1555,7 +969,7 @@ function Login() {
       ===================== */}
 
       {!mode && (
-        <div className="login-choice">
+        <div className="login-choice" id="login-section" style={{ scrollMarginTop: "90px" }}>
 
           {/* TEACHER */}
 
@@ -1718,6 +1132,7 @@ function Login() {
             )}
           </p>
 
+          <>
           <form
             onSubmit={
               handleTeacherLogin
@@ -1906,249 +1321,7 @@ function Login() {
               "המשך באמצעות Google"
             )}
           </button>
-
-          {/* PHONE */}
-
-          <button
-            type="button"
-
-            onClick={() => {
-              clearMessages();
-
-              setShowPhoneLogin(
-                (
-                  current
-                ) =>
-                  !current
-              );
-            }}
-
-            disabled={
-              loading
-            }
-
-            style={
-              alternativeButtonStyle
-            }
-          >
-            📱&nbsp;&nbsp;
-
-            {text(
-              "Continue with phone number",
-
-              "المتابعة باستخدام رقم الهاتف",
-
-              "המשך באמצעות מספר טלפון"
-            )}
-          </button>
-
-          {/* PHONE LOGIN BOX */}
-
-          {showPhoneLogin && (
-            <div
-              style={
-                phoneBoxStyle
-              }
-            >
-              {!codeSent ? (
-                <>
-                  <label>
-                    {text(
-                      "Phone number",
-                      "رقم الهاتف",
-                      "מספר טלפון"
-                    )}
-                  </label>
-
-                  <input
-                    type="tel"
-
-                    placeholder="0501234567"
-
-                    value={
-                      phoneNumber
-                    }
-
-                    onChange={(
-                      e
-                    ) =>
-                      setPhoneNumber(
-                        e.target
-                          .value
-                      )
-                    }
-
-                    style={
-                      phoneInputStyle
-                    }
-                  />
-
-                  <div
-                    id="recaptcha-container"
-
-                    style={{
-                      marginBottom:
-                        "12px",
-                    }}
-                  />
-
-                  <button
-                    type="button"
-
-                    onClick={
-                      handleSendPhoneCode
-                    }
-
-                    disabled={
-                      loading
-                    }
-
-                    style={
-                      phoneActionStyle
-                    }
-                  >
-                    {loading
-                      ? text(
-                          "Sending...",
-                          "جارٍ الإرسال...",
-                          "שולח..."
-                        )
-                      : text(
-                          "Send verification code",
-
-                          "إرسال رمز التحقق",
-
-                          "שליחת קוד אימות"
-                        )}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <label>
-                    {text(
-                      "Verification code",
-
-                      "رمز التحقق",
-
-                      "קוד אימות"
-                    )}
-                  </label>
-
-                  <input
-                    type="text"
-
-                    inputMode="numeric"
-
-                    maxLength={
-                      6
-                    }
-
-                    placeholder="123456"
-
-                    value={
-                      verificationCode
-                    }
-
-                    onChange={(
-                      e
-                    ) =>
-                      setVerificationCode(
-                        e.target.value
-                          .replace(
-                            /\D/g,
-                            ""
-                          )
-                          .slice(
-                            0,
-                            6
-                          )
-                      )
-                    }
-
-                    style={
-                      phoneInputStyle
-                    }
-                  />
-
-                  <button
-                    type="button"
-
-                    onClick={
-                      handleVerifyPhoneCode
-                    }
-
-                    disabled={
-                      loading
-                    }
-
-                    style={
-                      phoneActionStyle
-                    }
-                  >
-                    {loading
-                      ? text(
-                          "Verifying...",
-                          "جارٍ التحقق...",
-                          "מאמת..."
-                        )
-                      : text(
-                          "Verify and login",
-
-                          "تحقق وسجّل الدخول",
-
-                          "אימות והתחברות"
-                        )}
-                  </button>
-
-                  <button
-                    type="button"
-
-                    onClick={() => {
-                      resetPhoneLogin();
-
-                      clearMessages();
-                    }}
-
-                    style={{
-                      width:
-                        "100%",
-
-                      marginTop:
-                        "10px",
-
-                      padding:
-                        "4px",
-
-                      border:
-                        "none",
-
-                      background:
-                        "transparent",
-
-                      color:
-                        "#6d28d9",
-
-                      fontWeight:
-                        "700",
-
-                      cursor:
-                        "pointer",
-                    }}
-                  >
-                    {text(
-                      "Use another phone number",
-
-                      "استخدم رقم هاتف آخر",
-
-                      "השתמשו במספר טלפון אחר"
-                    )}
-                  </button>
-                </>
-              )}
-            </div>
-          )}
-
-          {/* ERRORS */}
+          </>
 
           {error && (
             <p className="login-error">
@@ -2262,6 +1435,7 @@ function Login() {
             </button>
           </div>
 
+          <>
           <form
             onSubmit={
               studentLoginMethod === "class"
@@ -2287,11 +1461,11 @@ function Login() {
               type="text"
 
               placeholder={text(
-                "Example: TL-7K29PQ",
+                "Example: TM-7K29PQ",
 
-                "مثال: TL-7K29PQ",
+                "مثال: TM-7K29PQ",
 
-                "לדוגמה: TL-7K29PQ"
+                "לדוגמה: TM-7K29PQ"
               )}
 
               id="student-code"
@@ -2460,10 +1634,86 @@ function Login() {
               </button>
             )}
           </form>
+          </>
         </div>
       )}
+      <a
+        href={whatsappUrl}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={text(
+          "Contact us on WhatsApp",
+          "تواصل معنا عبر واتساب",
+          "יצירת קשר ב-WhatsApp"
+        )}
+        title={text(
+          "Contact us on WhatsApp",
+          "تواصل معنا عبر واتساب",
+          "יצירת קשר ב-WhatsApp"
+        )}
+        style={{
+          position: "fixed",
+          insetInlineEnd: "22px",
+          bottom: "22px",
+          zIndex: 99990,
+          width: "58px",
+          height: "58px",
+          borderRadius: "50%",
+          display: "grid",
+          placeItems: "center",
+          textDecoration: "none",
+          background: "#25D366",
+          color: "#ffffff",
+          fontSize: "28px",
+          boxShadow: "0 14px 34px rgba(37, 211, 102, 0.30)",
+          border: "3px solid rgba(255,255,255,0.95)",
+          transition: "transform 180ms ease, box-shadow 180ms ease",
+          cursor: "pointer",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = "translateY(-3px) scale(1.04)";
+          e.currentTarget.style.boxShadow =
+            "0 18px 38px rgba(37, 211, 102, 0.38)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = "translateY(0) scale(1)";
+          e.currentTarget.style.boxShadow =
+            "0 14px 34px rgba(37, 211, 102, 0.30)";
+        }}
+      >
+        💬
+      </a>
+
       <footer className="login-about-footer">
-        <Link to="/about">{text("About Us", "من نحن", "אודותינו")}</Link>
+        <Link
+          className="login-guest-cta"
+          to="/programs"
+        >
+          {text(
+            "Browse as Guest",
+            "تصفح كضيف",
+            "גלישה כאורח"
+          )}
+        </Link>
+
+        <Link
+          className="login-guest-cta"
+          to="/courses"
+        >
+          {text(
+            "Courses & Private Lessons",
+            "الدورات والدروس الخاصة",
+            "קורסים ושיעורים פרטיים"
+          )}
+        </Link>
+
+        <Link to="/about">
+          {text(
+            "About Us",
+            "من نحن",
+            "אודותינו"
+          )}
+        </Link>
       </footer>
     </div>
   );

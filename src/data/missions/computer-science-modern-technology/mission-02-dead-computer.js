@@ -938,4 +938,4 @@ Byte מצא קובץ מוזר.
   ],
 };
 
-export default mission_02_dead_computer;
+export default mission02;

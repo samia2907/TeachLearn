@@ -11,13 +11,15 @@ import {
   doc,
   getDoc,
   getDocs,
-  increment,
   query,
-  runTransaction,
   serverTimestamp,
   setDoc,
   where,
 } from "firebase/firestore";
+
+import {
+  httpsCallable,
+} from "firebase/functions";
 
 import {
   useNavigate,
@@ -27,6 +29,7 @@ import {
 import {
   auth,
   db,
+  functions,
 } from "../firebase/firebase";
 
 import {
@@ -494,21 +497,26 @@ function StudentLessonDetails() {
           };
 
 
-          /*
-            Extra safety:
-            student can only open
-            lessons from their class.
-          */
+          if (lessonData.classId) {
+            const membershipSnapshot =
+              await getDoc(
+                doc(
+                  db,
+                  "classMembers",
+                  `${lessonData.classId}_${currentUser.uid}`
+                )
+              );
 
-          if (
-            lessonData.classId &&
-            studentData.classId &&
-            lessonData.classId !==
-              studentData.classId
-          ) {
-            throw new Error(
-              "wrong-class"
-            );
+            if (
+              !membershipSnapshot.exists() ||
+              membershipSnapshot.data().status !== "active" ||
+              membershipSnapshot.data().studentId !== currentUser.uid ||
+              membershipSnapshot.data().classId !== lessonData.classId
+            ) {
+              throw new Error(
+                "wrong-class"
+              );
+            }
           }
 
 
@@ -1501,196 +1509,39 @@ const addTaskToPortfolio =
         );
 
 
-        const completionId =
-          `${currentUser.uid}_${lesson.id}`;
+        const response =
+          await httpsCallable(
+            functions,
+            "completeLesson"
+          )({
+            lessonId:
+              lesson.id,
 
+            progress: {
+              currentSlide,
+              maxUnlockedSlide,
+              selectedAnswers,
+              answerResults,
+              taskAnswers,
+            },
+          });
 
-        const completionRef =
-          doc(
-            db,
-            "lessonCompletions",
-            completionId
+        const {
+          xp: reward,
+          alreadyCompleted,
+        } =
+          response.data ||
+          {};
+
+        if (
+          !Number.isFinite(reward) ||
+          typeof alreadyCompleted !==
+          "boolean"
+        ) {
+          throw new Error(
+            "invalid-completion-response"
           );
-
-
-        const progressRef =
-          doc(
-            db,
-            "lessonProgress",
-            completionId
-          );
-
-
-        const studentRef =
-          doc(
-            db,
-            "users",
-            currentUser.uid
-          );
-
-
-        const reward =
-          Number(
-            lesson.xpReward ||
-            0
-          );
-
-
-        let alreadyCompleted =
-          false;
-
-
-        await runTransaction(
-          db,
-
-          async (
-            transaction
-          ) => {
-
-            const completionSnapshot =
-              await transaction.get(
-                completionRef
-              );
-
-
-            if (
-              completionSnapshot.exists()
-            ) {
-              alreadyCompleted =
-                true;
-
-              return;
-            }
-
-
-            transaction.set(
-              completionRef,
-
-              {
-                studentId:
-                  currentUser.uid,
-
-                studentName:
-                  studentProfile?.name ||
-                  "",
-
-                lessonId:
-                  lesson.id,
-
-                lessonTitle:
-                  getLessonTitle(),
-
-                teacherId:
-                  lesson.teacherId ||
-                  studentProfile?.teacherId ||
-                  "",
-
-                classId:
-                  lesson.classId ||
-                  studentProfile?.classId ||
-                  "",
-
-                className:
-                  lesson.className ||
-                  studentProfile?.className ||
-                  "",
-
-                xpReward:
-                  reward,
-
-                completedAt:
-                  serverTimestamp(),
-              }
-            );
-
-
-            transaction.update(
-              studentRef,
-
-              {
-                xp:
-                  increment(
-                    reward
-                  ),
-
-                completedLessons:
-                  increment(1),
-
-                lastCompletedLessonId:
-                  lesson.id,
-
-                updatedAt:
-                  serverTimestamp(),
-              }
-            );
-
-
-            transaction.set(
-              progressRef,
-
-              {
-                studentId:
-                  currentUser.uid,
-
-                studentName:
-                  studentProfile?.name ||
-                  "",
-
-                lessonId:
-                  lesson.id,
-
-                lessonTitle:
-                  getLessonTitle(),
-
-                teacherId:
-                  lesson.teacherId ||
-                  studentProfile?.teacherId ||
-                  "",
-
-                classId:
-                  lesson.classId ||
-                  studentProfile?.classId ||
-                  "",
-
-                className:
-                  lesson.className ||
-                  studentProfile?.className ||
-                  "",
-
-                currentSlide:
-                  Math.max(
-                    totalSlides - 1,
-                    0
-                  ),
-
-                maxUnlockedSlide:
-                  Math.max(
-                    totalSlides - 1,
-                    0
-                  ),
-
-                selectedAnswers,
-
-                answerResults,
-
-                taskAnswers,
-
-                status:
-                  "completed",
-
-                completedAt:
-                  serverTimestamp(),
-
-                updatedAt:
-                  serverTimestamp(),
-              },
-
-              {
-                merge: true,
-              }
-            );
-          }
-        );
+        }
 
 
         setLessonCompleted(
@@ -2873,7 +2724,7 @@ const addTaskToPortfolio =
           <div>
 
             <span>
-              TEACHLEARN
+              TechMinds
             </span>
 
 
@@ -3226,8 +3077,8 @@ const addTaskToPortfolio =
           <span>
 
             {text(
-              "TEACHLEARN INTERACTIVE LESSON",
-              "درس تفاعلي من TeachLearn"
+              "TechMinds INTERACTIVE LESSON",
+              "درس تفاعلي من TechMinds"
             )}
 
           </span>

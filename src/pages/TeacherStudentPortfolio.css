@@ -1,735 +1,97 @@
-* {
+.teacher-student-portfolio-page,
+.teacher-student-portfolio-page * { 
+
   box-sizing: border-box;
+
 }
+
+
+
+:root {
+
+  --portfolio-bg: #f7f6fb;
+
+  --portfolio-surface: rgba(255, 255, 255, 0.9);
+
+  --portfolio-surface-solid: #ffffff;
+
+
+
+  --portfolio-text: #172033;
+
+  --portfolio-muted: #718096;
+
+  --portfolio-soft-muted: #9aa7bb;
+
+
+
+  --portfolio-purple: #6f45c6;
+
+  --portfolio-purple-dark: #56339f;
+
+  --portfolio-blue: #6477d8;
+
+  --portfolio-cyan: #66a8b8;
+
+
+
+  --portfolio-border: #e5eaf2;
+
+
+
+  --portfolio-shadow:
+
+    0 18px 45px rgba(15, 23, 42, 0.07);
+
+
+
+  --portfolio-shadow-hover:
+
+    0 24px 60px rgba(15, 23, 42, 0.12);
+
+}
+
+
+
+/* =========================================================
+
+   PAGE
+
+\========================================================= */
+
 
 
 .teacher-student-portfolio-page {
-  min-height: 100vh;
 
-  padding:
-    32px 38px 70px;
-
-  font-family:
-    "Segoe UI",
-    Tahoma,
-    Arial,
-    sans-serif;
-
-  color: #1e293b;
-
-  background:
-    radial-gradient(
-      circle at 5% 5%,
-      rgba(139, 92, 246, 0.12),
-      transparent 28%
-    ),
-    radial-gradient(
-      circle at 95% 8%,
-      rgba(6, 182, 212, 0.12),
-      transparent 28%
-    ),
-    #f6f8fc;
-}
-
-
-/* HEADER */
-
-.teacher-portfolio-header {
-  max-width: 1250px;
-
-  margin:
-    0 auto 18px;
-
-  padding:
-    24px 27px;
-
-  display: flex;
-
-  justify-content:
-    space-between;
-
-  align-items:
-    flex-end;
-
-  gap: 20px;
-
-  border:
-    1px solid #e9edf5;
-
-  border-radius: 24px;
-
-  background: white;
-
-  box-shadow:
-    0 13px 35px
-    rgba(
-      15,
-      23,
-      42,
-      0.055
-    );
-}
-
-
-.teacher-portfolio-back {
-  margin-bottom: 12px;
-
-  padding:
-    9px 13px;
-
-  border:
-    1px solid #ddd6fe;
-
-  border-radius: 11px;
-
-  background: white;
-
-  color: #6d28d9;
-
-  font-weight: 800;
-
-  cursor: pointer;
-}
-
-
-.teacher-portfolio-header h1 {
-  margin:
-    0 0 6px;
-
-  font-size: 30px;
-}
-
-
-.teacher-portfolio-header p {
-  margin: 0;
-
-  color: #94a3b8;
-
-  font-size: 13px;
-}
-
-
-/* LANGUAGE */
-
-.teacher-portfolio-language {
-  display: flex;
-
-  padding: 4px;
-
-  border:
-    1px solid #e5e7eb;
-
-  border-radius: 12px;
-
-  background: white;
-}
-
-
-.teacher-portfolio-language button {
-  padding:
-    8px 10px;
-
-  border: none;
-
-  border-radius: 9px;
-
-  background: transparent;
-
-  color: #94a3b8;
-
-  font-weight: 800;
-
-  cursor: pointer;
-}
-
-
-.teacher-portfolio-language button.active {
-  color: white;
-
-  background:
-    linear-gradient(
-      135deg,
-      #8b5cf6,
-      #3b82f6
-    );
-}
-
-
-/* STUDENT */
-
-.teacher-portfolio-student {
-  max-width: 1250px;
-
-  margin:
-    0 auto 18px;
-
-  padding: 20px;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 16px;
-
-  border:
-    1px solid #e8edf5;
-
-  border-radius: 20px;
-
-  background: white;
-}
-
-
-.teacher-portfolio-avatar {
-  width: 65px;
-  height: 65px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  flex-shrink: 0;
-
-  border-radius: 18px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #ede9fe,
-      #dbeafe
-    );
-
-  font-size: 32px;
-}
-
-
-.teacher-portfolio-student-info {
-  flex: 1;
-}
-
-
-.teacher-portfolio-student-info small {
-  color: #7c3aed;
-
-  font-weight: 900;
-}
-
-
-.teacher-portfolio-student-info h2 {
-  margin:
-    4px 0;
-}
-
-
-.teacher-portfolio-student-info p {
-  margin: 0;
-
-  color: #64748b;
-}
-
-
-.teacher-portfolio-stats {
-  display: flex;
-
-  gap: 10px;
-}
-
-
-.teacher-portfolio-stats > div {
-  min-width: 95px;
-
-  padding: 12px;
-
-  text-align: center;
-
-  border-radius: 13px;
-
-  background: #f8fafc;
-}
-
-
-.teacher-portfolio-stats strong {
-  display: block;
-
-  font-size: 22px;
-}
-
-
-.teacher-portfolio-stats span {
-  color: #64748b;
-
-  font-size: 11px;
-}
-
-
-/* GRID */
-
-.teacher-portfolio-grid {
-  max-width: 1250px;
-
-  margin: auto;
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(
-      3,
-      minmax(0, 1fr)
-    );
-
-  gap: 18px;
-}
-
-
-.teacher-portfolio-card {
-  overflow: hidden;
-
-  border:
-    1px solid #e8edf5;
-
-  border-radius: 20px;
-
-  background: white;
-
-  box-shadow:
-    0 10px 28px
-    rgba(
-      15,
-      23,
-      42,
-      0.05
-    );
-}
-
-
-.teacher-project-cover {
-  height: 130px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  background:
-    linear-gradient(
-      135deg,
-      #ede9fe,
-      #dbeafe,
-      #cffafe
-    );
-}
-
-
-.teacher-project-cover span {
-  font-size: 55px;
-}
-
-
-.teacher-project-body {
-  padding: 17px;
-}
-
-
-.teacher-project-badges {
-  display: flex;
-
-  flex-wrap: wrap;
-
-  gap: 7px;
-
-  margin-bottom: 11px;
-}
-
-
-.teacher-project-status,
-.teacher-project-lesson {
-  padding:
-    6px 8px;
-
-  border-radius: 999px;
-
-  font-size: 10px;
-
-  font-weight: 800;
-}
-
-
-.teacher-project-status {
-  background: #ecfdf5;
-
-  color: #047857;
-}
-
-
-.teacher-project-lesson {
-  background: #f5f3ff;
-
-  color: #6d28d9;
-}
-
-
-.teacher-project-body h2 {
-  margin:
-    5px 0 8px;
-
-  font-size: 18px;
-}
-
-
-.teacher-project-body p {
-  min-height: 40px;
-
-  color: #64748b;
-
-  font-size: 12px;
-
-  line-height: 1.6;
-}
-
-
-.teacher-project-date {
-  margin:
-    12px 0;
-
-  color: #94a3b8;
-
-  font-size: 11px;
-}
-
-
-.teacher-project-body > button {
-  width: 100%;
-
-  min-height: 40px;
-
-  border: none;
-
-  border-radius: 11px;
-
-  color: white;
-
-  background:
-    linear-gradient(
-      135deg,
-      #7c3aed,
-      #3b82f6
-    );
-
-  font-weight: 800;
-
-  cursor: pointer;
-}
-
-
-/* EMPTY */
-
-.teacher-portfolio-empty {
-  max-width: 1250px;
-
-  min-height: 350px;
-
-  margin: auto;
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-  justify-content: center;
-
-  text-align: center;
-
-  border:
-    1px solid #e8edf5;
-
-  border-radius: 22px;
-
-  background: white;
-}
-
-
-.teacher-portfolio-empty > div {
-  font-size: 60px;
-}
-
-
-.teacher-portfolio-empty h2 {
-  margin:
-    13px 0 5px;
-}
-
-
-.teacher-portfolio-empty p {
-  color: #94a3b8;
-}
-
-
-/* MODAL */
-
-.teacher-project-modal-overlay {
-  position: fixed;
-
-  inset: 0;
-
-  z-index: 4000;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  padding: 20px;
-
-  background:
-    rgba(
-      15,
-      23,
-      42,
-      0.5
-    );
-
-  backdrop-filter:
-    blur(6px);
-}
-
-
-.teacher-project-modal {
   position: relative;
 
-  width: 100%;
-
-  max-width: 650px;
-
-  max-height: 90vh;
-
-  overflow-y: auto;
-
-  padding: 30px;
-
-  border-radius: 25px;
-
-  background: white;
-}
 
 
-.teacher-project-modal-close {
-  position: absolute;
-
-  top: 15px;
-  right: 15px;
-
-  width: 38px;
-  height: 38px;
-
-  border: none;
-
-  border-radius: 10px;
-
-  background: #f1f5f9;
-
-  font-size: 22px;
-
-  cursor: pointer;
-}
-
-
-[dir="rtl"]
-.teacher-project-modal-close {
-  right: auto;
-  left: 15px;
-}
-
-
-.teacher-project-modal-icon {
-  width: 75px;
-  height: 75px;
-
-  margin-bottom: 12px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 20px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #ede9fe,
-      #dbeafe
-    );
-
-  font-size: 38px;
-}
-
-
-.teacher-project-modal > small {
-  color: #7c3aed;
-
-  font-weight: 900;
-}
-
-
-.teacher-project-modal h2 {
-  margin:
-    7px 0;
-}
-
-
-.teacher-project-modal-lesson {
-  margin-bottom: 16px;
-
-  color: #64748b;
-}
-
-
-.teacher-project-answer {
-  margin-top: 20px;
-
-  padding: 18px;
-
-  border-radius: 15px;
-
-  background: #f8fafc;
-}
-
-
-.teacher-project-answer small {
-  color: #7c3aed;
-
-  font-weight: 900;
-}
-
-
-.teacher-project-answer p {
-  margin-bottom: 0;
-
-  color: #1e293b;
-
-  font-size: 15px;
-
-  line-height: 1.8;
-
-  white-space: pre-wrap;
-}
-
-
-/* ERROR */
-
-.teacher-portfolio-error {
-  max-width: 1250px;
-
-  margin:
-    0 auto 15px;
-
-  padding: 12px;
-
-  border:
-    1px solid #fecaca;
-
-  border-radius: 12px;
-
-  background: #fef2f2;
-
-  color: #b91c1c;
-}
-
-
-/* LOADING */
-
-.teacher-portfolio-loading {
   min-height: 100vh;
 
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-  justify-content: center;
-
-  gap: 10px;
-
-  background: #f8fafc;
-
-  font-size: 55px;
-}
 
 
-.teacher-portfolio-loading p {
-  font-size: 14px;
-}
+  padding: 36px 38px 80px;
 
 
-/* RTL */
 
-[dir="rtl"]
-.teacher-student-portfolio-page {
-  direction: rtl;
-
-  text-align: right;
-}
+  overflow-x: hidden;
 
 
-/* RESPONSIVE */
 
-@media (
-  max-width: 900px
-) {
+  font-family:
 
-  .teacher-portfolio-grid {
-    grid-template-columns:
-      repeat(
-        2,
-        1fr
-      );
-  }
+    "Segoe UI",
+
+    Tahoma,
+
+    Arial,
+
+    sans-serif;
 
 
-  .teacher-portfolio-student {
-    align-items:
-      flex-start;
-  }
 
+  color: var(--portfolio-text);
 
-  .teacher-portfolio-stats {
-    flex-wrap: wrap;
-  }
-}
-
-
-@media (
-  max-width: 650px
-) {
-
-  .teacher-student-portfolio-page {
-    padding:
-      20px 14px 50px;
-  }
-
-
-  .teacher-portfolio-header,
-  .teacher-portfolio-student {
-    flex-direction: column;
-
-    align-items: stretch;
-  }
-
-
-  .teacher-portfolio-grid {
-    grid-template-columns:
-      1fr;
-  }
-
-
-  .teacher-portfolio-stats {
-    display: grid;
-
-    grid-template-columns:
-      repeat(
-        3,
-        1fr
-      );
-  }
+  background-color: var(--portfolio-bg);
 }

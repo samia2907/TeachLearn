@@ -4,8 +4,6 @@ import {
 
 import "./LegalPages.css";
 
-import { hebrewText } from "../data/hebrewText";
-
 
 function TermsConditions() {
   const {
@@ -17,7 +15,7 @@ function TermsConditions() {
   const text = (
     english,
     arabic,
-    hebrew = hebrewText(english)
+    hebrew
   ) =>
     language === "ar"
       ? arabic
@@ -27,7 +25,7 @@ function TermsConditions() {
 
 
   return (
-    <div className="legal-page">
+    <div className="legal-page" dir={language === "en" ? "ltr" : "rtl"}>
 
       <div className="legal-container">
 
@@ -37,7 +35,7 @@ function TermsConditions() {
             href="/"
             className="legal-logo"
           >
-            🚀 TeachLearn
+            🚀 TechMinds
           </a>
 
 
@@ -92,27 +90,30 @@ function TermsConditions() {
           </div>
 
           <span>
-            TEACHLEARN
+            TECHMINDS
           </span>
 
           <h1>
             {text(
               "Terms & Conditions",
-              "الشروط والأحكام"
+              "الشروط والأحكام",
+              "תנאים והגבלות"
             )}
           </h1>
 
           <p>
             {text(
-              "The terms governing access to and use of the TeachLearn platform.",
-              "الشروط التي تنظّم الوصول إلى منصة TeachLearn واستخدامها."
+              "The terms governing access to and use of the TechMinds platform.",
+              "الشروط التي تنظّم الوصول إلى منصة TechMinds واستخدامها.",
+              "התנאים המסדירים את הגישה לפלטפורמת TechMinds והשימוש בה."
             )}
           </p>
 
           <small>
             {text(
-              "Last updated: September 1, 2026",
-              "آخر تحديث: 1 سبتمبر 2026"
+              "Last updated: September 28, 2026",
+              "آخر تحديث: 28 سبتمبر 2026",
+              "עודכן לאחרונה: 28 בספטמבר 2026"
             )}
           </small>
 
@@ -126,14 +127,16 @@ function TermsConditions() {
               1.{" "}
               {text(
                 "Agreement",
-                "الموافقة على الشروط"
+                "الموافقة على الشروط",
+                "הסכמה לתנאים"
               )}
             </h2>
 
             <p>
               {text(
-                "By creating an account, accessing TeachLearn or purchasing a subscription, you agree to these Terms and Conditions and the applicable Privacy and Refund Policies.",
-                "من خلال إنشاء حساب أو استخدام TeachLearn أو شراء اشتراك، فإنك توافق على هذه الشروط والأحكام وسياسة الخصوصية وسياسة الاسترجاع."
+                "By creating an account, accessing TechMinds or purchasing a subscription, you agree to these Terms and Conditions and the applicable Privacy and Refund Policies.",
+                "من خلال إنشاء حساب أو استخدام TechMinds أو شراء اشتراك، فإنك توافق على هذه الشروط والأحكام وسياسة الخصوصية وسياسة الاسترجاع.",
+                "על ידי יצירת חשבון, גישה ל-TechMinds או רכישת מנוי, אתם מסכימים לתנאים והגבלות אלה ולמדיניות הפרטיות וההחזרים החלות."
               )}
             </p>
           </section>
@@ -144,14 +147,16 @@ function TermsConditions() {
               2.{" "}
               {text(
                 "About the Service",
-                "حول الخدمة"
+                "حول الخدمة",
+                "אודות השירות"
               )}
             </h2>
 
             <p>
               {text(
-                "TeachLearn provides educational programs and digital learning tools including lessons, activities, classroom management, progress tracking, attendance and student portfolios.",
-                "توفر TeachLearn برامج تعليمية وأدوات تعلم رقمية تشمل الدروس والأنشطة وإدارة الصفوف وتتبع التقدم والحضور وملفات أعمال الطلاب."
+                "TechMinds provides educational programs and digital learning tools including lessons, activities, classroom management, progress tracking, attendance and student portfolios. Programs may be offered as free, paid or class-based access, and the platform owner may grant access directly where appropriate.",
+                "توفر TechMinds برامج تعليمية وأدوات تعلم رقمية تشمل الدروس والأنشطة وإدارة الصفوف وتتبع التقدم والحضور وملفات أعمال الطلاب. وقد تكون البرامج مجانية أو مدفوعة أو متاحة من خلال الصف، كما يمكن لمالك المنصة منح الوصول مباشرة عند الحاجة.",
+                "TechMinds מספקת תוכניות חינוכיות וכלי למידה דיגיטליים, כולל שיעורים, פעילויות, ניהול כיתות, מעקב התקדמות, נוכחות ותיקי עבודות של תלמידים. התוכניות עשויות להיות חינמיות, בתשלום או מבוססות גישה דרך כיתה, ובעל הפלטפורמה רשאי להעניק גישה ישירה במקרים מתאימים."
               )}
             </p>
           </section>
@@ -162,14 +167,16 @@ function TermsConditions() {
               3.{" "}
               {text(
                 "Accounts",
-                "الحسابات"
+                "الحسابات",
+                "חשבונות"
               )}
             </h2>
 
             <p>
               {text(
                 "Users are responsible for maintaining the confidentiality of their login credentials. Teachers are responsible for appropriately managing student accounts created under their teacher account.",
-                "يتحمل المستخدم مسؤولية الحفاظ على سرية بيانات تسجيل الدخول. ويتحمل المعلم مسؤولية الإدارة المناسبة لحسابات الطلاب التي يتم إنشاؤها تحت حسابه."
+                "يتحمل المستخدم مسؤولية الحفاظ على سرية بيانات تسجيل الدخول. ويتحمل المعلم مسؤولية الإدارة المناسبة لحسابات الطلاب التي يتم إنشاؤها تحت حسابه.",
+                "המשתמשים אחראים לשמור על סודיות פרטי ההתחברות שלהם. מורים אחראים לניהול תקין של חשבונות תלמידים שנוצרו תחת חשבון המורה שלהם."
               )}
             </p>
           </section>
@@ -180,14 +187,16 @@ function TermsConditions() {
               4.{" "}
               {text(
                 "Student Accounts",
-                "حسابات الطلاب"
+                "حسابات الطلاب",
+                "חשבונות תלמידים"
               )}
             </h2>
 
             <p>
               {text(
                 "Student accounts may be created or managed by teachers. Access may depend on membership in a class, the teacher's subscription and the student's account status.",
-                "يمكن إنشاء حسابات الطلاب أو إدارتها من قبل المعلمين. وقد يعتمد الوصول على الانضمام إلى الصف واشتراك المعلم وحالة حساب الطالب."
+                "يمكن إنشاء حسابات الطلاب أو إدارتها من قبل المعلمين. وقد يعتمد الوصول على الانضمام إلى الصف واشتراك المعلم وحالة حساب الطالب.",
+                "חשבונות תלמידים יכולים להיווצר או להיות מנוהלים על ידי מורים. הגישה עשויה להיות תלויה בחברות בכיתה, במנוי של המורה ובסטטוס החשבון של התלמיד."
               )}
             </p>
           </section>
@@ -197,22 +206,25 @@ function TermsConditions() {
             <h2>
               5.{" "}
               {text(
-                "Subscriptions",
-                "الاشتراكات"
+                "Paid Access and Subscriptions",
+                "الوصول المدفوع والاشتراكات",
+                "גישה בתשלום ומנויים"
               )}
             </h2>
 
             <p>
               {text(
-                "Some TechMinds features require a paid subscription. The price, billing period and features included in each plan will be displayed before purchase.",
-                "تتطلب بعض ميزات TechMinds اشتراكًا مدفوعًا. سيتم عرض السعر وفترة الفوترة والميزات المتضمنة في كل خطة قبل الشراء."
+                "TechMinds may offer free programs, one-time paid access, recurring subscriptions or class-based access. Before any paid purchase, the applicable price, access period, billing model and included features will be displayed.",
+                "قد توفّر TechMinds برامج مجانية أو وصولًا مدفوعًا لمرة واحدة أو اشتراكات متجددة أو وصولًا من خلال الصف. قبل أي عملية شراء مدفوعة، سيتم عرض السعر ومدة الوصول وطريقة الفوترة والميزات المشمولة.",
+                "TechMinds עשויה להציע תוכניות חינמיות, גישה בתשלום חד-פעמי, מנויים מתחדשים או גישה דרך כיתה. לפני כל רכישה בתשלום יוצגו המחיר, תקופת הגישה, מודל החיוב והתכונות הכלולות."
               )}
             </p>
 
             <p>
               {text(
-                "If a plan renews automatically, this will be clearly disclosed before the customer completes the purchase.",
-                "إذا كانت الخطة تتجدد تلقائيًا، فسيتم توضيح ذلك للعميل قبل إتمام عملية الشراء."
+                "If a plan renews automatically, this will be clearly disclosed before the customer completes the purchase. Access granted directly by the platform owner or through a class does not necessarily require a separate payment by the student.",
+                "إذا كانت الخطة تتجدد تلقائيًا، فسيتم توضيح ذلك للعميل قبل إتمام عملية الشراء. أما الوصول الممنوح مباشرة من مالك المنصة أو من خلال الصف فلا يتطلب بالضرورة دفعة منفصلة من الطالب.",
+                "אם תוכנית מתחדשת אוטומטית, הדבר יוצג בבירור לפני השלמת הרכישה. גישה שניתנת ישירות על ידי בעל הפלטפורמה או דרך כיתה אינה מחייבת בהכרח תשלום נפרד מצד התלמיד."
               )}
             </p>
           </section>
@@ -223,22 +235,25 @@ function TermsConditions() {
               6.{" "}
               {text(
                 "Payment Processing",
-                "معالجة الدفع"
+                "معالجة الدفع",
+                "עיבוד תשלומים"
               )}
             </h2>
 
             <p>
               {text(
-                "When Paddle is used for payment processing, Paddle acts as the Merchant of Record for the transaction and processes the payment, billing-related customer support and applicable returns.",
-                "عند استخدام Paddle لمعالجة الدفع، تعمل Paddle كـMerchant of Record للمعاملة وتتولى معالجة الدفع وخدمة العملاء المتعلقة بالفوترة وعمليات الاسترجاع المطبقة."
+                "When payment is enabled for a TechMinds product or program, payment may be processed through Paddle. Where Paddle processes the transaction, it may act as the Merchant of Record and handle payment processing, billing-related support and applicable refunds according to its terms. TechMinds does not store full credit card numbers or card security codes.",
+                "عند تفعيل الدفع لمنتج أو برنامج في TechMinds، قد تتم معالجة الدفع من خلال Paddle. وعندما تعالج Paddle المعاملة، فقد تعمل كـ Merchant of Record وتتولى معالجة الدفع ودعم الفوترة وعمليات الاسترجاع المطبقة وفقًا لشروطها. لا تقوم TechMinds بتخزين أرقام بطاقات الائتمان الكاملة أو رموز أمان البطاقات.",
+                "כאשר תשלום מופעל עבור מוצר או תוכנית ב-TechMinds, התשלום עשוי להתבצע באמצעות Paddle. כאשר Paddle מעבדת את העסקה, היא עשויה לפעול כ-Merchant of Record ולטפל בעיבוד התשלום, בתמיכה הקשורה לחיוב ובהחזרים החלים בהתאם לתנאיה. TechMinds אינה שומרת מספרי כרטיס אשראי מלאים או קודי אבטחה של הכרטיס."
               )}
             </p>
 
             <div className="legal-note">
               ℹ️{" "}
               {text(
-                "Before Paddle website approval, add Paddle's current prescribed Merchant of Record wording exactly as shown in the Paddle seller handbook.",
-                "قبل تقديم الموقع لموافقة Paddle، أضيفي النص الرسمي الحالي الخاص بـMerchant of Record كما يظهر في دليل بائعي Paddle."
+                "Payment availability may vary by program. If payment has not yet been enabled for a paid program, the platform may display that payment is coming soon or grant access through another authorized method.",
+                "قد تختلف إمكانية الدفع حسب البرنامج. إذا لم يتم تفعيل الدفع بعد لبرنامج مدفوع، فقد تعرض المنصة أن الدفع سيتوفر قريبًا أو تمنح الوصول بطريقة معتمدة أخرى.",
+                "זמינות התשלום עשויה להשתנות בין תוכניות. אם התשלום עדיין לא הופעל עבור תוכנית בתשלום, הפלטפורמה עשויה להציג שהתשלום יהיה זמין בקרוב או להעניק גישה בדרך מורשית אחרת."
               )}
             </div>
           </section>
@@ -249,14 +264,16 @@ function TermsConditions() {
               7.{" "}
               {text(
                 "Cancellation and Refunds",
-                "الإلغاء والاسترجاع"
+                "الإلغاء والاسترجاع",
+                "ביטולים והחזרים"
               )}
             </h2>
 
             <p>
               {text(
-                "Subscription cancellation and refund eligibility are governed by the Refund Policy, applicable consumer law and, where Paddle processes the order, Paddle's applicable buyer and refund terms.",
-                "تخضع أهلية إلغاء الاشتراك واسترداد الأموال لسياسة الاسترجاع وقوانين حماية المستهلك المعمول بها، وعند معالجة الطلب بواسطة Paddle، لشروط Paddle المطبقة."
+                "Cancellation and refund eligibility are governed by the Refund Policy, applicable consumer law and, where Paddle processes the payment, Paddle's applicable buyer and refund terms. A full refund may result in removal of access to the related paid program, service or features.",
+                "تخضع أهلية الإلغاء والاسترجاع لسياسة الاسترجاع وقوانين حماية المستهلك المعمول بها، وعندما تتم معالجة الدفع بواسطة Paddle، لشروط المشترين وسياسة الاسترجاع المطبقة لديها. وقد يؤدي الاسترجاع الكامل إلى إلغاء الوصول إلى البرنامج أو الخدمة أو الميزات المدفوعة المرتبطة بالدفع.",
+                "זכאות לביטול ולהחזר כפופה למדיניות ההחזרים, לדיני הצרכנות החלים, וכאשר Paddle מעבדת את התשלום — גם לתנאי הקונה ולמדיניות ההחזרים החלים שלה. החזר מלא עשוי להביא להסרת הגישה לתוכנית, לשירות או לתכונות בתשלום הקשורות לתשלום."
               )}
             </p>
           </section>
@@ -267,14 +284,16 @@ function TermsConditions() {
               8.{" "}
               {text(
                 "Acceptable Use",
-                "الاستخدام المقبول"
+                "الاستخدام المقبول",
+                "שימוש מקובל"
               )}
             </h2>
 
             <p>
               {text(
                 "Users may not use TechMinds to harm others, compromise platform security, gain unauthorized access, interfere with the service or use accounts belonging to another person without authorization.",
-                "لا يجوز استخدام TechMinds لإيذاء الآخرين أو اختراق أمان المنصة أو الحصول على وصول غير مصرح به أو تعطيل الخدمة أو استخدام حساب شخص آخر دون إذن."
+                "لا يجوز استخدام TechMinds لإيذاء الآخرين أو اختراق أمان المنصة أو الحصول على وصول غير مصرح به أو تعطيل الخدمة أو استخدام حساب شخص آخر دون إذن.",
+                "אין להשתמש ב-TechMinds כדי לפגוע באחרים, לסכן את אבטחת הפלטפורמה, להשיג גישה בלתי מורשית, להפריע לשירות או להשתמש בחשבון של אדם אחר ללא הרשאה."
               )}
             </p>
           </section>
@@ -285,14 +304,16 @@ function TermsConditions() {
               9.{" "}
               {text(
                 "Educational Content",
-                "المحتوى التعليمي"
+                "المحتوى التعليمي",
+                "תוכן חינוכי"
               )}
             </h2>
 
             <p>
               {text(
                 "TechMinds content is provided for educational purposes. Lessons and activities may be updated, improved, replaced or removed as the platform develops.",
-                "يتم تقديم محتوى TechMinds لأغراض تعليمية. وقد يتم تحديث الدروس والأنشطة أو تحسينها أو استبدالها أو إزالتها مع تطور المنصة."
+                "يتم تقديم محتوى TechMinds لأغراض تعليمية. وقد يتم تحديث الدروس والأنشطة أو تحسينها أو استبدالها أو إزالتها مع تطور المنصة.",
+                "התוכן של TechMinds מסופק למטרות חינוכיות. שיעורים ופעילויות עשויים להתעדכן, להשתפר, להיות מוחלפים או מוסרים ככל שהפלטפורמה מתפתחת."
               )}
             </p>
           </section>
@@ -303,14 +324,16 @@ function TermsConditions() {
               10.{" "}
               {text(
                 "Intellectual Property",
-                "الملكية الفكرية"
+                "الملكية الفكرية",
+                "קניין רוחני"
               )}
             </h2>
 
             <p>
               {text(
                 "Unless otherwise stated, the TechMinds platform, branding, interface and original educational materials are protected intellectual property and may not be copied or commercially redistributed without permission.",
-                "ما لم يُذكر خلاف ذلك، فإن منصة TechMinds والعلامة التجارية والواجهة والمواد التعليمية الأصلية هي ملكية فكرية محمية ولا يجوز نسخها أو إعادة توزيعها تجاريًا دون إذن."
+                "ما لم يُذكر خلاف ذلك، فإن منصة TechMinds والعلامة التجارية والواجهة والمواد التعليمية الأصلية هي ملكية فكرية محمية ولا يجوز نسخها أو إعادة توزيعها تجاريًا دون إذن.",
+                "אלא אם צוין אחרת, פלטפורמת TechMinds, המיתוג, הממשק וחומרי הלימוד המקוריים הם קניין רוחני מוגן ואין להעתיקם או להפיץ אותם מחדש באופן מסחרי ללא אישור."
               )}
             </p>
           </section>
@@ -321,14 +344,16 @@ function TermsConditions() {
               11.{" "}
               {text(
                 "Service Availability",
-                "توفر الخدمة"
+                "توفر الخدمة",
+                "זמינות השירות"
               )}
             </h2>
 
             <p>
               {text(
                 "We aim to keep TechMinds available and reliable, but temporary interruptions may occur because of maintenance, updates, technical problems or third-party services.",
-                "نسعى إلى إبقاء TechMinds متاحة وموثوقة، إلا أن انقطاعات مؤقتة قد تحدث بسبب الصيانة أو التحديثات أو المشكلات التقنية أو خدمات الجهات الخارجية."
+                "نسعى إلى إبقاء TechMinds متاحة وموثوقة، إلا أن انقطاعات مؤقتة قد تحدث بسبب الصيانة أو التحديثات أو المشكلات التقنية أو خدمات الجهات الخارجية.",
+                "אנו שואפים לשמור על TechMinds זמינה ואמינה, אך ייתכנו הפסקות זמניות עקב תחזוקה, עדכונים, תקלות טכניות או שירותי צד שלישי."
               )}
             </p>
           </section>
@@ -339,14 +364,16 @@ function TermsConditions() {
               12.{" "}
               {text(
                 "Account Suspension",
-                "تعليق الحساب"
+                "تعليق الحساب",
+                "השעיית חשבון"
               )}
             </h2>
 
             <p>
               {text(
                 "TechMinds may restrict or suspend access when an account is used in violation of these Terms, creates a security risk, or where required by law.",
-                "يجوز لـTechMinds تقييد أو تعليق الوصول إذا تم استخدام الحساب بما يخالف هذه الشروط أو يشكل خطرًا أمنيًا أو عندما يقتضي القانون ذلك."
+                "يجوز لـTechMinds تقييد أو تعليق الوصول إذا تم استخدام الحساب بما يخالف هذه الشروط أو يشكل خطرًا أمنيًا أو عندما يقتضي القانون ذلك.",
+                "TechMinds רשאית להגביל או להשעות גישה כאשר נעשה שימוש בחשבון בניגוד לתנאים אלה, כאשר קיים סיכון אבטחה או כאשר הדבר נדרש על פי דין."
               )}
             </p>
           </section>
@@ -357,14 +384,16 @@ function TermsConditions() {
               13.{" "}
               {text(
                 "Changes to These Terms",
-                "التغييرات على الشروط"
+                "التغييرات على الشروط",
+                "שינויים בתנאים אלה"
               )}
             </h2>
 
             <p>
               {text(
                 "We may update these Terms as TechMinds develops. Material changes will be published on this page with an updated revision date.",
-                "قد نقوم بتحديث هذه الشروط مع تطور TechMinds. سيتم نشر التغييرات المهمة في هذه الصفحة مع تحديث تاريخ المراجعة."
+                "قد نقوم بتحديث هذه الشروط مع تطور TechMinds. سيتم نشر التغييرات المهمة في هذه الصفحة مع تحديث تاريخ المراجعة.",
+                "אנו עשויים לעדכן תנאים אלה ככל ש-TechMinds מתפתחת. שינויים מהותיים יפורסמו בעמוד זה יחד עם תאריך עדכון חדש."
               )}
             </p>
           </section>
@@ -375,27 +404,29 @@ function TermsConditions() {
               14.{" "}
               {text(
                 "Operator and Contact",
-                "المشغّل وبيانات التواصل"
+                "المشغّل وبيانات التواصل",
+                "מפעיל ופרטי קשר"
               )}
             </h2>
 
             <p>
               <strong>
-                TeachLearn
+                TechMinds
               </strong>
             </p>
 
             <p>
               {text(
-                "Operated by: YOUR_LEGAL_NAME",
-                "المشغّل: YOUR_LEGAL_NAME"
+                "Operated by: TechMinds",
+                "المشغّل: TechMinds",
+                "מופעל על ידי: TechMinds"
               )}
             </p>
 
             <div className="legal-contact">
-              ✉️ YOUR_SUPPORT_EMAIL
+              ✉️ samia.nabil.29.7@gmail.com
               <br />
-              📞 YOUR_SUPPORT_PHONE
+              📞 0549308793
             </div>
 
           </section>
@@ -421,35 +452,39 @@ function LegalFooter({
     <footer className="legal-footer">
 
       <span>
-        © 2026 TeachLearn
+        © 2026 TechMinds
       </span>
 
       <div>
         <a href="/privacy">
           {text(
             "Privacy",
-            "الخصوصية"
+            "الخصوصية",
+            "פרטיות"
           )}
         </a>
 
         <a href="/terms">
           {text(
             "Terms",
-            "الشروط"
+            "الشروط",
+            "תנאים"
           )}
         </a>
 
         <a href="/refund-policy">
           {text(
             "Refund Policy",
-            "سياسة الاسترجاع"
+            "سياسة الاسترجاع",
+            "מדיניות החזרים"
           )}
         </a>
 
         <a href="/plans">
           {text(
             "Plans",
-            "الخطط"
+            "الخطط",
+            "תוכניות"
           )}
         </a>
       </div>

@@ -1,0 +1,2 @@
+.profile-nav-link { display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; margin: 6px 0; border: 1px solid #c7d2fe; border-radius: 10px; background: #eef2ff; color: #3730a3; font-weight: 600; text-decoration: none; }
+.profile-nav-link:focus-visible { outline: 3px solid #818cf8; outline-offset: 3px; }

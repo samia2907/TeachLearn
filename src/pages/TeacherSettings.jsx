@@ -722,8 +722,8 @@ function TeacherSettings() {
               <p>
 
                 {text(
-                  "Update the name displayed in TeachLearn.",
-                  "عدّلي الاسم الذي يظهر في TeachLearn."
+                  "Update the name displayed in TechMinds.",
+                  "عدّلي الاسم الذي يظهر في TechMinds."
                 )}
 
               </p>
@@ -853,8 +853,8 @@ function TeacherSettings() {
               <p>
 
                 {text(
-                  "Choose the language used across TeachLearn.",
-                  "اختاري اللغة المستخدمة في TeachLearn."
+                  "Choose the language used across TechMinds.",
+                  "اختاري اللغة المستخدمة في TechMinds."
                 )}
 
               </p>
@@ -1298,8 +1298,8 @@ function TeacherSettings() {
 
       <p>
         {text(
-          "Having a technical problem? Contact the TeachLearn support team.",
-          "هل تواجه مشكلة تقنية؟ تواصل مع فريق دعم TeachLearn."
+          "Having a technical problem? Contact the TechMinds support team.",
+          "هل تواجه مشكلة تقنية؟ تواصل مع فريق دعم TechMinds."
         )}
       </p>
 

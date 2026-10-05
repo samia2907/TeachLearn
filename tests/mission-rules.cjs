@@ -28,8 +28,12 @@ async function main() {
     const records = {
       'users/student1': user, 'users/other': { ...user, uid: 'other' },
       'lessons/lesson1': { ...lesson, ...options.lesson },
+      'classMembers/class1_student1': {
+        studentId: 'student1', classId: 'class1', status: 'active',
+      },
       ...(options.completionExists ? { 'lessonCompletions/student1_lesson1': completion } : {}),
       ...(options.existing ? { [document]: options.existing } : {}),
+      ...options.records,
     };
     const after = { ...records, 'users/student1': options.rewarded || rewarded, 'lessonCompletions/student1_lesson1': completion };
     const keys = new Set([...Object.keys(records), ...Object.keys(after), document]);
@@ -61,13 +65,86 @@ async function main() {
   add('mission state on ordinary lesson denied', 'create', 'lessonProgress/student1_lesson1', progress, 'DENY', { lesson: { activityType: 'ai' } });
   const { mission: _ignored, ...legacy } = progress;
   add('ordinary lesson progress remains valid', 'create', 'lessonProgress/student1_lesson1', legacy, 'ALLOW', { lesson: { activityType: 'ai' } });
-  add('completion with atomic XP update', 'create', 'lessonCompletions/student1_lesson1', completion, 'ALLOW');
-  add('completion cannot invent XP', 'create', 'lessonCompletions/student1_lesson1', { ...completion, xpReward: 999 }, 'DENY');
-  add('completion without user update denied', 'create', 'lessonCompletions/student1_lesson1', completion, 'DENY', { rewarded: user });
+  add('client completion write is denied even with an XP update', 'create', 'lessonCompletions/student1_lesson1', completion, 'DENY');
+  add('client completion cannot invent XP', 'create', 'lessonCompletions/student1_lesson1', { ...completion, xpReward: 999 }, 'DENY');
+  add('client completion without user update denied', 'create', 'lessonCompletions/student1_lesson1', completion, 'DENY', { rewarded: user });
   add('completion cannot be replaced', 'update', 'lessonCompletions/student1_lesson1', completion, 'DENY', { existing: completion });
   add('completion cannot be removed', 'delete', 'lessonCompletions/student1_lesson1', null, 'DENY', { existing: completion });
-  add('XP awarded in first transaction', 'update', 'users/student1', rewarded, 'ALLOW', { existing: user });
+  add('client XP update is denied even with a completion receipt', 'update', 'users/student1', rewarded, 'DENY', { existing: user });
   add('duplicate XP denied', 'update', 'users/student1', rewarded, 'DENY', { existing: user, completionExists: true });
+  const independent = { ...user, classId: null };
+  const paidLesson = { ...lesson, lessonType: 'commercial', programId: 'program1' };
+  delete paidLesson.teacherId;
+  delete paidLesson.classId;
+  const paidProgress = { ...progress, teacherId: null, classId: null };
+  const paidCompletion = { ...completion, teacherId: null, classId: null };
+  const entitlement = { userId: 'student1', programId: 'program1', status: 'active' };
+  const paidRecords = {
+    'users/student1': independent,
+    'lessons/lesson1': paidLesson,
+    'programs/program1': { status: 'published', accessType: 'paid' },
+    'programAccess/student_student1_program1': entitlement,
+  };
+  add('purchased student without class saves', 'create', 'lessonProgress/student1_lesson1', paidProgress, 'ALLOW', { records: paidRecords });
+  for (const accessType of ['paid', 'class']) {
+    const records = { ...paidRecords,
+      'users/student1': { ...independent, ownerGrantedProgramIds: ['program1'] },
+      'programs/program1': { status: 'published', accessType },
+      'programAccess/student_student1_program1': null,
+    };
+    add(`owner-granted ${accessType} mission saves`, 'create', 'lessonProgress/student1_lesson1', paidProgress, 'ALLOW', { records });
+    add(`owner-granted ${accessType} mission updates`, 'update', 'lessonProgress/student1_lesson1', paidProgress, 'ALLOW', { records, existing: paidProgress });
+    for (const [label, replacement] of [
+      ['revoked', { ...independent, ownerGrantedProgramIds: [] }],
+      ['wrong program', { ...independent, ownerGrantedProgramIds: ['other'] }],
+      ['suspended', { ...independent, accountStatus: 'suspended', ownerGrantedProgramIds: ['program1'] }],
+    ]) {
+      add(`${label} owner grant cannot save ${accessType} mission`, 'create', 'lessonProgress/student1_lesson1', paidProgress, 'DENY', {
+        records: { ...records, 'users/student1': replacement },
+      });
+    }
+  }
+  for (const [label, program, expectation] of [
+    ['explicitly free', { status: 'published', accessType: 'free' }, 'ALLOW'],
+    ['missing access type', { status: 'published' }, 'DENY'],
+  ]) {
+    const records = { ...paidRecords, 'programs/program1': program, 'programAccess/student_student1_program1': null };
+    add(`${label} student saves without purchase`, 'create', 'lessonProgress/student1_lesson1', paidProgress, expectation, { records });
+    add(`${label} client completion is denied`, 'create', 'lessonCompletions/student1_lesson1', paidCompletion, 'DENY', { records });
+  }
+  add('personal purchase does not bypass class-only progress', 'create', 'lessonProgress/student1_lesson1', paidProgress, 'DENY', {
+    records: { ...paidRecords, 'programs/program1': { status: 'published', accessType: 'class' } },
+  });
+  const classRecords = {
+    ...paidRecords,
+    'programs/program1': { status: 'published', accessType: 'class' },
+    'programAccess/student_student1_program1': null,
+    'classMembers/class2_student1': { studentId: 'student1', classId: 'class2', status: 'active' },
+    'classAssignments/class2_program_program1': { status: 'active' },
+  };
+  add('multi-class student saves via assignment', 'create', 'lessonProgress/student1_lesson1', { ...paidProgress, programAccessClassId: 'class2' }, 'ALLOW', { records: classRecords });
+  add('multi-class client completion is denied', 'create', 'lessonCompletions/student1_lesson1', { ...paidCompletion, programAccessClassId: 'class2' }, 'DENY', { records: classRecords });
+  add('forged class hint denied', 'create', 'lessonProgress/student1_lesson1', { ...paidProgress, programAccessClassId: 'class2' }, 'DENY', {
+    records: { ...classRecords, 'classMembers/class2_student1': { studentId: 'other', classId: 'class2', status: 'active' } },
+  });
+  add('inactive class membership denied', 'create', 'lessonProgress/student1_lesson1', { ...paidProgress, programAccessClassId: 'class2' }, 'DENY', {
+    records: { ...classRecords, 'classMembers/class2_student1': { studentId: 'student1', classId: 'class2', status: 'inactive' } },
+  });
+  add('purchased student resumes', 'get', 'lessonProgress/student1_lesson1', null, 'ALLOW', { records: paidRecords, existing: paidProgress });
+  add('purchased student updates', 'update', 'lessonProgress/student1_lesson1', paidProgress, 'ALLOW', { records: paidRecords, existing: paidProgress });
+  add('purchased student client completion is denied', 'create', 'lessonCompletions/student1_lesson1', paidCompletion, 'DENY', { records: paidRecords });
+  for (const [label, replacement] of [
+    ['missing', null], ['revoked', { ...entitlement, status: 'revoked' }],
+    ['another owner', { ...entitlement, userId: 'other' }],
+    ['another program', { ...entitlement, programId: 'other' }],
+  ]) {
+    const records = { ...paidRecords, 'programAccess/student_student1_program1': replacement };
+    add(`${label} entitlement cannot save`, 'create', 'lessonProgress/student1_lesson1', paidProgress, 'DENY', { records });
+    add(`${label} entitlement cannot complete`, 'create', 'lessonCompletions/student1_lesson1', paidCompletion, 'DENY', { records });
+  }
+  add('unpublished purchased program denied', 'create', 'lessonProgress/student1_lesson1', paidProgress, 'DENY', { records: { ...paidRecords, 'programs/program1': { status: 'draft' } } });
+  add('suspended purchaser denied', 'create', 'lessonProgress/student1_lesson1', paidProgress, 'DENY', { records: { ...paidRecords, 'users/student1': { ...independent, accountStatus: 'suspended' } } });
+  add('purchased completion cannot inflate XP', 'create', 'lessonCompletions/student1_lesson1', { ...paidCompletion, xpReward: 999 }, 'DENY', { records: paidRecords });
   const result = await client.post(`/projects/${project}:test`, {
     source: { files: [{ name: 'firestore.rules', content: fs.readFileSync(path.join(__dirname, '../firestore.rules'), 'utf8') }] },
     testSuite: { testCases: cases.map(([, value]) => value) },

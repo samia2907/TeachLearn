@@ -20,7 +20,7 @@ try {
   for(let i=0;i<80;i++){if(await evaluate('!!document.querySelector(".studio-window")'))break;await new Promise(r=>setTimeout(r,250));}
   assert.ok(await evaluate('!!document.querySelector(".studio-window")'));
   for (const language of ['en','ar','he']) {
-    await evaluate(`localStorage.setItem('teachlearn-language','${language}')`);
+    await evaluate(`localStorage.setItem('TechMinds-language','${language}')`);
     await call('Page.reload');
     await new Promise(r=>setTimeout(r,1000));
     for(const width of [1440,390,320]) {

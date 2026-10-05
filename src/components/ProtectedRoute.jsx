@@ -1,3 +1,4 @@
+import { authEntry } from '../auth/returnTo.mjs';
 import {
   useEffect,
   useState,
@@ -6,6 +7,7 @@ import {
 import {
   Navigate,
   useNavigate,
+  useLocation,
 } from "react-router-dom";
 
 import {
@@ -28,11 +30,15 @@ import {
 } from "../context/LanguageContext";
 
 
+const manualAccessMode =
+  String(import.meta.env.VITE_MANUAL_ACCESS_MODE ?? "true").toLowerCase() !== "false";
+
 function ProtectedRoute({
   children,
   allowedRole,
   requiredPlan,
 }) {
+  const location = useLocation();
   const navigate =
     useNavigate();
 
@@ -59,12 +65,12 @@ function ProtectedRoute({
   const [
     planAllowed,
     setPlanAllowed,
-  ] = useState(!requiredPlan);
+  ] = useState(manualAccessMode || !requiredPlan);
 
   const [
     checkingPlan,
     setCheckingPlan,
-  ] = useState(Boolean(requiredPlan));
+  ] = useState(Boolean(requiredPlan) && !manualAccessMode);
 
 
   const text = (
@@ -187,7 +193,7 @@ function ProtectedRoute({
               return;
             }
 
-            if (requiredPlan) {
+            if (requiredPlan && !manualAccessMode) {
               const subscriptionSnapshot =
                 await getDoc(
                   doc(
@@ -206,6 +212,11 @@ function ProtectedRoute({
                 subscription?.status === "active" &&
                 subscription.planId === requiredPlan
               );
+              setCheckingPlan(false);
+            } else {
+              // In the manual-access MVP, route-level plan gates are disabled.
+              // Program and lesson access is enforced by the centralized access system.
+              setPlanAllowed(true);
               setCheckingPlan(false);
             }
 
@@ -343,7 +354,7 @@ function ProtectedRoute({
     );
   }
 
-  if (requiredPlan && checkingPlan) {
+  if (allowed && requiredPlan && !manualAccessMode && checkingPlan) {
     return (
       <div
         style={{
@@ -363,7 +374,7 @@ function ProtectedRoute({
     );
   }
 
-  if (requiredPlan && !planAllowed) {
+  if (allowed && requiredPlan && !manualAccessMode && !planAllowed) {
     return (
       <div
         style={{
@@ -595,8 +606,8 @@ function ProtectedRoute({
             }}
           >
             {text(
-              "You currently cannot access TeachLearn. Please contact your teacher if you believe this was a mistake.",
-              "لا يمكنك حاليًا الدخول إلى TeachLearn. يرجى التواصل مع المعلّم إذا كنت تعتقد أن الحساب تم تعطيله بالخطأ."
+              "You currently cannot access TechMinds. Please contact your teacher if you believe this was a mistake.",
+              "لا يمكنك حاليًا الدخول إلى TechMinds. يرجى التواصل مع المعلّم إذا كنت تعتقد أن الحساب تم تعطيله بالخطأ."
             )}
           </p>
 
@@ -671,7 +682,7 @@ function ProtectedRoute({
   ) {
     return (
       <Navigate
-        to="/login"
+        to={authEntry(location.pathname + location.search + location.hash)}
         replace
       />
     );

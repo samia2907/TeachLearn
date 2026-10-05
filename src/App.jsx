@@ -1,3 +1,7 @@
+import { lazy, Suspense } from "react";
+import PageLoading from "./components/PageLoading";
+const PublicProgram = lazy(() => import('./pages/PublicProgram'));
+
 import {
   BrowserRouter,
   Routes,
@@ -8,164 +12,180 @@ import {
 import ProtectedRoute
   from "./components/ProtectedRoute";
 
-import Login
-  from "./pages/Login";
-import AboutUs from "./pages/AboutUs";
+import PublicLayout
+  from "./components/PublicLayout";
 
-import Register
-  from "./pages/Register";
+const Login = lazy(() => import('./pages/Login'));
 
-import Plans
-  from "./pages/Plans";
+const AboutUs = lazy(() => import('./pages/AboutUs'));
 
-import Checkout
-  from "./pages/Checkout";
+const Courses = lazy(() => import('./pages/Courses'));
 
-import TeacherDashboard
-  from "./pages/TeacherDashboard";
+const Profile = lazy(() => import('./pages/Profile'));
 
-import StudentDashboard
-  from "./pages/StudentDashboard";
+const OwnerAccessManagement = lazy(() => import('./pages/OwnerAccessManagement'));
 
-import TeacherStudents
-  from "./pages/TeacherStudents";
+const ProgramAccess = lazy(() => import('./pages/ProgramAccess'));
 
-import TeacherClasses
-  from "./pages/TeacherClasses";
-import TeacherClassDetail
-  from "./pages/TeacherClassDetail";
-import OwnerPlans from "./pages/OwnerPlans";
-import TeacherLessons
-  from "./pages/TeacherLessons";
+const Register = lazy(() => import('./pages/Register'));
 
-import TeacherAttendance
-  from "./pages/TeacherAttendance";
+const Plans = lazy(() => import('./pages/Plans'));
 
-import TeacherSettings
-  from "./pages/TeacherSettings";
+const Checkout = lazy(() => import('./pages/Checkout'));
 
-import TeacherStudentProgress
-  from "./pages/TeacherStudentProgress";
+const TeacherDashboard = lazy(() => import('./pages/TeacherDashboard'));
 
-import TeacherStudentPortfolio
-  from "./pages/TeacherStudentPortfolio";
-import ProgramLearning
-  from "./pages/ProgramLearning";
-import StudentLessons
-  from "./pages/StudentLessons";
+const StudentDashboard = lazy(() => import('./pages/StudentDashboard'));
 
-import StudentLessonDetails
-  from "./pages/StudentLessonDetails";
+const TeacherStudents = lazy(() => import('./pages/TeacherStudents'));
 
-import StudentPortfolio
-  from "./pages/StudentPortfolio";
-import StudentJoinClass
-  from "./pages/StudentJoinClass";
+const TeacherClasses = lazy(() => import('./pages/TeacherClasses'));
 
-import ProgramsMarketplace
-  from "./pages/ProgramsMarketplace";
-import ProgramLessonPlayer
-  from "./pages/ProgramLessonPlayer";
-import PrivacyPolicy
-  from "./pages/PrivacyPolicy";
+const TeacherClassDetail = lazy(() => import('./pages/TeacherClassDetail'));
 
-import TermsConditions
-  from "./pages/TermsConditions";
+const OwnerPlans = lazy(() => import('./pages/OwnerPlans'));
 
-import RefundPolicy
-  from "./pages/RefundPolicy";
+const TeacherLessons = lazy(() => import('./pages/TeacherLessons'));
 
-import OwnerDashboard
-  from "./pages/OwnerDashboard";
+const TeacherAttendance = lazy(() => import('./pages/TeacherAttendance'));
 
-import OwnerPrograms
-  from "./pages/OwnerPrograms";
+const TeacherSettings = lazy(() => import('./pages/TeacherSettings'));
 
-import OwnerProgramLessons
-  from "./pages/OwnerProgramLessons";
+const TeacherStudentProgress = lazy(() => import('./pages/TeacherStudentProgress'));
 
-import OwnerLessonBuilder
-  from "./pages/OwnerLessonBuilder";
+const TeacherStudentPortfolio = lazy(() => import('./pages/TeacherStudentPortfolio'));
 
-import OwnerCustomers
-  from "./pages/OwnerCustomers";
+const StudentLessons = lazy(() => import('./pages/StudentLessons'));
 
-import OwnerSales
-  from "./pages/OwnerSales";
+const StudentLessonDetails = lazy(() => import('./pages/StudentLessonDetails'));
 
-import OwnerAnalytics
-  from "./pages/OwnerAnalytics";
+const StudentPortfolio = lazy(() => import('./pages/StudentPortfolio'));
 
-import OwnerSettings
-  from "./pages/OwnerSettings";
+const StudentJoinClass = lazy(() => import('./pages/StudentJoinClass'));
+
+const ProgramsMarketplace = lazy(() => import('./pages/ProgramsMarketplace'));
+
+const ProgramLessonPlayer = lazy(() => import('./pages/ProgramLessonPlayer'));
+
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+
+const TermsConditions = lazy(() => import('./pages/TermsConditions'));
+
+const RefundPolicy = lazy(() => import('./pages/RefundPolicy'));
+
+const OwnerDashboard = lazy(() => import('./pages/OwnerDashboard'));
+
+const OwnerPrograms = lazy(() => import('./pages/OwnerPrograms'));
+
+const OwnerProgramLessons = lazy(() => import('./pages/OwnerProgramLessons'));
+
+const OwnerLessonBuilder = lazy(() => import('./pages/OwnerLessonBuilder'));
+
+const OwnerCustomers = lazy(() => import('./pages/OwnerCustomers'));
+
+const OwnerSales = lazy(() => import('./pages/OwnerSales'));
+
+const OwnerAnalytics = lazy(() => import('./pages/OwnerAnalytics'));
+
+const OwnerSettings = lazy(() => import('./pages/OwnerSettings'));
+
+const OwnerCourseRegistrations = lazy(() => import('./pages/OwnerCourseRegistrations'));
 
 
 function App() {
   return (
     <BrowserRouter>
 
+      <Suspense fallback={<PageLoading />}>
       <Routes>
-        <Route path="/about" element={<AboutUs />} />
 
         {/* =================================================
-            DEFAULT
+            PUBLIC / NO LOGIN REQUIRED
+        ================================================= */}
+
+        <Route element={<PublicLayout />}>
+          <Route
+            path="/"
+            element={<Login />}
+          />
+
+          <Route
+            path="/login"
+            element={<Login />}
+          />
+
+          <Route
+            path="/register"
+            element={<Register />}
+          />
+
+          <Route
+            path="/about"
+            element={<AboutUs />}
+          />
+
+          <Route
+            path="/programs"
+            element={<ProgramsMarketplace />}
+          />
+
+          <Route
+            path="/programs/:programId"
+            element={<PublicProgram />}
+          />
+
+          <Route
+            path="/courses"
+            element={<Courses />}
+          />
+
+          <Route
+            path="/privacy"
+            element={<PrivacyPolicy />}
+          />
+
+          <Route
+            path="/terms"
+            element={<TermsConditions />}
+          />
+
+          <Route
+            path="/refund-policy"
+            element={<RefundPolicy />}
+          />
+        </Route>
+
+
+        {/* =================================================
+            SHARED PROTECTED
         ================================================= */}
 
         <Route
-          path="/"
+          path="/owner/access"
           element={
-            <Navigate
-              to="/login"
-              replace
-            />
+            <ProtectedRoute
+              allowedRole="owner"
+            >
+              <OwnerAccessManagement />
+            </ProtectedRoute>
           }
         />
 
-
-        {/* =================================================
-            AUTH
-        ================================================= */}
-
         <Route
-          path="/login"
+          path="/programs/:programId/access"
           element={
-            <Login />
+            <ProtectedRoute>
+              <ProgramAccess />
+            </ProtectedRoute>
           }
         />
 
-
         <Route
-          path="/register"
+          path="/profile"
           element={
-            <Register />
-          }
-        />
-
-
-        {/* =================================================
-            LEGAL
-        ================================================= */}
-
-        <Route
-          path="/privacy"
-          element={
-            <PrivacyPolicy />
-          }
-        />
-
-
-        <Route
-          path="/terms"
-          element={
-            <TermsConditions />
-          }
-        />
-
-
-        <Route
-          path="/refund-policy"
-          element={
-            <RefundPolicy />
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
           }
         />
 
@@ -177,44 +197,36 @@ function App() {
         <Route
           path="/plans"
           element={
-            <Plans />
+            <ProtectedRoute>
+              <Plans />
+            </ProtectedRoute>
           }
         />
 
-<Route
-  path="/owner/plans"
-  element={<OwnerPlans />}
-/>
+        <Route
+          path="/owner/plans"
+          element={
+            <ProtectedRoute
+              allowedRole="owner"
+            >
+              <OwnerPlans />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/checkout"
           element={
-            <Checkout />
+            <ProtectedRoute>
+              <Checkout />
+            </ProtectedRoute>
           }
         />
 
 
         {/* =================================================
-            MARKETPLACE
+            MARKETPLACE ALIASES
         ================================================= */}
-
-        <Route
-          path="/programs"
-          element={
-            <ProtectedRoute>
-              <ProgramsMarketplace />
-            </ProtectedRoute>
-          }
-        />
-<Route
-  path="/programs/:programId"
-  element={
-    <ProtectedRoute>
-      <ProgramLearning />
-    </ProtectedRoute>
-  }
-/>
-
-        {/* Student alias */}
 
         <Route
           path="/student/programs"
@@ -226,9 +238,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-
-        {/* Teacher alias */}
 
         <Route
           path="/teacher/programs"
@@ -257,7 +266,6 @@ function App() {
           }
         />
 
-
         <Route
           path="/teacher/classes"
           element={
@@ -280,7 +288,6 @@ function App() {
           }
         />
 
-
         <Route
           path="/teacher/students"
           element={
@@ -291,7 +298,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
 
         <Route
           path="/teacher/students/:studentId/progress"
@@ -304,7 +310,6 @@ function App() {
           }
         />
 
-
         <Route
           path="/teacher/students/:studentId/portfolio"
           element={
@@ -315,7 +320,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
 
         <Route
           path="/teacher/attendance"
@@ -328,7 +332,6 @@ function App() {
           }
         />
 
-
         <Route
           path="/teacher/lessons"
           element={
@@ -340,7 +343,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
 
         <Route
           path="/teacher/settings"
@@ -369,7 +371,6 @@ function App() {
           }
         />
 
-
         <Route
           path="/student/lessons"
           element={
@@ -381,7 +382,6 @@ function App() {
           }
         />
 
-
         <Route
           path="/student/lessons/:lessonId"
           element={
@@ -392,7 +392,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
 
         <Route
           path="/student/portfolio"
@@ -432,7 +431,6 @@ function App() {
           }
         />
 
-
         <Route
           path="/owner/programs"
           element={
@@ -443,7 +441,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
 
         <Route
           path="/owner/programs/:programId/lessons"
@@ -456,7 +453,6 @@ function App() {
           }
         />
 
-
         <Route
           path="/owner/programs/:programId/lessons/:lessonId/edit"
           element={
@@ -468,14 +464,15 @@ function App() {
           }
         />
 
-<Route
-  path="/programs/:programId/lessons/:lessonId"
-  element={
-    <ProtectedRoute>
-      <ProgramLessonPlayer />
-    </ProtectedRoute>
-  }
-/>
+        <Route
+          path="/programs/:programId/lessons/:lessonId"
+          element={
+            <ProtectedRoute>
+              <ProgramLessonPlayer />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/owner/customers"
           element={
@@ -487,6 +484,16 @@ function App() {
           }
         />
 
+        <Route
+          path="/owner/course-registrations"
+          element={
+            <ProtectedRoute
+              allowedRole="owner"
+            >
+              <OwnerCourseRegistrations />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/owner/sales"
@@ -499,7 +506,6 @@ function App() {
           }
         />
 
-
         <Route
           path="/owner/analytics"
           element={
@@ -510,7 +516,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
 
         <Route
           path="/owner/settings"
@@ -539,6 +544,7 @@ function App() {
         />
 
       </Routes>
+      </Suspense>
 
     </BrowserRouter>
   );

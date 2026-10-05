@@ -23,6 +23,7 @@ async function main() {
     title: { en: 'Coding', ar: 'Coding' }, description: { en: 'Description', ar: '' },
     status: 'published', createdBy: 'owner', createdAt: '2026-09-01T12:00:00Z',
     updatedAt: '2026-09-01T12:00:00Z', publishedAt: '2026-09-01T12:00:00Z',
+    accessType: 'free', price: 0,
   };
   const after = {
     ...before, title: { en: 'Updated', ar: 'Updated' }, description: { en: 'Updated', ar: '' },
@@ -81,7 +82,45 @@ async function main() {
       cases.push([`${role || 'anonymous'} ${method} denied`, testCase(role, method, data)]);
     }
   }
+  cases.push(
+    ['owner configures free program', testCase('owner', 'update', { ...after, accessType: 'free', price: 0, currency: 'ILS', paymentProvider: null, paymentProductId: null }, 'ALLOW')],
+    ['owner configures paid without provider', testCase('owner', 'update', { ...after, accessType: 'paid', price: 50, currency: 'ILS', paymentProvider: null, paymentProductId: null }, 'ALLOW')],
+    ['owner configures class access', testCase('owner', 'update', { ...after, accessType: 'class', price: 0 }, 'ALLOW')],
+    ['owner must explicitly configure an access type', testCase('owner', 'update', (() => {
+      const { accessType, ...legacy } = after;
+      return legacy;
+    })())],
+    ['invalid access type denied', testCase('owner', 'update', { ...after, accessType: 'invalid' })],
+    ['negative price denied', testCase('owner', 'update', { ...after, accessType: 'paid', price: -1 })],
+    ['free price must be zero', testCase('owner', 'update', { ...after, accessType: 'free', price: 1 })],
+    ['invalid provider denied', testCase('owner', 'update', { ...after, paymentProvider: 7 })],
+    ['student cannot change access policy', testCase('student', 'update', { ...after, accessType: 'free', price: 0 })],
+  );
   await run('fixed rules', source, cases);
+
+  const grantCases = [];
+  for (const role of ['student', 'teacher']) {
+    const target = { uid: role, role, createdAt: 'earlier', accountStatus: 'active' };
+    const granted = { ...target, ownerGrantedProgramIds: ['p1'] };
+    const grantCase = (caller, data, expectation = 'DENY', status = 'active', existing = target) =>
+      testCase(caller, 'update', data, expectation, status, `users/${role}`, existing);
+    grantCases.push(
+      [`owner grants to ${role}`, grantCase('owner', granted, 'ALLOW')],
+      [`owner revokes from ${role}`, grantCase('owner', { ...granted, ownerGrantedProgramIds: [] }, 'ALLOW', 'active', granted)],
+      [`${role} cannot self-grant`, grantCase(role, granted)],
+      [`${role} cannot change grants`, grantCase(role, { ...granted, ownerGrantedProgramIds: ['p2'] }, 'DENY', 'active', granted)],
+      [`${role} cannot delete grants`, grantCase(role, target, 'DENY', 'active', granted)],
+      [`teacher cannot grant to ${role}`, grantCase('teacher', { ...granted, teacherId: 'teacher' }, 'DENY', 'active', { ...target, teacherId: 'teacher' })],
+      [`anonymous cannot grant to ${role}`, grantCase(null, granted)],
+      [`suspended owner cannot grant to ${role}`, grantCase('owner', granted, 'DENY', 'suspended')],
+      [`malformed grants for ${role} denied`, grantCase('owner', { ...target, ownerGrantedProgramIds: 'p1' })],
+      [`oversized grants for ${role} denied`, grantCase('owner', { ...target, ownerGrantedProgramIds: Array(1001).fill('p1') })],
+      [`grant cannot change ${role} identity`, grantCase('owner', { ...granted, uid: 'other' })],
+      [`grant cannot modify ${role} billing`, grantCase('owner', { ...granted, plan: 'paid' })],
+      [`${role} cannot create with grants`, testCase(role, 'create', granted, 'DENY', 'active', `users/${role}`)],
+    );
+  }
+  await run('owner program grants', source, grantCases);
 
   const lesson = {
     title: { en: 'Lesson', ar: '' }, description: { en: '', ar: '' },

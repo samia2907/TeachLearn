@@ -1,26 +1,19 @@
+import { useAuthNavigation } from '../auth/useAuthNavigation';
 import {
-  useEffect,
   useState,
 } from "react";
 
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
   signInWithPopup,
   signOut,
 } from "firebase/auth";
 
-import {
-  doc,
-  getDoc,
-  serverTimestamp,
-  setDoc,
-} from "firebase/firestore";
+import { ensureUserProfile } from "../firebase/userProfile";
+import { phoneDashboard } from "../firebase/phoneAuthPolicy";
 
 import {
-  useNavigate,
   useSearchParams,
 } from "react-router-dom";
 
@@ -28,6 +21,12 @@ import {
   auth,
   db,
 } from "../firebase/firebase";
+
+import {
+  doc,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
 
 import {
   useLanguage,
@@ -40,8 +39,7 @@ import {
 import "./Register.css";
 
 function Register() {
-  const navigate =
-    useNavigate();
+  const { navigate, finishAuth } = useAuthNavigation();
 
   const [searchParams] =
     useSearchParams();
@@ -71,6 +69,17 @@ function Register() {
      COMMON FORM STATE
   =========================== */
 
+  const [phoneNumber, setPhoneNumber] = useState('');
+
+  const [age, setAge] =
+    useState("");
+
+  const [grade, setGrade] =
+    useState("");
+
+  const [city, setCity] =
+    useState("");
+
   const [name, setName] =
     useState("");
 
@@ -93,35 +102,6 @@ function Register() {
 
   const [success, setSuccess] =
     useState("");
-
-  /* ===========================
-     PHONE REGISTRATION
-  =========================== */
-
-  const [
-    showPhoneRegister,
-    setShowPhoneRegister,
-  ] = useState(false);
-
-  const [
-    phoneNumber,
-    setPhoneNumber,
-  ] = useState("");
-
-  const [
-    verificationCode,
-    setVerificationCode,
-  ] = useState("");
-
-  const [
-    confirmationResult,
-    setConfirmationResult,
-  ] = useState(null);
-
-  const [
-    codeSent,
-    setCodeSent,
-  ] = useState(false);
 
   /* ===========================
      TEXT HELPER
@@ -147,120 +127,14 @@ function Register() {
     language === "ar" ||
     language === "he";
 
-  /* ===========================
-     RECAPTCHA CLEANUP
-  =========================== */
-
-  useEffect(() => {
-    return () => {
-      if (
-        window.registerRecaptchaVerifier
-      ) {
-        try {
-          window.registerRecaptchaVerifier.clear();
-        } catch (cleanupError) {
-          console.warn(
-            "Register reCAPTCHA cleanup:",
-            cleanupError
-          );
-        }
-
-        window.registerRecaptchaVerifier =
-          null;
-      }
-    };
-  }, []);
-
-  /* ===========================
-     GENERAL HELPERS
-  =========================== */
-
   const clearMessages = () => {
     setError("");
     setSuccess("");
   };
 
-  const resetPhoneRegister = () => {
-    setPhoneNumber("");
-    setVerificationCode("");
-    setConfirmationResult(null);
-    setCodeSent(false);
-
-    if (
-      window.registerRecaptchaVerifier
-    ) {
-      try {
-        window.registerRecaptchaVerifier.clear();
-      } catch (cleanupError) {
-        console.warn(
-          "Register reCAPTCHA cleanup:",
-          cleanupError
-        );
-      }
-
-      window.registerRecaptchaVerifier =
-        null;
-    }
-  };
-
-  const normalizePhoneNumber = (
-    value
-  ) => {
-    const cleaned = value
-      .trim()
-      .replace(
-        /[\s\-()]/g,
-        ""
-      );
-
-    // Israel:
-    // 0501234567
-    // → +972501234567
-
-    if (
-      /^05\d{8}$/.test(
-        cleaned
-      )
-    ) {
-      return (
-        "+972" +
-        cleaned.slice(1)
-      );
-    }
-
-    if (
-      /^9725\d{8}$/.test(
-        cleaned
-      )
-    ) {
-      return (
-        "+" +
-        cleaned
-      );
-    }
-
-    // International E.164
-
-    if (
-      /^\+\d{8,15}$/.test(
-        cleaned
-      )
-    ) {
-      return cleaned;
-    }
-
-    return null;
-  };
-
   const goBack = () => {
     setRole(null);
-
     clearMessages();
-
-    setShowPhoneRegister(false);
-
-    resetPhoneRegister();
-
     navigate("/register");
   };
 
@@ -268,98 +142,17 @@ function Register() {
      TEACHER PROFILE
   =========================== */
 
-  const createTeacherProfile =
-    async (
-      firebaseUser,
-      {
-        teacherName,
-        teacherEmail = null,
-        teacherPhone = null,
-        authProvider,
-      }
-    ) => {
-      const userRef =
-        doc(
-          db,
-          "users",
-          firebaseUser.uid
-        );
-
-      const existingSnapshot =
-        await getDoc(
-          userRef
-        );
-
-      /*
-        If this Firebase user already
-        has a TeachLearn profile,
-        do not overwrite it.
-      */
-
-      if (
-        existingSnapshot.exists()
-      ) {
-        const existingData =
-          existingSnapshot.data();
-
-        if (
-          existingData.role !==
-          "teacher"
-        ) {
-          await signOut(auth);
-
-          throw new Error(
-            "account-role-conflict"
-          );
-        }
-
-        navigate("/plans");
-
-        return;
-      }
-
-      await setDoc(
-        userRef,
-        {
-          uid:
-            firebaseUser.uid,
-
-          name:
-            teacherName.trim(),
-
-          email:
-            teacherEmail,
-
-          phoneNumber:
-            teacherPhone,
-
-          role:
-            "teacher",
-
-          authProvider,
-
-          plan:
-            "free",
-
-          subscriptionStatus:
-            "inactive",
-
-          billingCycle:
-            null,
-
-          subscriptionId:
-            null,
-
-          accountStatus:
-            "active",
-
-          createdAt:
-            serverTimestamp(),
-        }
-      );
-
-      navigate("/plans");
-    };
+  const createTeacherProfile = async (firebaseUser, { teacherName, authProvider }) => {
+    const profile = await ensureUserProfile(firebaseUser, {
+      role: 'teacher', name: teacherName, authProvider, preferredLanguage: language, phoneNumber,
+    });
+    try { phoneDashboard(profile); } catch (error) { await signOut(auth); throw error; }
+    if (profile.role !== 'teacher') {
+      await signOut(auth);
+      throw new Error('account-role-conflict');
+    }
+    finishAuth('/plans');
+  };
 
   /* ===========================
      EMAIL TEACHER REGISTRATION
@@ -470,317 +263,40 @@ function Register() {
     };
 
   /* ===========================
-     PHONE TEACHER REGISTRATION
-  =========================== */
-
-  const setupRegisterRecaptcha =
-    () => {
-      if (
-        window.registerRecaptchaVerifier
-      ) {
-        try {
-          window.registerRecaptchaVerifier.clear();
-        } catch (cleanupError) {
-          console.warn(
-            "Register reCAPTCHA cleanup:",
-            cleanupError
-          );
-        }
-
-        window.registerRecaptchaVerifier =
-          null;
-      }
-
-      auth.languageCode =
-        language;
-
-      window.registerRecaptchaVerifier =
-        new RecaptchaVerifier(
-          auth,
-          "register-recaptcha-container",
-          {
-            size:
-              "normal",
-
-            "expired-callback":
-              () => {
-                setError(
-                  text(
-                    "reCAPTCHA expired. Please verify again.",
-
-                    "انتهت صلاحية reCAPTCHA. يرجى التحقق مرة أخرى.",
-
-                    "תוקף אימות reCAPTCHA פג. יש לבצע אימות מחדש."
-                  )
-                );
-              },
-          }
-        );
-
-      return (
-        window.registerRecaptchaVerifier
-      );
-    };
-
-  const sendTeacherPhoneCode =
-    async () => {
-      clearMessages();
-
-      if (!name.trim()) {
-        setError(
-          text(
-            "Please enter your full name first.",
-
-            "أدخل الاسم الكامل أولًا.",
-
-            "יש להזין תחילה שם מלא."
-          )
-        );
-
-        return;
-      }
-
-      const normalizedPhone =
-        normalizePhoneNumber(
-          phoneNumber
-        );
-
-      if (!normalizedPhone) {
-        setError(
-          text(
-            "Enter a valid phone number, for example 0501234567.",
-
-            "أدخل رقم هاتف صحيحًا، مثل 0501234567.",
-
-            "יש להזין מספר טלפון תקין, לדוגמה 0501234567."
-          )
-        );
-
-        return;
-      }
-
-      setLoading(true);
-
-      try {
-        const appVerifier =
-          setupRegisterRecaptcha();
-
-        const result =
-          await signInWithPhoneNumber(
-            auth,
-            normalizedPhone,
-            appVerifier
-          );
-
-        setConfirmationResult(
-          result
-        );
-
-        setCodeSent(true);
-
-        setSuccess(
-          text(
-            "Verification code sent by SMS.",
-
-            "تم إرسال رمز التحقق برسالة SMS.",
-
-            "קוד אימות נשלח בהודעת SMS."
-          )
-        );
-      } catch (err) {
-        console.error(
-          "Phone code error:",
-          err
-        );
-
-        handleRegistrationError(
-          err
-        );
-
-        if (
-          window.registerRecaptchaVerifier
-        ) {
-          try {
-            window.registerRecaptchaVerifier.clear();
-          } catch (cleanupError) {
-            console.warn(
-              "Register reCAPTCHA cleanup:",
-              cleanupError
-            );
-          }
-
-          window.registerRecaptchaVerifier =
-            null;
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-  const verifyTeacherPhoneCode =
-    async () => {
-      clearMessages();
-
-      if (
-        !confirmationResult
-      ) {
-        setError(
-          text(
-            "Send the verification code first.",
-
-            "أرسل رمز التحقق أولًا.",
-
-            "יש לשלוח תחילה קוד אימות."
-          )
-        );
-
-        return;
-      }
-
-      if (
-        verificationCode
-          .trim()
-          .length !== 6
-      ) {
-        setError(
-          text(
-            "Enter the 6-digit verification code.",
-
-            "أدخل رمز التحقق المكوّن من 6 أرقام.",
-
-            "יש להזין קוד אימות בן 6 ספרות."
-          )
-        );
-
-        return;
-      }
-
-      setLoading(true);
-
-      try {
-        const result =
-          await confirmationResult.confirm(
-            verificationCode.trim()
-          );
-
-        await createTeacherProfile(
-          result.user,
-          {
-            teacherName:
-              name.trim(),
-
-            teacherEmail:
-              result.user.email ||
-              null,
-
-            teacherPhone:
-              result.user.phoneNumber ||
-              normalizePhoneNumber(
-                phoneNumber
-              ),
-
-            authProvider:
-              "phone",
-          }
-        );
-      } catch (err) {
-        console.error(
-          "Phone verification error:",
-          err
-        );
-
-        handleRegistrationError(
-          err
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-  /* ===========================
      REGISTER STUDENT
   =========================== */
 
-  const registerStudent =
-    async () => {
-      const cleanEmail =
-        email.trim().toLowerCase();
+  const registerStudent = async () => {
+    const result = await createUserWithEmailAndPassword(
+      auth,
+      email.trim().toLowerCase(),
+      password
+    );
 
-      const result =
-        await createUserWithEmailAndPassword(
-          auth,
-          cleanEmail,
-          password
-        );
+    await ensureUserProfile(result.user, {
+      role: "student",
+      name,
+      authProvider: "password",
+      preferredLanguage: language,
+      phoneNumber,
+    });
 
-      const userRef =
-        doc(
-          db,
-          "users",
-          result.user.uid
-        );
+    await updateDoc(
+      doc(
+        db,
+        "users",
+        result.user.uid
+      ),
+      {
+        age: Number(age),
+        grade: grade.trim(),
+        city: city.trim(),
+        updatedAt: serverTimestamp(),
+      }
+    );
 
-      await setDoc(
-        userRef,
-        {
-          uid:
-            result.user.uid,
-
-          name:
-            name.trim(),
-
-          role:
-            "student",
-
-          studentAccountType:
-            "independent",
-
-          email:
-            cleanEmail,
-
-          authEmail:
-            cleanEmail,
-
-          classId:
-            null,
-
-          classCode:
-            null,
-
-          teacherId:
-            null,
-
-          xp:
-            0,
-
-          level:
-            1,
-
-          badges:
-            [],
-
-          plan:
-            "free",
-
-          subscriptionStatus:
-            "inactive",
-
-          billingCycle:
-            null,
-
-          subscriptionId:
-            null,
-
-          accountStatus:
-            "active",
-
-          createdAt:
-            serverTimestamp(),
-        }
-      );
-
-      navigate("/plans");
-    };
+    finishAuth("/plans");
+  };
 
   /* ===========================
      STANDARD FORM SUBMIT
@@ -820,17 +336,6 @@ function Register() {
         return;
       }
 
-      /*
-        Phone registration uses
-        its own buttons.
-      */
-
-      if (
-        role === "teacher" &&
-        showPhoneRegister
-      ) {
-        return;
-      }
 
       if (!email.trim()) {
         setError(
@@ -843,6 +348,57 @@ function Register() {
 
         return;
       }
+
+      if (
+        role === "student" &&
+        (
+          age === "" ||
+          Number.isNaN(Number(age)) ||
+          Number(age) < 5 ||
+          Number(age) > 120
+        )
+      ) {
+        setError(
+          text(
+            "Please enter a valid age between 5 and 120.",
+            "أدخل عمرًا صحيحًا بين 5 و120.",
+            "יש להזין גיל תקין בין 5 ל-120."
+          )
+        );
+
+        return;
+      }
+
+      if (
+        role === "student" &&
+        !grade.trim()
+      ) {
+        setError(
+          text(
+            "Please enter your grade.",
+            "أدخل الصف.",
+            "יש להזין כיתה."
+          )
+        );
+
+        return;
+      }
+
+      if (
+        role === "student" &&
+        !city.trim()
+      ) {
+        setError(
+          text(
+            "Please enter your town or city.",
+            "أدخل اسم البلد.",
+            "יש להזין יישוב."
+          )
+        );
+
+        return;
+      }
+
 
       if (!isStrongPassword(password)) {
         setError(
@@ -1004,9 +560,9 @@ function Register() {
       case "auth/operation-not-allowed":
         setError(
           text(
-            "Phone sign-in is not enabled for this Firebase project. Enable the Phone provider in Firebase Authentication, or use email/Google.",
-            "تسجيل الدخول بالهاتف غير مفعّل في مشروع Firebase. فعّل مزوّد الهاتف من Firebase Authentication أو استخدم البريد/Google.",
-            "התחברות באמצעות טלפון אינה מופעלת בפרויקט Firebase. יש להפעיל את ספק הטלפון או להשתמש באימייל/Google."
+            "This sign-in method is currently unavailable. Please try email or Google.",
+            "طريقة الدخول هذه غير متاحة حاليًا. جرّب البريد الإلكتروني أو Google.",
+            "שיטת התחברות זו אינה זמינה כרגע. נסו אימייל או Google."
           )
         );
         break;
@@ -1015,33 +571,14 @@ function Register() {
       case "auth/app-not-authorized":
         setError(
           text(
-            "This website domain is not authorized for phone authentication.",
-            "نطاق هذا الموقع غير مصرح له باستخدام تسجيل الدخول بالهاتف.",
-            "דומיין האתר אינו מורשה לאימות באמצעות טלפון."
+            "This website domain is not authorized for authentication.",
+            "نطاق هذا الموقع غير مصرح له بتسجيل الدخول.",
+            "דומיין האתר אינו מורשה לאימות."
           )
         );
         break;
 
-      case "auth/billing-not-enabled":
-        setError(
-          text(
-            "Phone authentication requires billing to be enabled for this Firebase project.",
-            "تسجيل الدخول بالهاتف يحتاج إلى تفعيل الفوترة في مشروع Firebase.",
-            "אימות באמצעות טלפון מחייב הפעלת חיוב בפרויקט Firebase."
-          )
-        );
-        break;
 
-      case "auth/invalid-app-credential":
-      case "auth/missing-app-credential":
-        setError(
-          text(
-            "reCAPTCHA could not verify this request. Refresh the page and try again.",
-            "تعذر على reCAPTCHA التحقق من الطلب. حدّث الصفحة وحاول مرة أخرى.",
-            "reCAPTCHA לא הצליח לאמת את הבקשה. יש לרענן את הדף ולנסות שוב."
-          )
-        );
-        break;
 
       case "auth/network-request-failed":
         setError(
@@ -1065,51 +602,17 @@ function Register() {
         );
         break;
 
-      case "auth/quota-exceeded":
-        setError(
-          text(
-            "SMS quota has been reached. Please try again later.",
 
-            "تم الوصول إلى حد رسائل SMS. حاول مرة أخرى لاحقًا.",
 
-            "הגעתם למכסת הודעות ה-SMS. נסו שוב מאוחר יותר."
-          )
-        );
-        break;
-
-      case "auth/captcha-check-failed":
-        setError(
-          text(
-            "reCAPTCHA verification failed. Please try again.",
-
-            "فشل التحقق من reCAPTCHA. حاول مرة أخرى.",
-
-            "אימות reCAPTCHA נכשל. נסו שוב."
-          )
-        );
-        break;
-
-      case "auth/invalid-verification-code":
-      case "auth/code-expired":
-        setError(
-          text(
-            "The verification code is incorrect or expired.",
-
-            "رمز التحقق غير صحيح أو انتهت صلاحيته.",
-
-            "קוד האימות שגוי או שפג תוקפו."
-          )
-        );
-        break;
 
       case "account-role-conflict":
         setError(
           text(
-            "This login already belongs to a non-teacher TeachLearn account.",
+            "This login already belongs to a non-teacher TechMinds account.",
 
-            "طريقة الدخول هذه مرتبطة بحساب TeachLearn ليس حساب معلّم.",
+            "طريقة الدخول هذه مرتبطة بحساب TechMinds ليس حساب معلّم.",
 
-            "שיטת התחברות זו כבר משויכת לחשבון TeachLearn שאינו חשבון מורה."
+            "שיטת התחברות זו כבר משויכת לחשבון TechMinds שאינו חשבון מורה."
           )
         );
         break;
@@ -1293,94 +796,6 @@ function Register() {
 
     fontSize:
       "14px",
-
-    cursor:
-      loading
-        ? "not-allowed"
-        : "pointer",
-
-    opacity:
-      loading
-        ? 0.6
-        : 1,
-  };
-
-  const phoneBoxStyle = {
-    width:
-      "100%",
-
-    boxSizing:
-      "border-box",
-
-    margin:
-      "12px 0 4px",
-
-    padding:
-      "16px",
-
-    border:
-      "1px solid #e8e2ed",
-
-    borderRadius:
-      "14px",
-
-    background:
-      "#faf9fc",
-  };
-
-  const phoneInputStyle = {
-    width:
-      "100%",
-
-    minHeight:
-      "45px",
-
-    boxSizing:
-      "border-box",
-
-    margin:
-      "7px 0 12px",
-
-    padding:
-      "10px 12px",
-
-    border:
-      "1px solid #d7d0de",
-
-    borderRadius:
-      "10px",
-
-    outline:
-      "none",
-
-    fontSize:
-      "14px",
-  };
-
-  const phoneActionStyle = {
-    width:
-      "100%",
-
-    minHeight:
-      "45px",
-
-    border:
-      "none",
-
-    borderRadius:
-      "10px",
-
-    background:
-      "#6d28d9",
-
-    color:
-      "#ffffff",
-
-    fontSize:
-      "14px",
-
-    fontWeight:
-      "800",
 
     cursor:
       loading
@@ -1697,12 +1112,15 @@ function Register() {
                 )}
           </p>
 
+          <>
           <form
             className="register-form"
             onSubmit={
               handleRegister
             }
           >
+            <label htmlFor="register-phone">{text('Contact phone (optional)', 'رقم التواصل (اختياري)', 'טלפון ליצירת קשר (לא חובה)')}</label>
+            <input id="register-phone" type="tel" dir="ltr" autoComplete="tel" maxLength={40} value={phoneNumber} onChange={event => setPhoneNumber(event.target.value)} />
             {/* NAME */}
 
             <label>
@@ -1743,8 +1161,6 @@ function Register() {
 
             {role === "teacher" && (
               <>
-                {!showPhoneRegister && (
-                  <>
                     {/* EMAIL */}
 
                     <label>
@@ -1915,314 +1331,6 @@ function Register() {
                       )}
                     </button>
 
-                    {/* PHONE */}
-
-                    <button
-                      type="button"
-
-                      onClick={() => {
-                        clearMessages();
-
-                        setShowPhoneRegister(
-                          true
-                        );
-
-                        resetPhoneRegister();
-                      }}
-
-                      disabled={
-                        loading
-                      }
-
-                      style={
-                        alternativeButtonStyle
-                      }
-                    >
-                      📱&nbsp;&nbsp;
-
-                      {text(
-                        "Continue with phone number",
-
-                        "المتابعة باستخدام رقم الهاتف",
-
-                        "המשך באמצעות מספר טלפון"
-                      )}
-                    </button>
-                  </>
-                )}
-
-                {/* PHONE REGISTER */}
-
-                {showPhoneRegister && (
-                  <div
-                    className="phone-register-box"
-                    style={
-                      phoneBoxStyle
-                    }
-                  >
-                    <button
-                      type="button"
-                      className="phone-register-back"
-
-                      onClick={() => {
-                        clearMessages();
-
-                        setShowPhoneRegister(
-                          false
-                        );
-
-                        resetPhoneRegister();
-                      }}
-
-                      style={{
-                        border:
-                          "none",
-
-                        background:
-                          "transparent",
-
-                        color:
-                          "#6d28d9",
-
-                        fontWeight:
-                          "700",
-
-                        cursor:
-                          "pointer",
-
-                        marginBottom:
-                          "10px",
-
-                        padding:
-                          "0",
-                      }}
-                    >
-                      {text(
-                        "← Use email or Google",
-
-                        "العودة إلى البريد أو Google ↩",
-
-                        "↩ חזרה לאימייל או Google"
-                      )}
-                    </button>
-
-                    {!codeSent ? (
-                      <>
-                        <label>
-                          {text(
-                            "Phone Number",
-
-                            "رقم الهاتف",
-
-                            "מספר טלפון"
-                          )}
-                        </label>
-
-                        <input
-                          type="tel"
-
-                          placeholder="0501234567"
-
-                          value={
-                            phoneNumber
-                          }
-
-                          onChange={(e) =>
-                            setPhoneNumber(
-                              e.target.value
-                            )
-                          }
-
-                          style={
-                            phoneInputStyle
-                          }
-                        />
-
-                        <div
-                          id="register-recaptcha-container"
-
-                          style={{
-                            marginBottom:
-                              "12px",
-                          }}
-                        />
-
-                        <button
-                          type="button"
-
-                          onClick={
-                            sendTeacherPhoneCode
-                          }
-
-                          disabled={
-                            loading
-                          }
-
-                          style={
-                            phoneActionStyle
-                          }
-                        >
-                          {loading
-                            ? text(
-                                "Sending...",
-
-                                "جارٍ الإرسال...",
-
-                                "שולח..."
-                              )
-                            : text(
-                                "Send verification code",
-
-                                "إرسال رمز التحقق",
-
-                                "שליחת קוד אימות"
-                              )}
-                        </button>
-
-                        <p
-                          style={{
-                            margin:
-                              "10px 0 0",
-
-                            color:
-                              "#77717d",
-
-                            fontSize:
-                              "11px",
-
-                            lineHeight:
-                              "1.5",
-                          }}
-                        >
-                          {text(
-                            "A verification SMS will be sent to this number. Standard SMS rates may apply.",
-
-                            "سيتم إرسال رسالة SMS للتحقق إلى هذا الرقم، وقد تُطبق رسوم الرسائل المعتادة.",
-
-                            "הודעת SMS עם קוד אימות תישלח למספר זה. ייתכן שיחולו תעריפי SMS רגילים."
-                          )}
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <label>
-                          {text(
-                            "Verification Code",
-
-                            "رمز التحقق",
-
-                            "קוד אימות"
-                          )}
-                        </label>
-
-                        <input
-                          type="text"
-
-                          inputMode="numeric"
-
-                          maxLength={6}
-
-                          placeholder="123456"
-
-                          value={
-                            verificationCode
-                          }
-
-                          onChange={(e) =>
-                            setVerificationCode(
-                              e.target.value
-                                .replace(
-                                  /\D/g,
-                                  ""
-                                )
-                                .slice(
-                                  0,
-                                  6
-                                )
-                            )
-                          }
-
-                          style={
-                            phoneInputStyle
-                          }
-                        />
-
-                        <button
-                          type="button"
-
-                          onClick={
-                            verifyTeacherPhoneCode
-                          }
-
-                          disabled={
-                            loading
-                          }
-
-                          style={
-                            phoneActionStyle
-                          }
-                        >
-                          {loading
-                            ? text(
-                                "Verifying...",
-
-                                "جارٍ التحقق...",
-
-                                "מאמת..."
-                              )
-                            : text(
-                                "Verify & Create Account 🚀",
-
-                                "تحقق وأنشئ الحساب 🚀",
-
-                                "אימות ויצירת חשבון 🚀"
-                              )}
-                        </button>
-
-                        <button
-                          type="button"
-
-                          onClick={() => {
-                            clearMessages();
-
-                            resetPhoneRegister();
-                          }}
-
-                          style={{
-                            width:
-                              "100%",
-
-                            marginTop:
-                              "10px",
-
-                            border:
-                              "none",
-
-                            background:
-                              "transparent",
-
-                            color:
-                              "#6d28d9",
-
-                            fontWeight:
-                              "700",
-
-                            cursor:
-                              "pointer",
-                          }}
-                        >
-                          {text(
-                            "Use another phone number",
-
-                            "استخدم رقم هاتف آخر",
-
-                            "השתמשו במספר טלפון אחר"
-                          )}
-                        </button>
-                      </>
-                    )}
-                  </div>
-                )}
               </>
             )}
 
@@ -2261,6 +1369,86 @@ function Register() {
                     )
                   }
 
+                  required
+                />
+
+                <label htmlFor="register-age">
+                  {text(
+                    "Age",
+                    "العمر",
+                    "גיל"
+                  )}
+                </label>
+
+                <input
+                  id="register-age"
+                  type="number"
+                  min="5"
+                  max="120"
+                  inputMode="numeric"
+                  placeholder={text(
+                    "Enter your age",
+                    "أدخل عمرك",
+                    "הזינו גיל"
+                  )}
+                  value={age}
+                  onChange={(e) =>
+                    setAge(
+                      e.target.value
+                    )
+                  }
+                  required
+                />
+
+                <label htmlFor="register-grade">
+                  {text(
+                    "Grade",
+                    "الصف",
+                    "כיתה"
+                  )}
+                </label>
+
+                <input
+                  id="register-grade"
+                  type="text"
+                  maxLength={40}
+                  placeholder={text(
+                    "Example: Grade 6",
+                    "مثال: الصف السادس",
+                    "לדוגמה: כיתה ו׳"
+                  )}
+                  value={grade}
+                  onChange={(e) =>
+                    setGrade(
+                      e.target.value
+                    )
+                  }
+                  required
+                />
+
+                <label htmlFor="register-city">
+                  {text(
+                    "Town / City",
+                    "البلد",
+                    "יישוב"
+                  )}
+                </label>
+
+                <input
+                  id="register-city"
+                  type="text"
+                  maxLength={120}
+                  placeholder={text(
+                    "Enter your town or city",
+                    "أدخل اسم البلد",
+                    "הזינו יישוב"
+                  )}
+                  value={city}
+                  onChange={(e) =>
+                    setCity(
+                      e.target.value
+                    )
+                  }
                   required
                 />
 
@@ -2386,6 +1574,7 @@ function Register() {
               </div>
             )}
           </form>
+          </>
 
           {/* NOTE */}
 

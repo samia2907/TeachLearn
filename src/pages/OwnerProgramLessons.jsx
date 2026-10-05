@@ -1,3 +1,5 @@
+import { Fragment } from 'react';
+import { contentPresentation, programContentType } from '../../functions/programContent.mjs';
 import {
   useEffect,
   useMemo,
@@ -139,12 +141,13 @@ function OwnerProgramLessons() {
 
   const text = (
     english,
-    arabic
+    arabic,
+    hebrew = hebrewText(english)
   ) =>
     language === "ar"
       ? arabic
       : language === "he"
-        ? hebrewText(english)
+        ? hebrew
       : english;
 
 
@@ -428,6 +431,9 @@ function OwnerProgramLessons() {
      FILTER
   ===================================================== */
 
+  const presentation = contentPresentation(lessons);
+  const typeLabel = type => ({ lesson: text('Lesson', 'درس', 'שיעור'), mission: text('Mission', 'مهمة', 'משימה'), quiz: text('Quiz', 'اختبار', 'בוחן'), activity: text('Activity', 'نشاط', 'פעילות') })[type];
+  const groupLabel = type => ({ lesson: text('Lessons', 'الدروس', 'שיעורים'), mission: text('Missions', 'المهمات', 'משימות'), quiz: text('Quizzes', 'الاختبارات', 'בחנים'), activity: text('Activities', 'الأنشطة', 'פעילויות') })[type];
   const filteredLessons =
     useMemo(
       () => {
@@ -1068,8 +1074,9 @@ function OwnerProgramLessons() {
       lesson,
       direction
     ) => {
+      const sameType = lessons.filter(item => programContentType(item) === programContentType(lesson));
       const currentIndex =
-        lessons.findIndex(
+        sameType.findIndex(
           (item) =>
             item.id ===
             lesson.id
@@ -1092,14 +1099,14 @@ function OwnerProgramLessons() {
       if (
         targetIndex < 0 ||
         targetIndex >=
-          lessons.length
+          sameType.length
       ) {
         return;
       }
 
 
       const targetLesson =
-        lessons[
+        sameType[
           targetIndex
         ];
 
@@ -1143,8 +1150,7 @@ function OwnerProgramLessons() {
             order:
               secondOrder,
 
-            lessonNumber:
-              secondOrder,
+            ...(programContentType(lesson) === 'lesson' ? { lessonNumber: secondOrder } : {}),
 
             updatedAt:
               serverTimestamp(),
@@ -1163,8 +1169,7 @@ function OwnerProgramLessons() {
             order:
               firstOrder,
 
-            lessonNumber:
-              firstOrder,
+            ...(programContentType(targetLesson) === 'lesson' ? { lessonNumber: firstOrder } : {}),
 
             updatedAt:
               serverTimestamp(),
@@ -1476,8 +1481,8 @@ function OwnerProgramLessons() {
           </small>
 
           <strong>
-            {lessons.length}
-          </strong>
+            {presentation.lessonNumbers.size}
+          </strong><small>{lessons.filter(item => programContentType(item) === 'mission').length} {groupLabel('mission')}</small>
         </div>
 
 
@@ -1763,14 +1768,14 @@ function OwnerProgramLessons() {
 
           <div className="owner-lessons-list">
 
-            {filteredLessons.map(
+            {presentation.groups.map(group => <Fragment key={group.type}><h2 className="owner-content-heading">{groupLabel(group.type)}</h2>{filteredLessons.filter(item => programContentType(item) === group.type).map(
               (
                 lesson,
-                index
+                _index
               ) => {
 
                 const actualIndex =
-                  lessons.findIndex(
+                  group.items.findIndex(
                     (item) =>
                       item.id ===
                       lesson.id
@@ -1795,16 +1800,11 @@ function OwnerProgramLessons() {
                     <div className="owner-lesson-number">
 
                       <small>
-                        {text(
-                          "LESSON",
-                          "درس"
-                        )}
+                        {typeLabel(group.type)}
                       </small>
 
                       <strong>
-                        {lesson.order ||
-                          lesson.lessonNumber ||
-                          index + 1}
+                        {group.type === 'lesson' ? presentation.lessonNumbers.get(lesson.id) : '🎯'}
                       </strong>
 
                     </div>
@@ -1815,6 +1815,7 @@ function OwnerProgramLessons() {
                     {lesson.coverImage && (
                       <div className="owner-lesson-cover-wrap">
                         <img
+                          decoding="async"
                           src={lesson.coverImage}
                           alt={
                             localized(lesson.imageAlt) ||
@@ -1952,7 +1953,7 @@ function OwnerProgramLessons() {
                         type="button"
                         disabled={
                           actualIndex ===
-                            lessons.length -
+                            group.items.length -
                               1 ||
                           actionLoading ===
                             lesson.id
@@ -1990,10 +1991,7 @@ function OwnerProgramLessons() {
                         }
                       >
                         🖥️{" "}
-                        {text(
-                          "Build Lesson",
-                          "بناء الدرس"
-                        )}
+                        {group.type === 'mission' ? text('Build Mission', 'بناء المهمة', 'עריכת משימה') : text('Build Lesson', 'بناء الدرس', 'עריכת שיעור')}
                       </button>
 
 
@@ -2080,7 +2078,7 @@ function OwnerProgramLessons() {
                   </article>
                 );
               }
-            )}
+            )}</Fragment>)}
 
           </div>
 
@@ -2130,7 +2128,7 @@ function OwnerProgramLessons() {
                   <h2>
                     {editingLesson
                       ? text(
-                          "Edit Lesson",
+                          "Edit Content",
                           "تعديل الدرس"
                         )
                       : text(

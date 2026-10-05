@@ -19,7 +19,9 @@ const target = Object.freeze({
 function bilingual(en, ar) {
   return {en, ar};
 }
-
+function trilingual(en, ar, he) {
+  return { en, ar, he };
+}
 function contentSlide(id, title, content, type = "content") {
   return {
     id,
@@ -70,6 +72,7 @@ const programs = [
     category: "computer-science",
     ageFrom: 9,
     ageTo: 12,
+
     level: "beginner",
     status: "draft",
 
@@ -117,99 +120,288 @@ const programs = [
         status: "draft",
 
         sections: [
-          contentSlide(
-            "computer-system",
-            bilingual(
-              "A system, not a magic box",
-              "نظام وليس صندوقًا سحريًا",
-            ),
-            bilingual(
-              "A computer is a system of physical parts called hardware and instructions called software. Hardware performs actions; software tells it what actions to perform. Neither is useful alone.",
-              "الحاسوب نظام يتكوّن من أجزاء مادية تُسمّى العتاد وتعليمات تُسمّى البرمجيات. ينفّذ العتاد الأفعال، وتخبره البرمجيات بما يجب تنفيذه. ولا يفيد أحدهما دون الآخر.",
-            ),
-          ),
+  contentSlide(
+    "computer-hook",
+    trilingual(
+      "Does a computer think by itself?",
+      "هل الحاسوب يفكّر وحده؟",
+      "האם המחשב חושב בעצמו?"
+    ),
+    trilingual(
+      "A computer can do amazing things, but every result depends on parts working together and instructions telling those parts what to do. Let’s investigate what is really happening inside.",
+      "يستطيع الحاسوب تنفيذ أشياء مذهلة، لكن كل نتيجة تعتمد على أجزاء تعمل معًا وتعليمات تخبر هذه الأجزاء بما يجب فعله. هيا نكتشف ماذا يحدث فعلًا داخل الحاسوب.",
+      "מחשב יכול לבצע דברים מדהימים, אבל כל תוצאה תלויה בחלקים שפועלים יחד ובהוראות שאומרות להם מה לעשות. בואו נגלה מה באמת קורה בתוך המחשב."
+    )
+  ),
 
-          contentSlide(
-            "input-process-output",
-            bilingual(
-              "The information cycle",
-              "دورة المعلومات",
-            ),
-            bilingual(
-              "Most computer tasks follow a cycle: input enters through a sensor or device, the processor follows instructions, data may be stored, and output communicates a result. A touchscreen can be both input and output.",
-              "تتبع معظم مهام الحاسوب دورة: يدخل المدخل عبر مستشعر أو جهاز، ويتبع المعالج التعليمات، وقد تُخزّن البيانات، ثم تعرض المخرجات النتيجة. ويمكن للشاشة اللمسية أن تكون إدخالًا وإخراجًا معًا.",
-            ),
-          ),
+  contentSlide(
+    "hardware-software",
+    trilingual(
+      "Hardware + Software",
+      "العتاد + البرمجيات",
+      "חומרה + תוכנה"
+    ),
+    trilingual(
+      "Hardware is everything physical that you can touch, such as the keyboard, screen, processor, and memory. Software is the programs and instructions that tell the hardware what to do.",
+      "العتاد هو الأجزاء المادية التي يمكن لمسها، مثل لوحة المفاتيح والشاشة والمعالج والذاكرة. أما البرمجيات فهي البرامج والتعليمات التي تخبر العتاد بما يجب أن يفعله.",
+      "חומרה היא כל החלקים הפיזיים שאפשר לגעת בהם, כמו המקלדת, המסך, המעבד והזיכרון. תוכנה היא התוכניות וההוראות שאומרות לחומרה מה לעשות."
+    )
+  ),
 
-          contentSlide(
-            "device-detective",
-            bilingual(
-              "Device detective challenge",
-              "تحدّي محقق الأجهزة",
-            ),
-            bilingual(
-              "Choose a smart device. Identify one input, one processing decision, one stored item, and one output. Then explain what would fail if one component disappeared.",
-              "اختر جهازًا ذكيًا. حدّد مدخلًا واحدًا وقرار معالجة وعنصرًا مخزّنًا ومخرجًا واحدًا، ثم اشرح ما الذي سيتعطل إذا اختفى أحد المكوّنات.",
-            ),
-            "task",
-          ),
+  quizSlide(
+    "hardware-check",
+    trilingual(
+      "Quick Challenge",
+      "تحدٍ سريع",
+      "אתגר מהיר"
+    ),
+    trilingual(
+      "Which of these is hardware?",
+      "أي واحد من التالي يُعتبر عتادًا (Hardware)؟",
+      "איזה מהבאים הוא חומרה?"
+    ),
+    [
+      trilingual("Keyboard", "لوحة المفاتيح", "מקלדת"),
+      trilingual("Drawing app", "برنامج للرسم", "תוכנת ציור"),
+      trilingual("Computer game", "لعبة حاسوب", "משחק מחשב"),
+      trilingual("Operating system", "نظام التشغيل", "מערכת הפעלה")
+    ],
+    0
+  ),
 
-          quizSlide(
-            "hardware-software-quiz",
-            bilingual(
-              "Quick check",
-              "تحقق سريع",
-            ),
-            bilingual(
-              "Which statement best explains software?",
-              "أي عبارة تشرح البرمجيات بشكل أفضل؟",
-            ),
-            [
-              bilingual(
-                "Instructions that tell hardware what to do",
-                "تعليمات تخبر العتاد بما يجب فعله",
-              ),
-              bilingual(
-                "Only the screen and keyboard",
-                "الشاشة ولوحة المفاتيح فقط",
-              ),
-              bilingual(
-                "Electricity stored inside a file",
-                "كهرباء مخزنة داخل ملف",
-              ),
-              bilingual(
-                "Any object connected to the internet",
-                "أي جسم متصل بالإنترنت",
-              ),
-            ],
-            0,
-          ),
+  contentSlide(
+    "information-cycle",
+    trilingual(
+      "Input → Process → Output",
+      "إدخال ← معالجة ← إخراج",
+      "קלט ← עיבוד ← פלט"
+    ),
+    trilingual(
+      "Many computer actions follow the same cycle. First, the computer receives input. Then it processes the information according to instructions. Finally, it produces output. Data can also be stored for later use.",
+      "تتبع عمليات كثيرة في الحاسوب دورة بسيطة: أولًا يستقبل الحاسوب المدخلات، ثم يعالج المعلومات حسب التعليمات، وفي النهاية ينتج المخرجات. ويمكن أيضًا تخزين البيانات لاستخدامها لاحقًا.",
+      "פעולות רבות במחשב פועלות לפי מחזור פשוט: תחילה המחשב מקבל קלט, אחר כך הוא מעבד את המידע לפי הוראות, ולבסוף מפיק פלט. אפשר גם לשמור נתונים לשימוש מאוחר יותר."
+    )
+  ),
+{
+  id: "computer-parts-classification",
+  type: "classification",
 
-          contentSlide(
-            "system-summary",
-            bilingual(
-              "System thinking",
-              "التفكير المنظومي",
-            ),
-            bilingual(
-              "Computers transform input into useful output by coordinating hardware, software, processing, and storage. Strong computer scientists study how the whole system works, not only one part.",
-              "تحوّل الحواسيب المدخلات إلى مخرجات مفيدة عبر تنسيق العتاد والبرمجيات والمعالجة والتخزين. ويدرس علماء الحاسوب المتميزون طريقة عمل النظام كاملًا، لا جزءًا واحدًا فقط.",
-            ),
-            "summary",
-          ),
+  title: trilingual(
+    "Sort the Computer Parts",
+    "صنّف أجزاء الحاسوب",
+    "מיינו את חלקי המחשב"
+  ),
 
-          contentSlide(
-            "system-reflection",
-            bilingual(
-              "Reflection",
-              "تأمل",
-            ),
-            bilingual(
-              "If you could upgrade only one computer component, which would you choose and why?",
-              "لو استطعت تطوير مكوّن واحد فقط في الحاسوب، ماذا ستختار ولماذا؟",
-            ),
-          ),
-        ],
+  content: trilingual(
+    "Choose the correct role for each computer part.",
+    "اختَر الوظيفة الصحيحة لكل جزء من أجزاء الحاسوب.",
+    "בחרו את התפקיד הנכון לכל חלק במחשב."
+  ),
+
+  categories: [
+    {
+      id: "input",
+      emoji: "⌨️",
+      label: trilingual("Input", "إدخال", "קלט"),
+    },
+    {
+      id: "processing",
+      emoji: "🧠",
+      label: trilingual("Processing", "معالجة", "עיבוד"),
+    },
+    {
+      id: "output",
+      emoji: "🖥️",
+      label: trilingual("Output", "إخراج", "פלט"),
+    },
+  ],
+
+  items: [
+    {
+      id: "keyboard",
+      label: trilingual(
+        "⌨️ Keyboard",
+        "⌨️ لوحة المفاتيح",
+        "⌨️ מקלדת"
+      ),
+      correctCategory: "input",
+    },
+    {
+      id: "mouse",
+      label: trilingual(
+        "🖱️ Mouse",
+        "🖱️ الفأرة",
+        "🖱️ עכבר"
+      ),
+      correctCategory: "input",
+    },
+    {
+      id: "cpu",
+      label: trilingual(
+        "🧠 CPU",
+        "🧠 المعالج",
+        "🧠 מעבד"
+      ),
+      correctCategory: "processing",
+    },
+    {
+      id: "monitor",
+      label: trilingual(
+        "🖥️ Monitor",
+        "🖥️ الشاشة",
+        "🖥️ מסך"
+      ),
+      correctCategory: "output",
+    },
+  ],
+
+  required: true,
+},
+  quizSlide(
+    "input-check",
+    trilingual(
+      "Computer Detective",
+      "محقق الحاسوب",
+      "בלש המחשבים"
+    ),
+    trilingual(
+      "You speak into a microphone. What role is the microphone performing?",
+      "أنت تتحدث عبر الميكروفون. ما الدور الذي يقوم به الميكروفون؟",
+      "אתם מדברים למיקרופון. איזה תפקיד המיקרופון מבצע?"
+    ),
+    [
+      trilingual("Input", "إدخال", "קלט"),
+      trilingual("Processing", "معالجة", "עיבוד"),
+      trilingual("Storage", "تخزين", "אחסון"),
+      trilingual("Output", "إخراج", "פלט")
+    ],
+    0
+  ),
+
+  contentSlide(
+    "processor-storage",
+    trilingual(
+      "Processing and Storage",
+      "المعالجة والتخزين",
+      "עיבוד ואחסון"
+    ),
+    trilingual(
+      "The processor follows instructions and performs calculations and decisions. Storage keeps data so it can be used again later. They have different jobs, but both are important parts of a computer system.",
+      "يتبع المعالج التعليمات وينفذ العمليات الحسابية والقرارات. أما التخزين فيحتفظ بالبيانات حتى يمكن استخدامها لاحقًا. لكل منهما وظيفة مختلفة، لكن كليهما جزء مهم من نظام الحاسوب.",
+      "המעבד מבצע הוראות, חישובים והחלטות. האחסון שומר נתונים כדי שיהיה אפשר להשתמש בהם שוב מאוחר יותר. לכל אחד מהם תפקיד שונה, אך שניהם חשובים במערכת המחשב."
+    )
+  ),
+
+  quizSlide(
+    "output-check",
+    trilingual(
+      "What happens next?",
+      "ماذا يحدث بعد ذلك؟",
+      "מה קורה עכשיו?"
+    ),
+    trilingual(
+      "You click Play and music comes from the speakers. What role are the speakers performing?",
+      "ضغطت على زر التشغيل وخرجت الموسيقى من السماعات. ما الدور الذي تقوم به السماعات؟",
+      "לחצתם על Play ומוזיקה יוצאת מהרמקולים. איזה תפקיד הרמקולים מבצעים?"
+    ),
+    [
+      trilingual("Input", "إدخال", "קלט"),
+      trilingual("Output", "إخراج", "פלט"),
+      trilingual("Storage", "تخزين", "אחסון"),
+      trilingual("Software", "برمجيات", "תוכנה")
+    ],
+    1
+  ),
+
+  quizSlide(
+    "touchscreen-check",
+    trilingual(
+      "Think Like a Computer Scientist",
+      "فكّر كعالم حاسوب",
+      "חשבו כמו מדעני מחשב"
+    ),
+    trilingual(
+      "A touchscreen displays pictures and also detects your finger. Which statement is correct?",
+      "تعرض الشاشة اللمسية الصور وتكتشف أيضًا لمس إصبعك. أي عبارة صحيحة؟",
+      "מסך מגע מציג תמונות וגם מזהה את מגע האצבע. איזו טענה נכונה?"
+    ),
+    [
+      trilingual(
+        "It is only an input device",
+        "هي جهاز إدخال فقط",
+        "זהו התקן קלט בלבד"
+      ),
+      trilingual(
+        "It is only an output device",
+        "هي جهاز إخراج فقط",
+        "זהו התקן פלט בלבד"
+      ),
+      trilingual(
+        "It can be both input and output",
+        "يمكن أن تكون جهاز إدخال وإخراج",
+        "הוא יכול לשמש גם כקלט וגם כפלט"
+      ),
+      trilingual(
+        "It is software",
+        "هي برمجيات",
+        "זוהי תוכנה"
+      )
+    ],
+    2
+  ),
+
+  quizSlide(
+    "final-check",
+    trilingual(
+      "Final Challenge 🏁",
+      "التحدي الأخير 🏁",
+      "האתגר האחרון 🏁"
+    ),
+    trilingual(
+      "Which description best explains how a computer system works?",
+      "أي وصف يشرح بشكل أفضل كيف يعمل نظام الحاسوب؟",
+      "איזה תיאור מסביר בצורה הטובה ביותר כיצד מערכת מחשב פועלת?"
+    ),
+    [
+      trilingual(
+        "Hardware works without instructions",
+        "يعمل العتاد دون تعليمات",
+        "חומרה פועלת ללא הוראות"
+      ),
+      trilingual(
+        "Software works without hardware",
+        "تعمل البرمجيات دون عتاد",
+        "תוכנה פועלת ללא חומרה"
+      ),
+      trilingual(
+        "Hardware and software work together to receive, process, store, and output information",
+        "يعمل العتاد والبرمجيات معًا لاستقبال المعلومات ومعالجتها وتخزينها وإخراجها",
+        "חומרה ותוכנה פועלות יחד כדי לקבל, לעבד, לאחסן ולהציג מידע"
+      ),
+      trilingual(
+        "A computer only stores information",
+        "الحاسوب يخزن المعلومات فقط",
+        "מחשב רק מאחסן מידע"
+      )
+    ],
+    2
+  ),
+
+  contentSlide(
+    "system-summary",
+    trilingual(
+      "You cracked the system! 🎉",
+      "اكتشفت سر النظام! 🎉",
+      "פיצחתם את המערכת! 🎉"
+    ),
+    trilingual(
+      "A computer is a system. Hardware and software work together. Information enters as input, can be processed and stored, and finally appears as output. You are ready for the next challenge!",
+      "الحاسوب عبارة عن نظام. يعمل العتاد والبرمجيات معًا. تدخل المعلومات كمدخلات، ويمكن معالجتها وتخزينها، وفي النهاية تظهر كمخرجات. أنت جاهز للتحدي القادم!",
+      "מחשב הוא מערכת. החומרה והתוכנה פועלות יחד. מידע נכנס כקלט, ניתן לעבד ולאחסן אותו, ולבסוף הוא מופיע כפלט. אתם מוכנים לאתגר הבא!"
+    ),
+    "summary"
+  )
+],
       },
 
       /* =====================================================

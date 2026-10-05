@@ -253,3 +253,65 @@
   background: linear-gradient(115deg, #eee8f7 55%, #e8efd9);
   border-end-end-radius: 48px;
 }
+
+/* Shared Owner/Admin typography. Only font sizes change; page layouts and
+   the compact mobile sidebar remain owned by their existing styles. */
+#root :is(
+  .owner-dashboard, .owner-analytics-page, .owner-customers-page,
+  .owner-lesson-builder-page, .owner-plans-page, .owner-program-lessons-page,
+  .owner-programs-page, .owner-sales-page, .owner-settings-page
+) {
+  font-size: 16px;
+
+  /* Preserve decorative icons while raising every text/control baseline. */
+  & :where(*):not(:where(
+    [class*="icon"], [class*="icon"] *, [class*="avatar"], [class*="avatar"] *,
+    svg, svg *, .owner-nav-item > span,
+    .owner-analytics-main-stat > span, .owner-analytics-secondary > div > span,
+    .owner-program-status-analytics span, .owner-payment-status-grid span,
+    .owner-lessons-stats > div > span, .owner-program-mini-price > span,
+    .owner-customers-stats > div > span, .owner-sales-stats > div > span,
+    .owner-programs-stats > div > span,
+    .owner-settings-card-header > span, .owner-settings-role > span
+  )) {
+    font-size: 16px;
+  }
+
+  & h1 { font-size: clamp(28px, 2.5vw, 32px); }
+  & h2 { font-size: 24px; }
+  & :is(h3, h4, h5, h6) { font-size: 22px; }
+  & :is(th, td) { font-size: 16px; }
+
+  /* Beat the shared input selector's type-exclusion specificity. */
+  & :is(input, select, textarea) { font-size: 16px !important; }
+
+  & :is(
+    .owner-stat-card, .owner-business-stat, .owner-analytics-main-stat,
+    .owner-analytics-secondary, .owner-program-status-analytics,
+    .owner-payment-status-grid, .owner-customers-stats, .owner-sales-stats,
+    .owner-lessons-stats, .owner-programs-stats
+  ) strong,
+  & .owner-plan-price {
+    font-size: 30px;
+  }
+
+  & :is(small, .owner-nav-count, .owner-settings-field-note) {
+    font-size: 14px;
+  }
+
+  /* Override the two legacy per-page !important declarations. */
+  & .owner-settings-field-note { font-size: 14px !important; }
+  & .final-project-stat { font-size: 16px !important; }
+
+  & :is(h1, h2, h3, h4, h5, h6, small) :is(span, strong, b, a),
+  & .owner-plan-price :is(span, strong, b) {
+    font-size: inherit;
+  }
+}
+
+/* Keep navigation labels hidden in the existing icon-only mobile sidebar. */
+@media (max-width: 760px) {
+  #root .owner-dashboard :is(.owner-nav-item, .owner-logout) {
+    font-size: 0;
+  }
+}

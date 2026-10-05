@@ -1,3 +1,4 @@
+import ProfileLink from '../components/ProfileLink';
 import {
   useEffect,
   useMemo,
@@ -666,7 +667,7 @@ function OwnerDashboard() {
           <div>
 
             <h2>
-              TeachLearn
+              TechMinds
             </h2>
 
             <span>
@@ -689,6 +690,9 @@ function OwnerDashboard() {
         {/* NAVIGATION */}
 
         <nav className="owner-navigation">
+          <button className="owner-nav-item" onClick={() => navigate('/owner/access')}>
+            <span>🔑</span><span>{language === 'ar' ? 'إدارة الوصول' : language === 'he' ? 'ניהול גישה' : 'Access Management'}</span>
+          </button>
 
           {/* OVERVIEW */}
 
@@ -795,6 +799,31 @@ function OwnerDashboard() {
             <b className="owner-nav-count">
               {statistics.users}
             </b>
+          </button>
+
+
+          {/* COURSE REGISTRATIONS */}
+
+          <button
+            type="button"
+            className="owner-nav-item"
+            onClick={() =>
+              navigate(
+                "/owner/course-registrations"
+              )
+            }
+          >
+            <span>
+              🎓
+            </span>
+
+            {text(
+              "Course Registrations",
+
+              "طلبات الدورات",
+
+              "הרשמות לקורסים"
+            )}
           </button>
 
 
@@ -936,6 +965,7 @@ function OwnerDashboard() {
           </div>
 
 
+          <ProfileLink />
           <button
             type="button"
             className="owner-logout"
@@ -974,7 +1004,7 @@ function OwnerDashboard() {
           <div>
 
             <small>
-              TEACHLEARN ADMINISTRATION
+              TechMinds ADMINISTRATION
             </small>
 
 
@@ -1000,11 +1030,11 @@ function OwnerDashboard() {
 
             <p>
               {text(
-                "Manage your learning marketplace, content and TeachLearn community.",
+                "Manage your learning marketplace, content and TechMinds community.",
 
-                "أديري متجر TeachLearn والمحتوى والمستخدمين من مكان واحد.",
+                "أديري متجر TechMinds والمحتوى والمستخدمين من مكان واحد.",
 
-                "נהלו את החנות, התוכן וקהילת TeachLearn ממקום אחד."
+                "נהלו את החנות, התוכן וקהילת TechMinds ממקום אחד."
               )}
             </p>
 
@@ -1129,6 +1159,43 @@ function OwnerDashboard() {
               </span>
 
             </div>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              aria-label={text(
+                "Logout",
+                "تسجيل الخروج",
+                "התנתקות"
+              )}
+              title={text(
+                "Logout",
+                "تسجيل الخروج",
+                "התנתקות"
+              )}
+              style={{
+                minHeight: "42px",
+                padding: "9px 14px",
+                borderRadius: "12px",
+                border: "1px solid #eadde8",
+                background: "#fff7f7",
+                color: "#b42318",
+                font: "inherit",
+                fontWeight: 800,
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "7px",
+              }}
+            >
+              <span aria-hidden="true">🚪</span>
+
+              {text(
+                "Logout",
+                "تسجيل الخروج",
+                "התנתקות"
+              )}
+            </button>
 
           </div>
 
@@ -1794,11 +1861,11 @@ function OwnerDashboard() {
 
                   <p>
                     {text(
-                      "Manage TeachLearn",
+                      "Manage TechMinds",
 
-                      "إدارة TeachLearn",
+                      "إدارة TechMinds",
 
-                      "ניהול TeachLearn"
+                      "ניהול TechMinds"
                     )}
                   </p>
 
@@ -2020,7 +2087,7 @@ function OwnerDashboard() {
                   </h3>
 
                   <p>
-                    TeachLearn
+                    TechMinds
                   </p>
 
                 </div>
@@ -2234,11 +2301,11 @@ function OwnerDashboard() {
 
               <h2>
                 {text(
-                  "TeachLearn Commerce",
+                  "TechMinds Commerce",
 
-                  "تجارة TeachLearn",
+                  "تجارة TechMinds",
 
-                  "מסחר TeachLearn"
+                  "מסחר TechMinds"
                 )}
               </h2>
 

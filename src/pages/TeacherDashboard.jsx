@@ -1,3 +1,4 @@
+import ProfileLink from '../components/ProfileLink';
 import {
   useEffect,
   useState,
@@ -588,13 +589,13 @@ function TeacherDashboard() {
         "💳",
 
       en:
-        "Subscription",
+        "Services & Contact",
 
       ar:
-        "الاشتراك والدفع",
+        "الخدمات والتواصل",
 
       he:
-        "מנוי ותשלומים",
+        "שירותים ויצירת קשר",
     },
 
     {
@@ -849,7 +850,7 @@ function TeacherDashboard() {
 
           <div>
             <h2>
-              TeachLearn
+              TechMinds
             </h2>
 
             <span>
@@ -955,6 +956,7 @@ function TeacherDashboard() {
           </div>
 
 
+          <ProfileLink />
           <button
             type="button"
             className="teacher-logout"
@@ -1205,48 +1207,18 @@ function TeacherDashboard() {
                       )
 
                     : text(
-                        "Upgrade to unlock more TeachLearn features.",
+                        "Upgrade to unlock more TechMinds features.",
 
-                        "قم بترقية الباقة للحصول على ميزات إضافية في TeachLearn.",
+                        "قم بترقية الباقة للحصول على ميزات إضافية في TechMinds.",
 
-                        "שדרגו את התוכנית כדי לפתוח תכונות נוספות ב-TeachLearn."
+                        "שדרגו את התוכנית כדי לפתוח תכונות נוספות ב-TechMinds."
                       )}
                 </p>
 
               </div>
 
 
-              {!subscriptionLoading &&
-                !isTeacherPro && (
-
-                <button
-                  type="button"
-
-                  onClick={() =>
-                    navigate(
-                      "/plans"
-                    )
-                  }
-                >
-                  {isTeacherBasic
-                    ? text(
-                        "Upgrade to Pro",
-
-                        "الترقية إلى Pro",
-
-                        "שדרוג ל-Pro"
-                      )
-                    : text(
-                        "Upgrade",
-
-                        "ترقية الباقة",
-
-                        "שדרוג"
-                      )}
-                </button>
-
-              )}
-
+              
             </div>
 
 

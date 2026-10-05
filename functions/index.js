@@ -28,16 +28,14 @@ const {
   timingSafeEqual,
 } = require("crypto");
 
-const {
-  TranslationServiceClient,
-} = require("@google-cloud/translate");
-
 
 /* =========================================================
    FIREBASE ADMIN
 ========================================================= */
 
 const app = initializeApp();
+const {canAccessProgram, canAccessLesson, normalizeProgram, isValidManualAccess, programLessonViews} = require("./programAccessPolicy.mjs");
+const {isValidMissionCompletion} = require("./missionValidation");
 
 /*
   Your Firestore database ID is:
@@ -49,8 +47,32 @@ const app = initializeApp();
 
 const db = getFirestore(app, "default");
 
-const translationClient =
-  new TranslationServiceClient();
+const {createContentProgressHandlers} = require("./contentProgress");
+const contentProgressHandlers = createContentProgressHandlers({
+  db, HttpsError, FieldValue, requireRole,
+  resolveAccess: resolveLessonCompletionAccess, serialize: serializeValue,
+});
+for (const [name, handler] of Object.entries(contentProgressHandlers)) {
+  exports[name] = onCall({region: "europe-west1", timeoutSeconds: 30, memory: "256MiB"}, handler);
+}
+
+const {createManualAccessHandlers} = require("./manualProgramAccess");
+const manualAccessHandlers = createManualAccessHandlers({db, HttpsError, FieldValue, Timestamp, requireRole, requireActiveUser});
+for (const [name, handler] of Object.entries(manualAccessHandlers)) {
+  exports[name] = onCall({region: "europe-west1", timeoutSeconds: 30, memory: "256MiB"}, handler);
+}
+
+let translationClient;
+
+function getTranslationClient() {
+  // Keep this SDK out of deployment discovery and unrelated function startups.
+  // Reuse the client for subsequent translation requests in this instance.
+  if (!translationClient) {
+    const {TranslationServiceClient} = require("@google-cloud/translate");
+    translationClient = new TranslationServiceClient();
+  }
+  return translationClient;
+}
 
 
 /* =========================================================
@@ -100,7 +122,7 @@ exports.translatePlan =
       const translate =
         async (targetLanguageCode) => {
           const [response] =
-            await translationClient.translateText({
+            await getTranslationClient().translateText({
               parent:
                 `projects/${process.env.GCLOUD_PROJECT}/locations/global`,
 
@@ -159,7 +181,11 @@ async function requireRole(request, role) {
   const snapshot = await requireActiveUser(request);
   const data = snapshot.data();
 
-  if (!snapshot.exists || data?.role !== role || data?.accountStatus === "blocked") {
+  if (
+    !snapshot.exists ||
+    data?.role !== role ||
+    (data?.accountStatus || "active") !== "active"
+  ) {
     throw new HttpsError("permission-denied", "You do not have permission for this action.");
   }
 
@@ -202,6 +228,12 @@ exports.joinClass = onCall(
     if (existing.exists && existing.data().status === "active") {
       return { success: true, alreadyMember: true, membership: serializeValue(existing.data()) };
     }
+    if (existing.exists && existing.data().status === "removed") {
+      throw new HttpsError(
+        "permission-denied",
+        "Your membership was removed by the class teacher."
+      );
+    }
 
     const membership = {
       classId,
@@ -243,16 +275,67 @@ exports.removeClassMember = onCall(
     await requireRole(request, "teacher");
     const classId = String(request.data?.classId || "").trim();
     const studentId = String(request.data?.studentId || "").trim();
-    const classSnapshot = await db.collection("classes").doc(classId).get();
-
-    if (!classSnapshot.exists || classSnapshot.data().teacherId !== request.auth.uid) {
-      throw new HttpsError("permission-denied", "You do not own this class.");
+    if (
+      !classId ||
+      !studentId ||
+      classId.includes("/") ||
+      studentId.includes("/") ||
+      classId.length > 128 ||
+      studentId.length > 128
+    ) {
+      throw new HttpsError("invalid-argument", "A valid class and student are required.");
     }
 
-    await db.collection("classMembers").doc(membershipId(classId, studentId)).update({
-      status: "removed",
-      removedAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
+    const classRef = db.collection("classes").doc(classId);
+    const studentRef = db.collection("users").doc(studentId);
+    const memberRef = db.collection("classMembers").doc(membershipId(classId, studentId));
+    await db.runTransaction(async (transaction) => {
+      const [classSnapshot, studentSnapshot, memberSnapshot] = await Promise.all([
+        transaction.get(classRef),
+        transaction.get(studentRef),
+        transaction.get(memberRef),
+      ]);
+
+      if (
+        !classSnapshot.exists ||
+        classSnapshot.data().teacherId !== request.auth.uid
+      ) {
+        throw new HttpsError("permission-denied", "You do not own this class.");
+      }
+      if (
+        !memberSnapshot.exists ||
+        !isActiveMembership(memberSnapshot.data(), classId, studentId)
+      ) {
+        return;
+      }
+      const studentCount = Number(classSnapshot.data().studentCount || 0);
+      if (!Number.isFinite(studentCount) || studentCount < 0) {
+        throw new HttpsError("failed-precondition", "Class membership state is invalid.");
+      }
+
+      transaction.update(memberRef, {
+        status: "removed",
+        removedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      transaction.update(classRef, {
+        studentCount: Math.max(0, studentCount - 1),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      if (
+        studentSnapshot.exists &&
+        studentSnapshot.data().teacherId === request.auth.uid &&
+        studentSnapshot.data().classId === classId
+      ) {
+        transaction.update(studentRef, {
+          classId: "",
+          className: "",
+          classCode: "",
+          grade: "",
+          learningTrack: "",
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+      }
     });
     return { success: true };
   }
@@ -949,104 +1032,25 @@ exports.studentLogin =
    GET PURCHASED PROGRAM
 ========================================================= */
 
-exports.getPurchasedProgram =
-  onCall(
-    {
-      region: "europe-west1",
-
-      timeoutSeconds: 30,
-
-      memory: "256MiB",
-    },
-
-    async (request) => {
-      if (!request.auth) {
-        throw new HttpsError(
-          "unauthenticated",
-          "You must sign in first."
-        );
-      }
-
-      const userId =
-        request.auth.uid;
-
-      const programId =
-        String(
-          request.data
-            ?.programId ||
-            ""
-        ).trim();
-
-      if (!programId) {
-        throw new HttpsError(
-          "invalid-argument",
-          "Program ID is required."
-        );
-      }
-
-      const userSnapshot =
-        await db
-          .collection("users")
-          .doc(userId)
-          .get();
-
-      if (
-        !userSnapshot.exists
-      ) {
-        throw new HttpsError(
-          "not-found",
-          "TechMinds user was not found."
-        );
-      }
-
-      const userData =
-        userSnapshot.data();
-
-      const role =
-        userData.role;
-
-      if (
-        ![
-          "owner",
-          "teacher",
-          "student",
-        ].includes(role)
-      ) {
-        throw new HttpsError(
-          "permission-denied",
-          "Invalid TechMinds account role."
-        );
-      }
-
-      const programSnapshot =
-        await db
-          .collection("programs")
-          .doc(programId)
-          .get();
-
-      if (
-        !programSnapshot.exists
-      ) {
-        throw new HttpsError(
-          "not-found",
-          "Program was not found."
-        );
-      }
-
-      const programData =
-        programSnapshot.data();
-
-      if (
-        role !== "owner" &&
-        programData.status !==
-          "published"
-      ) {
-        throw new HttpsError(
-          "permission-denied",
-          "This program is not published."
-        );
-      }
-
+async function resolveProgramAccess(userId, programId, userData, program) {
+  let selectedAccess = null;
+  const role = userData.role;
+  const immediate = canAccessProgram({program, programId, user: userData});
+  if (immediate.hasAccess && immediate.source === "owner-granted") {
+    return {status: "active", accessType: "owner-granted", programId, userId};
+  }
+  if (immediate.hasAccess && immediate.source === "free") {
+    return {status: "active", accessType: "free", programId, userId};
+  }
+  if (role !== "owner") {
+    const manual = await db.collection("programAccess").doc(`${userId}_${programId}`).get();
+    if (isValidManualAccess(manual.data(), userId, programId)
+      && canAccessProgram({program, programId, user: userData, manualAccess: true}).hasAccess) {
+      const grant = {id: manual.id, ...manual.data(), accessType: "manual"};
+      if (grant.accessScope == null || grant.accessScope === "full") return grant;
+      if (grant.accessScope === "selected") selectedAccess = grant;
+    }
+  }
       let accessData =
         null;
 
@@ -1198,7 +1202,8 @@ exports.getPurchasedProgram =
 
       if (
         !accessData &&
-        role === "student"
+        role === "student" &&
+        canAccessProgram({program, user: userData, purchaseAccess: true}).hasAccess
       ) {
         const accessId =
           `student_${safeId(
@@ -1244,71 +1249,35 @@ exports.getPurchasedProgram =
       }
 
 
-      /* STUDENT CLASS ACCESS */
-
-      if (
-        !accessData &&
-        role === "student" &&
-        userData.classId
-      ) {
-        const classId =
-          String(
-            userData.classId
-          );
-
-        const accessId =
-          `class_${safeId(
-            classId
-          )}_${safeId(
-            programId
-          )}`;
-
-        const accessSnapshot =
-          await db
-            .collection(
-              "programAccess"
-            )
-            .doc(accessId)
-            .get();
-
-        if (
-          accessSnapshot.exists
-        ) {
-          const data =
-            accessSnapshot.data();
-
-          if (
-            data.status ===
-              "active" &&
-            data.programId ===
-              programId &&
-            data.classId ===
-              classId
-          ) {
-            accessData = {
-              id:
-                accessSnapshot.id,
-
-              ...data,
-            };
-          }
-        }
-      }
-
       /* STUDENT MULTI-CLASS ASSIGNMENT ACCESS */
 
       if (!accessData && role === "student") {
         const membershipsSnapshot = await db
           .collection("classMembers")
           .where("studentId", "==", userId)
+          .where("status", "==", "active")
           .get();
 
         for (const membershipDocument of membershipsSnapshot.docs) {
-          if (membershipDocument.data().status !== "active") {
+          const membership = membershipDocument.data();
+          if (
+            membership.studentId !== userId ||
+            typeof membership.classId !== "string" ||
+            !membership.classId
+          ) {
             continue;
           }
 
-          const classId = membershipDocument.data().classId;
+          const classId = membership.classId;
+          const classAccessId = `class_${safeId(classId)}_${safeId(programId)}`;
+          const classAccessSnapshot = await db.collection("programAccess").doc(classAccessId).get();
+          if (classAccessSnapshot.exists) {
+            const classAccess = classAccessSnapshot.data();
+            if (classAccess.status === "active" && classAccess.programId === programId && classAccess.classId === classId) {
+              accessData = { id: classAccessSnapshot.id, ...classAccess };
+              break;
+            }
+          }
           const assignmentId = `${classId}_program_${programId}`;
           const assignmentSnapshot = await db
             .collection("classAssignments")
@@ -1327,7 +1296,498 @@ exports.getPurchasedProgram =
       }
 
 
-      if (!accessData) {
+  const decision = canAccessProgram({program, user: userData,
+    purchaseAccess: Boolean(accessData && !accessData.classId && accessData.accessType !== "class"),
+    classAccess: Boolean(accessData && (accessData.classId || accessData.accessType === "class"))});
+  return decision.hasAccess ? accessData : selectedAccess;
+}
+
+// Metadata only: no lessons or paid content are read or returned.
+exports.checkProgramAccess = onCall(
+  {region: "europe-west1", timeoutSeconds: 30, memory: "256MiB"},
+  async (request) => {
+    if (!request.auth) throw new HttpsError("unauthenticated", "You must sign in first.");
+    const programId = request.data?.programId;
+    if (typeof programId !== "string" || !programId.trim() || programId.includes("/") || programId.length > 128) {
+      throw new HttpsError("invalid-argument", "A valid program ID is required.");
+    }
+    const userSnapshot = await db.collection("users").doc(request.auth.uid).get();
+    if (!userSnapshot.exists) throw new HttpsError("not-found", "TechMinds user was not found.");
+    const userData = userSnapshot.data();
+    if ((userData.accountStatus || "active") !== "active" || !["student", "teacher", "owner"].includes(userData.role)) {
+      throw new HttpsError("permission-denied", "This account cannot check program access.");
+    }
+    const id = programId.trim();
+    const programSnapshot = await db.collection("programs").doc(id).get();
+    if (!programSnapshot.exists) throw new HttpsError("not-found", "Program was not found.");
+    if (userData.role !== "owner" && programSnapshot.data().status !== "published") {
+      throw new HttpsError("permission-denied", "This program is not published.");
+    }
+    const access = await resolveProgramAccess(request.auth.uid, id, userData, programSnapshot.data());
+    if (!access) return {hasAccess: false};
+    return canAccessProgram({program: programSnapshot.data(), programId: id, user: userData,
+      manualAccess: access.accessType === "manual" ? access : false,
+      purchaseAccess: !["free", "manual"].includes(access.accessType) && !access.classId,
+      classAccess: Boolean(access.classId || access.accessType === "class")});
+  },
+);
+
+function isRecord(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isActiveMembership(data, classId, studentId) {
+  return data?.status === "active" &&
+    data.classId === classId &&
+    data.studentId === studentId;
+}
+
+function hasSmallMaps(progress) {
+  return ["selectedAnswers", "answerResults", "taskAnswers"].every((field) => {
+    const value = progress[field] || {};
+    return isRecord(value) && Object.keys(value).length <= 500;
+  });
+}
+
+function isValidStandardLessonCompletion(lesson, progress) {
+  const sections = lesson.sections;
+  if (
+    !Array.isArray(sections) ||
+    sections.length === 0 ||
+    sections.length > 300 ||
+    !isRecord(progress) ||
+    !hasSmallMaps(progress) ||
+    progress.currentSlide !== sections.length - 1 ||
+    progress.maxUnlockedSlide < sections.length - 1
+  ) {
+    return false;
+  }
+
+  return sections.every((section) => {
+    if (!isRecord(section) || typeof section.id !== "string" || !section.id) {
+      return false;
+    }
+    if (section.type === "multipleChoice") {
+      const answer = progress.selectedAnswers[section.id];
+      return progress.answerResults[section.id] === "correct" &&
+        String(answer) === String(
+          section.correctAnswer ?? section.correctOptionId ?? section.answer ?? ""
+        );
+    }
+    if (section.codingConfig) {
+      return progress.answerResults[section.id] === "correct";
+    }
+    if (
+      ["question", "task", "reflection"].includes(section.type) &&
+      section.answerPrompt
+    ) {
+      const answer = progress.taskAnswers[section.id];
+      return typeof answer === "string" && answer.trim().length > 0 && answer.length <= 20000;
+    }
+    return true;
+  });
+}
+
+async function resolveLessonCompletionAccess(userId, userData, lesson) {
+  if (lesson.status !== "published") {
+    return null;
+  }
+
+  if (typeof lesson.classId === "string" && lesson.classId) {
+    const membershipSnapshot = await db.collection("classMembers")
+      .doc(membershipId(lesson.classId, userId))
+      .get();
+    return isActiveMembership(membershipSnapshot.data(), lesson.classId, userId)
+      ? {classId: lesson.classId}
+      : null;
+  }
+
+  if (
+    lesson.lessonType !== "commercial" ||
+    typeof lesson.programId !== "string" ||
+    !lesson.programId ||
+    lesson.programId.includes("/") ||
+    lesson.programId.length > 128
+  ) {
+    return null;
+  }
+
+  const programSnapshot = await db.collection("programs").doc(lesson.programId).get();
+  if (!programSnapshot.exists) {
+    return null;
+  }
+  const access = await resolveProgramAccess(userId, lesson.programId, userData, programSnapshot.data());
+  let parent;
+  if (typeof lesson.parentLessonId === "string" && lesson.parentLessonId && !lesson.parentLessonId.includes("/") && lesson.parentLessonId.length <= 128) {
+    const snapshot = await db.collection("lessons").doc(lesson.parentLessonId).get();
+    if (snapshot.exists) parent = {...snapshot.data(), id: snapshot.id};
+  }
+  if (access?.accessType === "manual" && !canAccessLesson({program: programSnapshot.data(), programId: lesson.programId,
+    user: userData, manualAccess: access, lesson, parent}).hasAccess) return null;
+  return access;
+}
+
+function completionMetadata(userId, userData, lesson, access) {
+  const isClassLesson = typeof lesson.classId === "string" && lesson.classId;
+  return {
+    studentId: userId,
+    studentName: typeof userData.name === "string" ? userData.name : "",
+    lessonId: lesson.id,
+    lessonTitle: lesson.titleI18n?.ar || lesson.title?.ar ||
+      (typeof lesson.title === "string" ? lesson.title : ""),
+    teacherId: isClassLesson ? lesson.teacherId || null : null,
+    classId: isClassLesson ? lesson.classId : null,
+    className: isClassLesson ? lesson.className || "" : "",
+    ...(access?.classId && !isClassLesson
+      ? {programAccessClassId: access.classId}
+      : {}),
+  };
+}
+
+exports.completeLesson = onCall(
+  {region: "europe-west1", timeoutSeconds: 30, memory: "256MiB"},
+  async (request) => {
+    const userData = await requireRole(request, "student");
+    const userId = request.auth.uid;
+    const lessonId = String(request.data?.lessonId || "").trim();
+    if (!lessonId || lessonId.includes("/") || lessonId.length > 128) {
+      throw new HttpsError("invalid-argument", "A valid lesson ID is required.");
+    }
+
+    const lessonRef = db.collection("lessons").doc(lessonId);
+    const lessonSnapshot = await lessonRef.get();
+    if (!lessonSnapshot.exists) {
+      throw new HttpsError("not-found", "Lesson was not found.");
+    }
+
+    const lesson = {id: lessonSnapshot.id, ...lessonSnapshot.data()};
+    const access = await resolveLessonCompletionAccess(userId, userData, lesson);
+    if (!access) {
+      throw new HttpsError("permission-denied", "You do not have access to this lesson.");
+    }
+
+    const submittedMission = request.data?.mission;
+    const submittedProgress = request.data?.progress;
+    const validCompletion = lesson.activityType === "mission"
+      ? isValidMissionCompletion(lesson.sections, submittedMission)
+      : isValidStandardLessonCompletion(lesson, submittedProgress);
+    if (!validCompletion) {
+      throw new HttpsError("failed-precondition", "Lesson completion could not be validated.");
+    }
+
+    // Program completion is calculated only for published commercial program content.
+    // The lesson query happens before the transaction so the transaction itself can use
+    // deterministic document reads and remain idempotent.
+    let program = null;
+    let programLessons = [];
+    if (
+      lesson.lessonType === "commercial" &&
+      typeof lesson.programId === "string" &&
+      lesson.programId &&
+      !lesson.programId.includes("/") &&
+      lesson.programId.length <= 128
+    ) {
+      const [programSnapshot, lessonsSnapshot] = await Promise.all([
+        db.collection("programs").doc(lesson.programId).get(),
+        db.collection("lessons").where("programId", "==", lesson.programId).get(),
+      ]);
+      if (programSnapshot.exists && programSnapshot.data().status === "published") {
+        program = {id: programSnapshot.id, ...programSnapshot.data()};
+        programLessons = lessonsSnapshot.docs
+          .map((item) => ({id: item.id, ...item.data()}))
+          .filter((item) => item.lessonType === "commercial" && item.status === "published")
+          .sort((first, second) => {
+            const firstOrder = Number(first.order ?? first.lessonOrder ?? first.position ?? 999999);
+            const secondOrder = Number(second.order ?? second.lessonOrder ?? second.position ?? 999999);
+            if (firstOrder !== secondOrder) return firstOrder - secondOrder;
+            return Number(first.createdAt?.seconds || 0) - Number(second.createdAt?.seconds || 0);
+          });
+        if (programLessons.length > 300) {
+          throw new HttpsError("failed-precondition", "Program contains too many lessons.");
+        }
+      }
+    }
+
+    const completionRef = db.collection("lessonCompletions").doc(`${userId}_${lessonId}`);
+    const progressRef = db.collection("lessonProgress").doc(`${userId}_${lessonId}`);
+    const userRef = db.collection("users").doc(userId);
+    const programCompletionRef = program
+      ? db.collection("programCompletions").doc(`${userId}_${program.id}`)
+      : null;
+    const programLessonCompletionRefs = programLessons.map((item) =>
+      db.collection("lessonCompletions").doc(`${userId}_${item.id}`)
+    );
+
+    const reward = Number(lesson.xpReward ?? lesson.xp ?? 0);
+    if (!Number.isFinite(reward) || reward < 0 || reward > 10000) {
+      throw new HttpsError("failed-precondition", "Lesson XP reward is invalid.");
+    }
+
+    return db.runTransaction(async (transaction) => {
+      const reads = [
+        transaction.get(completionRef),
+        transaction.get(userRef),
+        transaction.get(lessonRef),
+      ];
+      if (access.classId) {
+        reads.push(transaction.get(
+          db.collection("classMembers").doc(membershipId(access.classId, userId))
+        ));
+      }
+      if (programCompletionRef) reads.push(transaction.get(programCompletionRef));
+      for (const ref of programLessonCompletionRefs) reads.push(transaction.get(ref));
+
+      const snapshots = await Promise.all(reads);
+      let cursor = 0;
+      const completionSnapshot = snapshots[cursor++];
+      const currentUserSnapshot = snapshots[cursor++];
+      const currentLessonSnapshot = snapshots[cursor++];
+      const membershipSnapshot = access.classId ? snapshots[cursor++] : null;
+      const existingProgramCompletion = programCompletionRef ? snapshots[cursor++] : null;
+      const programCompletionSnapshots = programLessonCompletionRefs.map(() => snapshots[cursor++]);
+
+      if (
+        !currentUserSnapshot.exists ||
+        currentUserSnapshot.data().role !== "student" ||
+        (currentUserSnapshot.data().accountStatus || "active") !== "active" ||
+        !currentLessonSnapshot.exists
+      ) {
+        throw new HttpsError("permission-denied", "Your account cannot complete this lesson.");
+      }
+      if (
+        access.classId &&
+        !isActiveMembership(membershipSnapshot?.data(), access.classId, userId)
+      ) {
+        throw new HttpsError("permission-denied", "Your class membership is no longer active.");
+      }
+
+      const currentLesson = {id: currentLessonSnapshot.id, ...currentLessonSnapshot.data()};
+      const currentValidCompletion = currentLesson.activityType === "mission"
+        ? isValidMissionCompletion(currentLesson.sections, submittedMission)
+        : isValidStandardLessonCompletion(currentLesson, submittedProgress);
+      if (!currentValidCompletion) {
+        throw new HttpsError("failed-precondition", "Lesson completion could not be validated.");
+      }
+
+      const currentReward = Number(currentLesson.xpReward ?? currentLesson.xp ?? 0);
+      const currentXp = Number(currentUserSnapshot.data().xp || 0);
+      const currentCompletedLessons = Number(currentUserSnapshot.data().completedLessons || 0);
+      const currentCompletedPrograms = Number(currentUserSnapshot.data().completedPrograms || 0);
+      if (
+        !Number.isFinite(currentReward) || currentReward < 0 || currentReward > 10000 ||
+        !Number.isFinite(currentXp) || currentXp < 0 ||
+        !Number.isFinite(currentCompletedLessons) || currentCompletedLessons < 0 ||
+        !Number.isFinite(currentCompletedPrograms) || currentCompletedPrograms < 0
+      ) {
+        throw new HttpsError("failed-precondition", "Lesson or account state is invalid.");
+      }
+
+      const alreadyCompleted = completionSnapshot.exists;
+      const totalXp = currentXp + (alreadyCompleted ? 0 : currentReward);
+      const level = Math.floor(totalXp / 500) + 1;
+
+      // Count the current lesson as complete even though its receipt is written below.
+      const allProgramLessonsCompleted = Boolean(program && programLessons.length) &&
+        programLessons.every((item, index) =>
+          item.id === lessonId ? true : programCompletionSnapshots[index]?.exists
+        );
+      const programCompleted = Boolean(existingProgramCompletion?.exists || allProgramLessonsCompleted);
+      const programCompletedNow = Boolean(
+        allProgramLessonsCompleted && programCompletionRef && !existingProgramCompletion?.exists
+      );
+
+      const nextLesson = program && !programCompleted
+        ? programLessons.find((item, index) =>
+          item.id !== lessonId && !programCompletionSnapshots[index]?.exists
+        )
+        : null;
+
+      if (!alreadyCompleted) {
+        const metadata = completionMetadata(userId, currentUserSnapshot.data(), currentLesson, access);
+        const progress = currentLesson.activityType === "mission"
+          ? {
+            mission: submittedMission,
+            currentSlide: submittedMission.currentScreen,
+            maxUnlockedSlide: currentLesson.sections.length - 1,
+            selectedAnswers: {},
+            answerResults: {},
+            taskAnswers: {},
+          }
+          : {
+            currentSlide: submittedProgress.currentSlide,
+            maxUnlockedSlide: submittedProgress.maxUnlockedSlide,
+            selectedAnswers: submittedProgress.selectedAnswers || {},
+            answerResults: submittedProgress.answerResults || {},
+            taskAnswers: submittedProgress.taskAnswers || {},
+          };
+
+        transaction.set(completionRef, {
+          ...metadata,
+          ...(program ? {programId: program.id} : {}),
+          xpReward: currentReward,
+          completedAt: FieldValue.serverTimestamp(),
+        });
+        transaction.set(progressRef, {
+          ...metadata,
+          ...(program ? {programId: program.id} : {}),
+          ...progress,
+          status: "completed",
+          completedAt: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
+        }, {merge: true});
+      }
+
+      if (programCompletedNow) {
+        transaction.set(programCompletionRef, {
+          studentId: userId,
+          programId: program.id,
+          programTitle: program.titleI18n?.ar || program.title?.ar ||
+            (typeof program.title === "string" ? program.title : ""),
+          totalLessons: programLessons.length,
+          status: "completed",
+          certificateStatus: "not_issued",
+          completedAt: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+      }
+
+      if (!alreadyCompleted || programCompletedNow) {
+        transaction.update(userRef, {
+          ...(!alreadyCompleted ? {
+            xp: totalXp,
+            completedLessons: currentCompletedLessons + 1,
+            lastCompletedLessonId: lessonId,
+          } : {}),
+          ...(programCompletedNow ? {
+            completedPrograms: currentCompletedPrograms + 1,
+            lastCompletedProgramId: program.id,
+          } : {}),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+      }
+
+      return {
+        xp: currentReward,
+        alreadyCompleted,
+        totalXp,
+        level,
+        programId: program?.id || null,
+        programCompleted,
+        programCompletedNow,
+        programTotalLessons: programLessons.length,
+        nextLessonId: nextLesson?.id || null,
+      };
+    });
+  },
+);
+
+
+exports.getPurchasedProgram =
+  onCall(
+    {
+      region: "europe-west1",
+
+      timeoutSeconds: 30,
+
+      memory: "256MiB",
+    },
+
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "You must sign in first."
+        );
+      }
+
+      const userId =
+        request.auth.uid;
+
+      const programId =
+        String(
+          request.data
+            ?.programId ||
+            ""
+        ).trim();
+
+      if (!programId) {
+        throw new HttpsError(
+          "invalid-argument",
+          "Program ID is required."
+        );
+      }
+
+      const userSnapshot =
+        await db
+          .collection("users")
+          .doc(userId)
+          .get();
+
+      if (
+        !userSnapshot.exists
+      ) {
+        throw new HttpsError(
+          "not-found",
+          "TechMinds user was not found."
+        );
+      }
+
+      const userData =
+        userSnapshot.data();
+
+      const role =
+        userData.role;
+
+      if ((userData.accountStatus || "active") !== "active") {
+        throw new HttpsError("permission-denied", "This account is not active.");
+      }
+
+      if (
+        ![
+          "owner",
+          "teacher",
+          "student",
+        ].includes(role)
+      ) {
+        throw new HttpsError(
+          "permission-denied",
+          "Invalid TechMinds account role."
+        );
+      }
+
+      const programSnapshot =
+        await db
+          .collection("programs")
+          .doc(programId)
+          .get();
+
+      if (
+        !programSnapshot.exists
+      ) {
+        throw new HttpsError(
+          "not-found",
+          "Program was not found."
+        );
+      }
+
+      const programData =
+        programSnapshot.data();
+
+      if (
+        role !== "owner" &&
+        programData.status !==
+          "published"
+      ) {
+        throw new HttpsError(
+          "permission-denied",
+          "This program is not published."
+        );
+      }
+
+      const accessData = await resolveProgramAccess(userId, programId, userData, programData);
+
+      const fullAccess = Boolean(accessData && (accessData.accessType !== "manual" || canAccessProgram({program: programData, programId, user: userData, manualAccess: accessData}).hasAccess));
+      if ((!accessData && programData.accessType === "class") || (!fullAccess && request.data?.accessOnly === true)) {
         throw new HttpsError(
           "permission-denied",
           "You do not have access to this program."
@@ -1359,6 +1819,7 @@ exports.getPurchasedProgram =
                 lessonDocument.id,
 
               ...lessonDocument.data(),
+              ...(role === "student" && accessData?.classId ? {programAccessClassId: accessData.classId} : {}),
             })
           )
           .filter(
@@ -1431,6 +1892,9 @@ exports.getPurchasedProgram =
 
         role,
 
+        fullAccess,
+        serverTime: new Date().toISOString(),
+
         access:
           serializeValue(
             accessData
@@ -1441,12 +1905,12 @@ exports.getPurchasedProgram =
             id:
               programSnapshot.id,
 
-            ...programData,
+            ...normalizeProgram(programData),
           }),
 
         lessons:
           serializeValue(
-            lessons
+            programLessonViews({lessons, program: programData, programId, user: userData, access: accessData})
           ),
       };
     }

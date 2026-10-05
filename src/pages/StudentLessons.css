@@ -2,19 +2,10 @@
   box-sizing: border-box;
 }
 
-
 .student-lessons-page {
   min-height: 100vh;
-
-  padding:
-    30px 40px 70px;
-
-  font-family:
-    "Segoe UI",
-    Tahoma,
-    Arial,
-    sans-serif;
-
+  padding: 30px 40px 70px;
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
   color: #1e293b;
 
   background:
@@ -36,140 +27,85 @@
     #f7f9fd;
 }
 
-
 /* =========================
    TOPBAR
 ========================= */
 
 .student-lessons-topbar {
   max-width: 1200px;
-
-  margin:
-    0 auto 20px;
-
+  margin: 0 auto 20px;
   display: flex;
-
   align-items: flex-end;
-  justify-content:
-    space-between;
-
+  justify-content: space-between;
   gap: 20px;
-
-  padding:
-    23px 26px;
-
-  border:
-    1px solid #e8edf5;
-
+  padding: 23px 26px;
+  border: 1px solid #e8edf5;
   border-radius: 25px;
-
-  background:
-    rgba(
-      255,
-      255,
-      255,
-      0.88
-    );
-
-  box-shadow:
-    0 13px 35px
-    rgba(
-      15,
-      23,
-      42,
-      0.055
-    );
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 13px 35px rgba(15, 23, 42, 0.055);
 }
-
 
 .student-lessons-back {
   margin-bottom: 13px;
-
-  padding:
-    9px 13px;
-
-  border:
-    1px solid #ddd6fe;
-
+  padding: 9px 13px;
+  border: 1px solid #ddd6fe;
   border-radius: 11px;
-
   background: white;
-
   color: #6d28d9;
-
   font-weight: 750;
-
   cursor: pointer;
 }
 
+.student-lessons-back:hover {
+  background: #faf5ff;
+  border-color: #c4b5fd;
+}
 
 .student-lessons-topbar h1 {
-  margin:
-    0 0 6px;
-
+  margin: 0 0 6px;
   font-size: 30px;
-
   color: #172033;
 }
 
-
 .student-lessons-topbar p {
   margin: 0;
-
   color: #94a3b8;
-
   font-size: 12px;
 }
-
 
 /* LANGUAGE */
 
 .student-lessons-language {
   display: flex;
-
+  gap: 3px;
   padding: 4px;
-
-  border:
-    1px solid #e5e7eb;
-
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
-
   background: white;
 }
 
-
 .student-lessons-language button {
-  padding:
-    8px 10px;
-
+  min-width: 48px;
+  padding: 8px 10px;
   border: none;
-
   border-radius: 9px;
-
   background: transparent;
-
   color: #94a3b8;
-
   font-size: 11px;
-
   font-weight: 800;
-
   cursor: pointer;
 }
 
-
-.student-lessons-language
-.active {
-  color: white;
-
-  background:
-    linear-gradient(
-      135deg,
-      #8b5cf6,
-      #3b82f6
-    );
+.student-lessons-language button:hover {
+  background: #f8fafc;
+  color: #6d28d9;
 }
 
+.student-lessons-language button.active {
+  color: white;
+  background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+  box-shadow: 0 5px 12px rgba(99, 102, 241, 0.2);
+}
 
 /* =========================
    CLASS BAR
@@ -177,124 +113,73 @@
 
 .student-lessons-class {
   max-width: 1200px;
-
-  margin:
-    0 auto 20px;
-
+  margin: 0 auto 20px;
   display: flex;
-
   align-items: center;
-
   gap: 13px;
-
-  padding:
-    16px 18px;
-
-  border:
-    1px solid #ddd6fe;
-
+  padding: 16px 18px;
+  border: 1px solid #ddd6fe;
   border-radius: 18px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #faf5ff,
-      #eff6ff
-    );
+  background: linear-gradient(135deg, #faf5ff, #eff6ff);
 }
-
 
 .student-lessons-class-icon {
   width: 49px;
   height: 49px;
-
   flex-shrink: 0;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   border-radius: 14px;
-
   background: white;
-
   font-size: 24px;
 }
 
-
 .student-lessons-class small {
   display: block;
-
   color: #94a3b8;
-
   font-size: 9px;
-
   font-weight: 700;
 }
 
-
 .student-lessons-class h2 {
-  margin:
-    2px 0;
-
+  margin: 2px 0;
   color: #4c1d95;
-
   font-size: 15px;
 }
 
-
 .student-lessons-class p {
   margin: 0;
-
   color: #7c3aed;
-
   font-size: 10px;
-
   font-weight: 700;
 }
 
-
 .student-lessons-count {
   margin-left: auto;
-
   min-width: 78px;
-
-  padding:
-    9px 13px;
-
+  padding: 9px 13px;
   border-radius: 13px;
-
   background: white;
-
   text-align: center;
 }
 
-
-[dir="rtl"]
-.student-lessons-count {
+[dir="rtl"] .student-lessons-count {
   margin-left: 0;
   margin-right: auto;
 }
 
-
 .student-lessons-count strong {
   display: block;
-
   color: #6d28d9;
-
   font-size: 20px;
 }
 
-
 .student-lessons-count span {
   color: #94a3b8;
-
   font-size: 8px;
-
   font-weight: 700;
 }
-
 
 /* =========================
    GRID
@@ -302,20 +187,11 @@
 
 .student-lessons-grid {
   max-width: 1200px;
-
   margin: auto;
-
   display: grid;
-
-  grid-template-columns:
-    repeat(
-      3,
-      minmax(0, 1fr)
-    );
-
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
-
 
 /* =========================
    LESSON CARD
@@ -323,235 +199,171 @@
 
 .student-lesson-card {
   position: relative;
-
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
   padding: 20px;
-
   overflow: hidden;
-
-  border:
-    1px solid #e9edf5;
-
-  border-top:
-    4px solid #8b5cf6;
-
+  border: 1px solid #e9edf5;
+  border-top: 4px solid #8b5cf6;
   border-radius: 22px;
-
   background: white;
-
-  box-shadow:
-    0 11px 30px
-    rgba(
-      15,
-      23,
-      42,
-      0.055
-    );
-
-  transition:
-    0.2s ease;
+  box-shadow: 0 11px 30px rgba(15, 23, 42, 0.055);
+  transition: 0.2s ease;
 }
-
 
 .student-lesson-card::after {
   content: "";
-
   position: absolute;
-
   top: -40px;
   right: -40px;
-
   width: 100px;
   height: 100px;
-
   border-radius: 50%;
-
-  background:
-    rgba(
-      139,
-      92,
-      246,
-      0.06
-    );
+  background: rgba(139, 92, 246, 0.06);
+  pointer-events: none;
 }
-
 
 .student-lesson-card:hover {
-  transform:
-    translateY(-4px);
-
+  transform: translateY(-4px);
   border-color: #ddd6fe;
-
-  box-shadow:
-    0 18px 37px
-    rgba(
-      99,
-      102,
-      241,
-      0.10
-    );
+  box-shadow: 0 18px 37px rgba(99, 102, 241, 0.10);
 }
-
 
 .student-lesson-card-top {
+  position: relative;
+  z-index: 1;
   display: flex;
-
   align-items: center;
-
-  justify-content:
-    space-between;
-
+  justify-content: space-between;
+  flex-wrap: wrap;
   gap: 10px;
-
-  margin-bottom: 16px;
+  margin-bottom: 13px;
 }
-
 
 .student-lesson-icon {
   width: 56px;
   height: 56px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   border-radius: 17px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #ede9fe,
-      #dbeafe
-    );
-
+  background: linear-gradient(135deg, #ede9fe, #dbeafe);
   font-size: 28px;
 }
 
-
 .student-lesson-type {
-  padding:
-    6px 10px;
-
+  padding: 6px 10px;
   border-radius: 999px;
-
   background: #f3e8ff;
-
   color: #7c3aed;
-
   font-size: 9px;
-
   font-weight: 800;
 }
 
+/* PROGRAM SOURCE */
+
+.student-lesson-program-name {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 11px;
+  padding: 7px 10px;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+  color: #4338ca;
+  font-size: 10px;
+  font-weight: 850;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .student-lesson-card h2 {
-  margin:
-    0 0 8px;
-
+  margin: 0 0 8px;
   color: #172033;
-
   font-size: 17px;
-
   line-height: 1.4;
 }
 
-
 .student-lesson-description {
   min-height: 52px;
-
-  margin:
-    0 0 15px;
-
+  margin: 0 0 15px;
   color: #64748b;
-
   font-size: 11px;
-
   line-height: 1.7;
 }
-
 
 /* META */
 
 .student-lesson-meta {
   display: flex;
-
   align-items: center;
-
+  flex-wrap: wrap;
   gap: 8px;
-
   margin-bottom: 17px;
 }
 
-
 .student-lesson-meta span {
-  padding:
-    7px 9px;
-
+  padding: 7px 9px;
   border-radius: 9px;
-
   background: #f8fafc;
-
   color: #64748b;
-
   font-size: 9px;
-
   font-weight: 700;
 }
 
-
-.student-lesson-meta
-.lesson-xp-pill {
+.student-lesson-meta .lesson-xp-pill {
   background: #fffbeb;
-
   color: #b45309;
 }
-
 
 /* START */
 
 .start-student-lesson {
   width: 100%;
-
   min-height: 42px;
-
+  margin-top: auto;
   border: none;
-
   border-radius: 12px;
-
   color: white;
-
-  background:
-    linear-gradient(
-      135deg,
-      #8b5cf6,
-      #3b82f6
-    );
-
+  background: linear-gradient(135deg, #8b5cf6, #3b82f6);
   font-size: 11px;
-
   font-weight: 850;
-
   cursor: pointer;
-
-  box-shadow:
-    0 10px 23px
-    rgba(
-      99,
-      102,
-      241,
-      0.21
-    );
-
-  transition:
-    0.18s ease;
+  box-shadow: 0 10px 23px rgba(99, 102, 241, 0.21);
+  transition: 0.18s ease;
 }
-
 
 .start-student-lesson:hover {
-  transform:
-    translateY(-1px);
+  transform: translateY(-1px);
+  box-shadow: 0 13px 27px rgba(99, 102, 241, 0.25);
 }
 
+/* =========================================================
+   COMPLETED LESSON
+========================================================= */
+
+.student-lesson-completed-badge {
+  width: fit-content;
+  padding: 6px 10px;
+  border: 1px solid #a7f3d0;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.student-lesson-card:has(.student-lesson-completed-badge) {
+  border-color: #a7f3d0;
+  border-top-color: #10b981;
+}
+
+.start-student-lesson.completed {
+  background: linear-gradient(135deg, #10b981, #06b6d4);
+  box-shadow: 0 10px 23px rgba(16, 185, 129, 0.18);
+}
 
 /* =========================
    EMPTY
@@ -559,256 +371,196 @@
 
 .student-lessons-empty {
   max-width: 1200px;
-
   min-height: 390px;
-
   margin: auto;
-
   display: flex;
-
   flex-direction: column;
-
   align-items: center;
   justify-content: center;
-
   padding: 35px;
-
-  border:
-    1px solid #e9edf5;
-
+  border: 1px solid #e9edf5;
   border-radius: 24px;
-
   background: white;
-
   text-align: center;
-
-  box-shadow:
-    0 12px 32px
-    rgba(
-      15,
-      23,
-      42,
-      0.05
-    );
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.05);
 }
-
 
 .student-lessons-empty > div {
   width: 82px;
   height: 82px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   border-radius: 24px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #ede9fe,
-      #dbeafe
-    );
-
+  background: linear-gradient(135deg, #ede9fe, #dbeafe);
   font-size: 39px;
 }
 
-
 .student-lessons-empty h2 {
-  margin:
-    14px 0 6px;
-
+  margin: 14px 0 6px;
   font-size: 19px;
 }
 
-
 .student-lessons-empty p {
-  margin:
-    0 0 11px;
-
+  margin: 0 0 11px;
   color: #94a3b8;
-
   font-size: 11px;
 }
 
-
 .student-lessons-empty span {
   color: #7c3aed;
-
   font-size: 10px;
-
   font-weight: 800;
 }
-
 
 /* ERROR */
 
 .student-lessons-error {
   max-width: 1200px;
-
-  margin:
-    0 auto 16px;
-
-  padding:
-    12px 14px;
-
-  border:
-    1px solid #fecaca;
-
+  margin: 0 auto 16px;
+  padding: 12px 14px;
+  border: 1px solid #fecaca;
   border-radius: 12px;
-
   background: #fef2f2;
-
   color: #b91c1c;
-
   font-size: 11px;
-
   font-weight: 700;
 }
-
 
 /* LOADING */
 
 .student-lessons-loading {
   min-height: 100vh;
-
   display: flex;
-
   flex-direction: column;
-
   align-items: center;
   justify-content: center;
-
   background: #f8fafc;
-
   color: #64748b;
 }
-
 
 .student-lessons-loading > div {
   font-size: 55px;
 }
 
-
 /* RTL */
 
-[dir="rtl"]
-.student-lessons-page {
+[dir="rtl"] .student-lessons-page {
   direction: rtl;
-
   text-align: right;
 }
 
-
 /* RESPONSIVE */
 
-@media (
-  max-width: 950px
-) {
-
+@media (max-width: 950px) {
   .student-lessons-grid {
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
 }
 
-
-@media (
-  max-width: 700px
-) {
-
+@media (max-width: 700px) {
   .student-lessons-page {
-    padding:
-      20px 15px 50px;
+    padding: 20px 15px 50px;
   }
-
 
   .student-lessons-topbar {
     flex-direction: column;
-
     align-items: stretch;
   }
 
-
-  .student-lessons-grid {
-    grid-template-columns:
-      1fr;
+  .student-lessons-language {
+    align-self: flex-start;
   }
 
+  .student-lessons-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-
-@media (
-  max-width: 480px
-) {
-
+@media (max-width: 480px) {
   .student-lessons-class {
     flex-wrap: wrap;
   }
 
-
   .student-lessons-count,
-  [dir="rtl"]
-  .student-lessons-count {
+  [dir="rtl"] .student-lessons-count {
     width: 100%;
-
     margin: 0;
   }
-/* =========================================================
-   COMPLETED LESSON
-========================================================= */
 
-.student-lesson-completed-badge {
-  width: fit-content;
+  .student-lesson-card {
+    padding: 17px;
+  }
 
-  margin:
-    0 0 12px;
-
-  padding:
-    7px 11px;
-
-  border:
-    1px solid #a7f3d0;
-
-  border-radius: 999px;
-
-  background: #ecfdf5;
-
-  color: #047857;
-
-  font-size: 10px;
-
-  font-weight: 850;
+  .student-lesson-program-name {
+    max-width: 100%;
+  }
 }
 
 
-.student-lesson-card:has(
-  .student-lesson-completed-badge
-) {
-  border-color: #a7f3d0;
+/* =========================
+   LESSON SECTIONS
+========================= */
+
+.student-lessons-sections {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
 
-
-.start-student-lesson.completed {
-  background:
-    linear-gradient(
-      135deg,
-      #10b981,
-      #06b6d4
-    );
-
-  box-shadow:
-    0 10px 23px
-    rgba(
-      16,
-      185,
-      129,
-      0.18
-    );
+.student-lessons-section {
+  width: 100%;
 }
+
+.student-lessons-section-header {
+  margin-bottom: 14px;
+  padding: 15px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #e8edf5;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.student-lessons-section-header small {
+  display: block;
+  margin-bottom: 4px;
+  color: #7c3aed;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.student-lessons-section-header h2 {
+  margin: 0 0 4px;
+  color: #172033;
+  font-size: 18px;
+}
+
+.student-lessons-section-header p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.student-lessons-section-header > strong {
+  min-width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #ede9fe, #dbeafe);
+  color: #5b21b6;
+  font-size: 16px;
+}
+
+@media (max-width: 700px) {
+  .student-lessons-section-header {
+    align-items: flex-start;
+  }
 }

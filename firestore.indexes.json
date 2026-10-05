@@ -1,6 +1,12 @@
 {
   "indexes": [
     {
+      "collectionGroup": "programAccess",
+      "queryScope": "COLLECTION",
+      "density": "DENSE",
+      "fields": [{ "fieldPath": "userId", "order": "ASCENDING" }]
+    },
+    {
       "collectionGroup": "classes",
       "queryScope": "COLLECTION",
       "density": "DENSE",

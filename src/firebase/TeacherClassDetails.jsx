@@ -492,6 +492,9 @@ function TeacherClassDetails() {
             role:
               "student",
 
+            studentAccountType:
+              "class",
+
             username:
               username.trim(),
 
@@ -536,6 +539,27 @@ function TeacherClassDetails() {
               "teacher",
 
             createdAt:
+              serverTimestamp(),
+          }
+        );
+
+        batch.set(
+          doc(
+            db,
+            "classMembers",
+            `${classId}_${studentUid}`
+          ),
+          {
+            classId,
+            studentId:
+              studentUid,
+            teacherId:
+              teacher.uid,
+            status:
+              "active",
+            joinedAt:
+              serverTimestamp(),
+            updatedAt:
               serverTimestamp(),
           }
         );
@@ -606,6 +630,8 @@ function TeacherClassDetails() {
           {
             studentCount:
               students.length + 1,
+            updatedAt:
+              serverTimestamp(),
           }
         );
 

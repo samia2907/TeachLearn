@@ -32,9 +32,17 @@ import {
 import "./OwnerPrograms.css";
 
 import { hebrewText } from "../data/hebrewText";
+import { normalizeProgram } from "../../functions/programAccessPolicy.mjs";
+import { countProgramContent } from "../../functions/programContent.mjs";
 
 
 const emptyForm = {
+  accessType: "free",
+  previewLessonCount: "1",
+  outcomesEn: "", outcomesAr: "", outcomesHe: "",
+  price: "0",
+  paymentProvider: "",
+  paymentProductId: "",
   titleEn: "",
   titleAr: "",
 
@@ -65,6 +73,7 @@ const emptyForm = {
 
 
 function OwnerPrograms() {
+  const [contentRecords, setContentRecords] = useState(null);
   const navigate =
     useNavigate();
 
@@ -134,13 +143,30 @@ function OwnerPrograms() {
 
   const text = (
     english,
-    arabic
+    arabic,
+    hebrew = hebrewText(english)
   ) =>
     language === "ar"
       ? arabic
       : language === "he"
-        ? hebrewText(english)
+        ? hebrew
       : english;
+
+  // Realtime counts must reflect edits rather than the legacy cached total.
+  useEffect(() => {
+    if (!owner) return undefined;
+    return onSnapshot(collection(db, 'lessons'), snapshot => {
+      setContentRecords(snapshot.docs.map(item => ({ ...item.data(), id: item.id })));
+    }, failure => { console.error('Program content counts failed', failure.code); setContentRecords(null); });
+  }, [owner]);
+  const contentCounts = programId => countProgramContent((contentRecords || []).filter(item => item.programId === programId && item.lessonType === 'commercial'));
+  const contentCountLabel = programId => {
+    if (!contentRecords) return '…';
+    const counts = contentCounts(programId);
+    const names = { lesson: text('lessons', 'دروس', 'שיעורים'), mission: text('missions', 'مهمات', 'משימות'),
+      quiz: text('quizzes', 'اختبارات', 'בחנים'), activity: text('activities', 'أنشطة', 'פעילויות') };
+    return Object.entries(counts).filter(([type, count]) => type === 'lesson' || count > 0).map(([type, count]) => `${count} ${names[type]}`).join(' • ');
+  };
 
 
   /* =====================================================
@@ -434,6 +460,14 @@ function OwnerPrograms() {
 
 
       setForm({
+        accessType: normalizeProgram(program).accessType,
+        previewLessonCount: String(program.previewLessonCount ?? 1),
+        outcomesEn: (program.learningOutcomes?.en || []).join('\n'),
+        outcomesAr: (program.learningOutcomes?.ar || []).join('\n'),
+        outcomesHe: (program.learningOutcomes?.he || []).join('\n'),
+        price: String(normalizeProgram(program).price),
+        paymentProvider: program.paymentProvider || "",
+        paymentProductId: program.paymentProductId || "",
         studentPaddlePriceId: program.paddlePriceIds?.student || "",
         teacherPaddlePriceId: program.paddlePriceIds?.teacher || "",
         classPaddlePriceId: program.paddlePriceIds?.class || "",
@@ -601,6 +635,17 @@ function OwnerPrograms() {
           0
         );
 
+      const price = form.accessType === "free" ? 0 : Number(form.price || 0);
+      const previewLessonCount = Number(form.previewLessonCount);
+      if (!Number.isInteger(previewLessonCount) || previewLessonCount < 0 || previewLessonCount > 10000) {
+        setError(text('Enter a whole preview count from 0 to 10000.', 'أدخل عدد معاينات صحيحًا بين 0 و10000.', 'הזינו מספר שיעורי התנסות שלם בין 0 ל-10000.'));
+        return;
+      }
+      if (!Number.isFinite(price) || price < 0 || price > 1000000) {
+        setError(text("Enter a valid price.", "أدخل سعرًا صحيحًا.", "יש להזין מחיר תקין."));
+        return;
+      }
+
       const paddlePriceIds = Object.fromEntries(
         ["student", "teacher", "class"].map((license) => [license, form[`${license}PaddlePriceId`].trim()])
       );
@@ -659,6 +704,12 @@ function OwnerPrograms() {
 
 
         const programData = {
+          accessType: form.accessType,
+          previewLessonCount,
+          learningOutcomes: Object.fromEntries([['en', form.outcomesEn], ['ar', form.outcomesAr], ['he', form.outcomesHe]].map(([key, value]) => [key, value.split('\n').map(item => item.trim()).filter(Boolean).slice(0, 20)])),
+          price,
+          paymentProvider: form.paymentProvider.trim() || null,
+          paymentProductId: form.paymentProductId.trim() || null,
           paddlePriceIds,
           title: {
             en:
@@ -947,7 +998,7 @@ function OwnerPrograms() {
       ) =>
         total +
         Number(
-          program.lessonCount ||
+          contentCounts(program.id).lesson ||
           0
         ),
 
@@ -1012,7 +1063,7 @@ function OwnerPrograms() {
 
 
           <small>
-            TEACHLEARN MARKETPLACE
+            TechMinds MARKETPLACE
           </small>
 
 
@@ -1534,12 +1585,7 @@ function OwnerPrograms() {
 
                     <span>
                       📚{" "}
-                      {program.lessonCount ||
-                        0}{" "}
-                      {text(
-                        "lessons",
-                        "دروس"
-                      )}
+                      {contentCountLabel(program.id)}
                     </span>
 
                   </div>
@@ -1721,7 +1767,7 @@ function OwnerPrograms() {
                 <div>
 
                   <small>
-                    TEACHLEARN
+                    TechMinds
                   </small>
 
                   <h2>
@@ -1738,8 +1784,8 @@ function OwnerPrograms() {
 
                   <p>
                     {text(
-                      "Create a commercial learning program for the TeachLearn marketplace.",
-                      "أنشئي برنامجًا تعليميًا تجاريًا لمتجر TeachLearn."
+                      "Create a commercial learning program for the TechMinds marketplace.",
+                      "أنشئي برنامجًا تعليميًا تجاريًا لمتجر TechMinds."
                     )}
                   </p>
 
@@ -2156,6 +2202,42 @@ function OwnerPrograms() {
                 </div>
 
 
+                <div className="program-form-grid">
+                  <label>
+                    {text("Student program access", "وصول الطالب إلى البرنامج", "גישת תלמידים לתוכנית")}
+                    <select value={form.accessType} onChange={(event) => setForm((current) => ({
+                      ...current, accessType: event.target.value,
+                      price: event.target.value === "free" ? "0" : current.price,
+                    }))}>
+                      <option value="free">{text("Free", "مجاني", "חינם")}</option>
+                      <option value="paid">{text("Paid", "مدفوع", "בתשלום")}</option>
+                      <option value="class">{text("Class access", "عبر الصف", "דרך הכיתה")}</option>
+                    </select>
+                  </label>
+                  {form.accessType === "paid" && <>
+                    <label>{text('Free preview lessons', 'عدد دروس المعاينة المجانية', 'מספר שיעורי התנסות בחינם')}
+                      <input type="number" min="0" max="10000" step="1" required value={form.previewLessonCount} onChange={event => setForm(current => ({ ...current, previewLessonCount: event.target.value }))} />
+                    </label>
+                    {[['outcomesEn', 'English'], ['outcomesAr', 'العربية'], ['outcomesHe', 'עברית']].map(([key, label]) => <label key={key}>
+                      {text('Learning outcomes (one per line)', 'مخرجات التعلم (واحد في كل سطر)', 'תוצאות למידה (אחת בכל שורה)')} · {label}
+                      <textarea dir={key === 'outcomesEn' ? 'ltr' : 'rtl'} maxLength={4000} value={form[key]} onChange={event => setForm(current => ({ ...current, [key]: event.target.value }))} />
+                    </label>)}
+                    <label>{text("Price (ILS)", "السعر (شيكل)", "מחיר (ש״ח)")}
+                      <input type="number" min="0" max="1000000" step="0.01" value={form.price}
+                        onChange={(event) => setForm((current) => ({ ...current, price: event.target.value }))} />
+                    </label>
+                    <label>{text("Payment provider (optional)", "مزود الدفع (اختياري)", "ספק תשלום (לא חובה)")}
+                      <input maxLength={128} value={form.paymentProvider}
+                        onChange={(event) => setForm((current) => ({ ...current, paymentProvider: event.target.value }))} />
+                    </label>
+                    <label>{text("Payment product ID (optional)", "معرّف منتج الدفع (اختياري)", "מזהה מוצר לתשלום (לא חובה)")}
+                      <input maxLength={256} value={form.paymentProductId}
+                        onChange={(event) => setForm((current) => ({ ...current, paymentProductId: event.target.value }))} />
+                    </label>
+                    <p>{text("Payment coming soon", "الدفع قريبًا", "התשלום יתווסף בקרוב")}</p>
+                  </>}
+                </div>
+                <p>{text("Legacy license pricing (kept for existing teacher workflows)", "أسعار التراخيص السابقة (محفوظة لعمل المعلمين الحالي)", "תמחור רישיונות קודם (נשמר לתהליכי המורים הקיימים)")}</p>
                 <div className="program-price-grid">
 
                   <label>

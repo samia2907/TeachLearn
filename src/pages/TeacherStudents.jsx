@@ -10,7 +10,6 @@ import {
   getDoc,
   onSnapshot,
   query,
-  runTransaction,
   serverTimestamp,
   updateDoc,
   where,
@@ -25,12 +24,17 @@ import {
 } from "firebase/auth";
 
 import {
+  httpsCallable,
+} from "firebase/functions";
+
+import {
   useNavigate,
 } from "react-router-dom";
 
 import {
   auth,
   db,
+  functions,
 } from "../firebase/firebase";
 
 import {
@@ -915,6 +919,34 @@ function TeacherStudents() {
           }
         );
 
+        batch.set(
+          doc(
+            db,
+            "classMembers",
+            `${selectedClass.id}_${studentUid}`
+          ),
+
+          {
+            classId:
+              selectedClass.id,
+
+            studentId:
+              studentUid,
+
+            teacherId:
+              currentTeacher.uid,
+
+            status:
+              "active",
+
+            joinedAt:
+              serverTimestamp(),
+
+            updatedAt:
+              serverTimestamp(),
+          }
+        );
+
 
         /* USERNAME INDEX */
 
@@ -1292,125 +1324,16 @@ function TeacherStudents() {
         setStudentActionError("");
         setSuccess("");
 
+        await httpsCallable(
+          functions,
+          "removeClassMember"
+        )({
+          classId:
+            selectedStudent.classId,
 
-        const studentRef =
-          doc(
-            db,
-            "users",
-            selectedStudent.id
-          );
-
-
-        const classRef =
-          doc(
-            db,
-            "classes",
-            selectedStudent.classId
-          );
-
-
-        await runTransaction(
-          db,
-
-          async (
-            transaction
-          ) => {
-            const studentSnapshot =
-              await transaction.get(
-                studentRef
-              );
-
-
-            if (
-              !studentSnapshot.exists()
-            ) {
-              throw new Error(
-                "student-not-found"
-              );
-            }
-
-
-            const studentData =
-              studentSnapshot.data();
-
-
-            if (
-              studentData.teacherId !==
-              currentTeacher.uid
-            ) {
-              throw new Error(
-                "not-your-student"
-              );
-            }
-
-
-            const classSnapshot =
-              await transaction.get(
-                classRef
-              );
-
-
-            transaction.update(
-              studentRef,
-
-              {
-                classId:
-                  "",
-
-                className:
-                  "",
-
-                classCode:
-                  "",
-
-                grade:
-                  "",
-
-                learningTrack:
-                  "",
-
-                updatedAt:
-                  serverTimestamp(),
-              }
-            );
-
-
-            if (
-              classSnapshot.exists()
-            ) {
-              const classData =
-                classSnapshot.data();
-
-
-              if (
-                classData.teacherId ===
-                currentTeacher.uid
-              ) {
-                const count =
-                  Number(
-                    classData.studentCount ||
-                    0
-                  );
-
-
-                transaction.update(
-                  classRef,
-
-                  {
-                    studentCount:
-                      Math.max(
-                        0,
-                        count - 1
-                      ),
-
-                    updatedAt:
-                      serverTimestamp(),
-                  }
-                );
-              }
-            }
-          }
-        );
+          studentId:
+            selectedStudent.id,
+        });
 
 
         setSuccess(
@@ -3531,7 +3454,7 @@ function TeacherStudents() {
                 <div>
 
                   <small>
-                    TEACHLEARN
+                    TechMinds
                   </small>
 
 
@@ -3545,8 +3468,8 @@ function TeacherStudents() {
 
                   <p>
                     {text(
-                      "Create a TeachLearn account for your student.",
-                      "أنشئ حساب TeachLearn جديد للطالب."
+                      "Create a TechMinds account for your student.",
+                      "أنشئ حساب TechMinds جديد للطالب."
                     )}
                   </p>
 
@@ -3721,8 +3644,8 @@ function TeacherStudents() {
 
                 <p>
                   {text(
-                    "TeachLearn creates a unique student code automatically. The student can log in using either the username or student code.",
-                    "سيقوم TeachLearn بإنشاء رمز خاص للطالب تلقائيًا، ويمكن للطالب تسجيل الدخول باسم المستخدم أو رمز الطالب."
+                    "TechMinds creates a unique student code automatically. The student can log in using either the username or student code.",
+                    "سيقوم TechMinds بإنشاء رمز خاص للطالب تلقائيًا، ويمكن للطالب تسجيل الدخول باسم المستخدم أو رمز الطالب."
                   )}
                 </p>
 
@@ -3806,7 +3729,7 @@ function TeacherStudents() {
 
           <div className="print-sheet-header">
 
-            <h1>TeachLearn</h1>
+            <h1>TechMinds</h1>
 
             {printClassId !==
               "all" && (

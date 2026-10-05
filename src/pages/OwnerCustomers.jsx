@@ -5,6 +5,8 @@ import {
 } from "react";
 
 import {
+  arrayRemove,
+  arrayUnion,
   collection,
   doc,
   onSnapshot,
@@ -31,6 +33,8 @@ import { hebrewText } from "../data/hebrewText";
 
 
 function OwnerCustomers() {
+  const [programs, setPrograms] = useState([]);
+  const [selectedProgramId, setSelectedProgramId] = useState("");
   const navigate =
     useNavigate();
 
@@ -205,10 +209,42 @@ function OwnerCustomers() {
       );
 
 
-    return () =>
+    const unsubscribePrograms = onSnapshot(collection(db, "programs"),
+      (snapshot) => setPrograms(snapshot.docs.map((program) => ({...program.data(), id: program.id}))),
+      () => setError(text("Could not load programs.", "تعذر تحميل البرامج.")));
+
+    return () => {
       unsubscribe();
+      unsubscribePrograms();
+    };
 
   }, [navigate]);
+
+  useEffect(() => {
+    setSelectedProgramId("");
+  }, [selectedUser?.id]);
+
+  const selectedUserGrants = users.find((user) => user.id === selectedUser?.id)?.ownerGrantedProgramIds;
+  const hasSelectedGrant = Array.isArray(selectedUserGrants) && selectedUserGrants.includes(selectedProgramId);
+
+  const changeProgramGrant = async (grant) => {
+    if (!selectedProgramId || !["student", "teacher"].includes(selectedUser?.role) || processingId) return;
+    setProcessingId(selectedUser.id);
+    setError("");
+    setSuccess("");
+    try {
+      await updateDoc(doc(db, "users", selectedUser.id), {
+        ownerGrantedProgramIds: grant ? arrayUnion(selectedProgramId) : arrayRemove(selectedProgramId),
+      });
+      setSuccess(grant
+        ? text("Program access granted.", "تم منح الوصول إلى البرنامج.")
+        : text("Owner grant revoked. Other access is unchanged.", "تم إلغاء منحة المالك. طرق الوصول الأخرى لم تتغير."));
+    } catch {
+      setError(text("Could not update program access.", "تعذر تحديث الوصول إلى البرنامج."));
+    } finally {
+      setProcessingId("");
+    }
+  };
 
 
   /* =====================================================
@@ -555,7 +591,7 @@ function OwnerCustomers() {
 
 
           <small>
-            TEACHLEARN ADMINISTRATION
+            TechMinds ADMINISTRATION
           </small>
 
 
@@ -570,8 +606,8 @@ function OwnerCustomers() {
 
           <p>
             {text(
-              "Manage students and teachers registered on TeachLearn.",
-              "أديري الطلاب والمعلمين المسجلين في TeachLearn."
+              "Manage students and teachers registered on TechMinds.",
+              "أديري الطلاب والمعلمين المسجلين في TechMinds."
             )}
           </p>
 
@@ -793,8 +829,8 @@ function OwnerCustomers() {
 
             <h2>
               {text(
-                "TeachLearn Users",
-                "مستخدمو TeachLearn"
+                "TechMinds Users",
+                "مستخدمو TechMinds"
               )}
             </h2>
 
@@ -1256,7 +1292,7 @@ function OwnerCustomers() {
               <div>
 
                 <small>
-                  TEACHLEARN CUSTOMER
+                  TechMinds CUSTOMER
                 </small>
 
 
@@ -1479,6 +1515,42 @@ function OwnerCustomers() {
 
             </div>
 
+
+            {["student", "teacher"].includes(selectedUser.role) && (
+              <div className="owner-customer-admin-section">
+                <h3>{text("Program Access", "الوصول إلى البرامج")}</h3>
+                <div className="owner-customers-toolbar">
+                  <select
+                    aria-label={text("Select a program", "اختر برنامجًا")}
+                    value={selectedProgramId}
+                    disabled={Boolean(processingId)}
+                    onChange={(event) => {
+                      setSelectedProgramId(event.target.value);
+                      setError("");
+                      setSuccess("");
+                    }}
+                  >
+                    <option value="">{text("Select a program", "اختر برنامجًا")}</option>
+                    {programs.map((program) => (
+                      <option key={program.id} value={program.id}>
+                        {typeof program.title === "string" ? program.title : program.title?.[language] || program.title?.en || program.id}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button type="button" className="owner-customer-activate"
+                  disabled={!selectedProgramId || hasSelectedGrant || Boolean(processingId)}
+                  onClick={() => changeProgramGrant(true)}>
+                  {text("Grant Access", "منح الوصول")}
+                </button>
+                <button type="button" className="owner-customer-deactivate"
+                  disabled={!selectedProgramId || !hasSelectedGrant || Boolean(processingId)}
+                  onClick={() => changeProgramGrant(false)}>
+                  {text("Revoke Access", "إلغاء الوصول")}
+                </button>
+                {(error || success) && <p role="status">{error || success}</p>}
+              </div>
+            )}
 
             <div className="owner-customer-admin-section">
 

@@ -40,13 +40,37 @@ function StudentPortfolio() {
 
   const text = (
     english,
-    arabic
+    arabic,
+    hebrew
   ) =>
     language === "ar"
       ? arabic
       : language === "he"
-        ? hebrewText(english)
-      : english;
+        ? (hebrew || hebrewText(english))
+        : english;
+
+
+  const localized = (value) => {
+    if (!value) {
+      return "";
+    }
+
+    if (typeof value === "string") {
+      return value;
+    }
+
+    if (typeof value === "object") {
+      return (
+        value[language] ||
+        value.he ||
+        value.ar ||
+        value.en ||
+        ""
+      );
+    }
+
+    return String(value);
+  };
 
 
   const [
@@ -145,7 +169,8 @@ function StudentPortfolio() {
           setError(
             text(
               "Could not load your portfolio.",
-              "تعذر تحميل معرض أعمالك."
+              "تعذر تحميل معرض أعمالك.",
+              "לא ניתן לטעון את תיק העבודות שלך."
             )
           );
 
@@ -207,7 +232,9 @@ function StudentPortfolio() {
         .toLocaleDateString(
           language === "ar"
             ? "ar"
-            : "en"
+            : language === "he"
+              ? "he-IL"
+              : "en"
         );
     };
 
@@ -222,7 +249,14 @@ function StudentPortfolio() {
 
 
   return (
-    <div className="student-portfolio-page">
+    <div
+      className="student-portfolio-page"
+      dir={
+        language === "ar" || language === "he"
+          ? "rtl"
+          : "ltr"
+      }
+    >
 
       {/* HEADER */}
 
@@ -249,15 +283,17 @@ function StudentPortfolio() {
             📁{" "}
             {text(
               "My Portfolio",
-              "معرض أعمالي"
+              "معرض أعمالي",
+              "תיק העבודות שלי"
             )}
           </h1>
 
 
           <p>
             {text(
-              "A collection of the projects and challenges you completed in TeachLearn.",
-              "مجموعة من المشاريع والمهام التي أنجزتها في TeachLearn."
+              "A collection of the projects and challenges you completed in TechMinds.",
+              "مجموعة من المشاريع والمهام التي أنجزتها في TechMinds.",
+              "אוסף הפרויקטים והאתגרים שהשלמת ב-TechMinds."
             )}
           </p>
 
@@ -295,6 +331,20 @@ function StudentPortfolio() {
             عربي
           </button>
 
+          <button
+            type="button"
+            className={
+              language === "he"
+                ? "active"
+                : ""
+            }
+            onClick={() =>
+              setLanguage("he")
+            }
+          >
+            עברית
+          </button>
+
         </div>
 
       </header>
@@ -311,7 +361,8 @@ function StudentPortfolio() {
             <small>
               {text(
                 "Projects",
-                "المشاريع"
+                "المشاريع",
+                "פרויקטים"
               )}
             </small>
 
@@ -329,7 +380,8 @@ function StudentPortfolio() {
             <small>
               {text(
                 "Completed Work",
-                "أعمال مكتملة"
+                "أعمال مكتملة",
+                "עבודות שהושלמו"
               )}
             </small>
 
@@ -369,7 +421,8 @@ function StudentPortfolio() {
           <h2>
             {text(
               "Your portfolio is waiting for your first project!",
-              "معرض أعمالك ينتظر أول مشروع!"
+              "معرض أعمالك ينتظر أول مشروع!",
+              "תיק העבודות שלך מחכה לפרויקט הראשון!"
             )}
           </h2>
 
@@ -377,7 +430,8 @@ function StudentPortfolio() {
           <p>
             {text(
               "Complete special activities inside your lessons and add them here.",
-              "أكمل المهام المميزة داخل الدروس وأضفها إلى معرض أعمالك."
+              "أكمل المهام المميزة داخل الدروس وأضفها إلى معرض أعمالك.",
+              "השלם פעילויות מיוחדות בתוך השיעורים והוסף אותן כאן."
             )}
           </p>
 
@@ -393,7 +447,8 @@ function StudentPortfolio() {
             📚{" "}
             {text(
               "Go to Lessons",
-              "اذهب إلى الدروس"
+              "اذهب إلى الدروس",
+              "עבור לשיעורים"
             )}
           </button>
 
@@ -430,7 +485,8 @@ function StudentPortfolio() {
                       ✅{" "}
                       {text(
                         "Completed",
-                        "مكتمل"
+                        "مكتمل",
+                        "הושלם"
                       )}
                     </span>
 
@@ -449,7 +505,7 @@ function StudentPortfolio() {
 
                     {project.lessonTitle
                       ? `📚 ${project.lessonTitle}`
-                      : "TeachLearn"}
+                      : "TechMinds"}
 
                   </small>
 
@@ -462,8 +518,9 @@ function StudentPortfolio() {
                   <p>
                     {project.description ||
                       text(
-                        "TeachLearn project",
-                        "مشروع TeachLearn"
+                        "TechMinds project",
+                        "مشروع TechMinds",
+                        "פרויקט TechMinds"
                       )}
                   </p>
 
@@ -494,7 +551,8 @@ function StudentPortfolio() {
 
                     {text(
                       "View Project",
-                      "عرض المشروع"
+                      "عرض المشروع",
+                      "צפייה בפרויקט"
                     )}
 
                   </button>
@@ -550,8 +608,9 @@ function StudentPortfolio() {
 
             <small>
               {text(
-                "MY TEACHLEARN PROJECT",
-                "مشروعي في TeachLearn"
+                "MY TechMinds PROJECT",
+                "مشروعي في TechMinds",
+                "הפרויקט שלי ב-TechMinds"
               )}
             </small>
 
@@ -589,7 +648,8 @@ function StudentPortfolio() {
 
                 {text(
                   "My Work",
-                  "عملي"
+                  "عملي",
+                  "העבודה שלי"
                 )}
 
               </small>
@@ -599,7 +659,8 @@ function StudentPortfolio() {
                 {selectedProject.answer ||
                   text(
                     "No written answer.",
-                    "لا توجد إجابة مكتوبة."
+                    "لا توجد إجابة مكتوبة.",
+                    "אין תשובה כתובה."
                   )}
               </p>
 
@@ -618,7 +679,8 @@ function StudentPortfolio() {
                 🔗{" "}
                 {text(
                   "Open Project",
-                  "فتح المشروع"
+                  "فتح المشروع",
+                  "פתח פרויקט"
                 )}
               </a>
 

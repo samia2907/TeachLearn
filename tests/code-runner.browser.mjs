@@ -6,7 +6,7 @@ import { join } from "node:path";
 import assert from "node:assert/strict";
 
 const base = process.env.TEST_BASE_URL || "http://127.0.0.1:5185";
-const profile = await mkdtemp(join(tmpdir(), "teachlearn-runner-"));
+const profile = await mkdtemp(join(tmpdir(), "TechMinds-runner-"));
 const chrome = spawn(process.env.CHROME_PATH || "C:/Program Files/Google/Chrome/Application/chrome.exe", ["--headless=new", "--disable-gpu", "--no-first-run", "--remote-debugging-port=9338", `--user-data-dir=${profile}`, "about:blank"], { windowsHide: true, stdio: "ignore" });
 let ws;
 try {

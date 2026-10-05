@@ -1,3 +1,5 @@
+import { authEntry } from '../auth/returnTo.mjs';
+import { manualAccessMode, programDestination } from '../access/programFlow.mjs';
 import {
   useEffect,
   useMemo,
@@ -22,6 +24,7 @@ import {
 import {
   auth,
   db,
+  functions,
 } from "../firebase/firebase";
 
 import {
@@ -29,10 +32,15 @@ import {
 } from "../context/LanguageContext";
 
 import "./ProgramsMarketplace.css";
+import { normalizeProgram } from "../../functions/programAccessPolicy.mjs";
 import { programLicenseForRole } from "../firebase/paddleConfig";
 import { httpsCallable } from "firebase/functions";
-import { functions } from "../firebase/firebase";
+import { studentHasProgramAccess } from "../firebase/studentProgramAccess";
 
+const checkProgramAccess = httpsCallable(
+  functions,
+  "checkProgramAccess"
+);
 
 function ProgramsMarketplace() {
   const navigate =
@@ -138,12 +146,12 @@ function ProgramsMarketplace() {
   useEffect(() => {
     const loadUser =
       async () => {
+        await auth.authStateReady();
         const user =
           auth.currentUser;
 
 
-        if (!user) {
-          navigate("/login");
+        if (!user) { setUserProfile({ role: "guest" });
           return;
         }
 
@@ -305,34 +313,7 @@ function ProgramsMarketplace() {
           setClasses(list);
 
 
-          if (list.length > 0) {
-            setSelectedClasses(
-              (current) => {
-                const next = {
-                  ...current,
-                };
 
-
-                programs.forEach(
-                  (program) => {
-                    if (
-                      !next[
-                        program.id
-                      ]
-                    ) {
-                      next[
-                        program.id
-                      ] =
-                        list[0].id;
-                    }
-                  }
-                );
-
-
-                return next;
-              }
-            );
-          }
         }
       );
 
@@ -340,11 +321,19 @@ function ProgramsMarketplace() {
     return () =>
       unsubscribe();
 
-  }, [
-    userProfile,
-    programs,
-  ]);
+  }, [userProfile?.uid, userProfile?.role]);
 
+  // Catalog changes update defaults without restarting the Firestore listener.
+  useEffect(() => {
+    if (userProfile?.role !== "teacher" || classes.length === 0) return;
+    setSelectedClasses(current => {
+      const next = { ...current };
+      programs.forEach(program => {
+        if (!next[program.id]) next[program.id] = classes[0].id;
+      });
+      return next;
+    });
+  }, [classes, programs, userProfile?.role]);
 
   /* =====================================================
      LOAD PROGRAM ACCESS
@@ -352,14 +341,19 @@ function ProgramsMarketplace() {
 
   useEffect(() => {
     let active = true;
+    let running = false;
+    let queued = false;
     const checkAccess =
       async () => {
         if (
-          !userProfile ||
-          programs.length === 0
+          !active || !userProfile?.uid || programs.length === 0
         ) {
           return;
         }
+        // Keep one batch in flight; replay invalidations received during it.
+        if (running) { queued = true; return; }
+        running = true;
+        try {
 
 
         const result = {};
@@ -371,106 +365,15 @@ function ProgramsMarketplace() {
               program
             ) => {
               try {
-                let personalAccessId;
-
-                if (userProfile.role === "owner") {
-                  result[program.id] = true;
-                  return;
-                }
-
-
-                if (
-                  userProfile.role ===
-                  "teacher"
-                ) {
-                  personalAccessId =
-                    `teacher_${safeId(
-                      userProfile.uid
-                    )}_${safeId(
-                      program.id
-                    )}`;
-
-                } else {
-                  personalAccessId =
-                    `student_${safeId(
-                      userProfile.uid
-                    )}_${safeId(
-                      program.id
-                    )}`;
-                }
-
-
-                const personalSnapshot =
-                  await getDoc(
-                    doc(
-                      db,
-                      "programAccess",
-                      personalAccessId
-                    )
-                  ).catch(() => null);
-
-
-                if (
-                  personalSnapshot?.exists() &&
-                  personalSnapshot.data()
-                    .status ===
-                    "active"
-                ) {
-                  result[
-                    program.id
-                  ] = true;
-
-                  return;
-                }
-
-                if (userProfile.role === "teacher") {
-                  const response = await httpsCallable(functions, "getPurchasedProgram")({ programId: program.id, accessOnly: true });
-                  result[program.id] = response.data?.access?.status === "active";
-                  return;
-                }
-
-
-                /*
-                  Student may also have access
-                  through a teacher's class license.
-                */
-
-                if (
-                  userProfile.role ===
-                    "student" &&
-                  userProfile.classId
-                ) {
-                  const classAccessId =
-                    `class_${safeId(
-                      userProfile.classId
-                    )}_${safeId(
-                      program.id
-                    )}`;
-
-
-                  const classSnapshot =
-                    await getDoc(
-                      doc(
-                        db,
-                        "programAccess",
-                        classAccessId
-                      )
-                    );
-
-
-                  if (
-                    classSnapshot.exists() &&
-                    classSnapshot.data()
-                      .status ===
-                      "active"
-                  ) {
-                    result[
-                      program.id
-                    ] = true;
-                  }
-                }
-
+                result[program.id] = await studentHasProgramAccess(checkProgramAccess, program.id);
               } catch (error) {
+                if (active && userProfile.role === "student") {
+                  setMessage(text(
+                    "Could not verify program access. Please try again.",
+                    "تعذر التحقق من الوصول إلى البرنامج. يرجى المحاولة مجددًا.",
+                    "לא ניתן לאמת את הגישה לתוכנית. נסו שוב.",
+                  ));
+                }
                 console.error(
                   "Access check error:",
                   program.id,
@@ -483,15 +386,30 @@ function ProgramsMarketplace() {
 
 
         if (active) setAccessMap(result);
+        } finally {
+          running = false;
+          if (queued && active) {
+            queued = false;
+            void checkAccess();
+          }
+        }
       };
 
 
-    checkAccess();
     // Recheck when returning from Paddle or another tab; checkout also waits for the entitlement.
     window.addEventListener("focus", checkAccess);
     const refresh = window.setInterval(checkAccess, 10000);
+    const stopAccess = userProfile?.uid ? onSnapshot(
+      query(collection(db, 'programAccess'), where('userId', '==', userProfile.uid)),
+      checkAccess,
+      failure => {
+        console.error('Program access subscription failed', failure.code);
+        void checkAccess();
+      },
+    ) : () => {};
     return () => {
       active = false;
+      stopAccess();
       window.clearInterval(refresh);
       window.removeEventListener("focus", checkAccess);
     };
@@ -549,6 +467,78 @@ function ProgramsMarketplace() {
     );
 
 
+
+
+  /* =====================================================
+     MY PROGRAMS / OTHER PROGRAMS
+  ===================================================== */
+
+  const hasProgramAccess =
+    (program) =>
+      userProfile?.role === "owner" ||
+      Boolean(accessMap[program.id]) ||
+      normalizeProgram(program).accessType === "free";
+
+
+  const myPrograms =
+    filteredPrograms.filter(
+      (program) => hasProgramAccess(program)
+    );
+
+
+  const otherPrograms =
+    filteredPrograms.filter(
+      (program) => !hasProgramAccess(program)
+    );
+
+
+  const sectionedPrograms = userProfile?.role === "guest" ? [
+    {
+      type: "section",
+      id: "available-programs",
+      section: "available",
+      count: filteredPrograms.length,
+    },
+    ...filteredPrograms.map((program) => ({ type: "program", program })),
+  ] : [
+    {
+      type: "section",
+      id: "my-programs",
+      section: "mine",
+      count: myPrograms.length,
+    },
+
+    ...(myPrograms.length > 0
+      ? myPrograms.map((program) => ({
+          type: "program",
+          program,
+        }))
+      : [
+          {
+            type: "empty-section",
+            id: "my-programs-empty",
+            section: "mine",
+          },
+        ]),
+
+    ...(otherPrograms.length > 0
+      ? [
+          {
+            type: "section",
+            id: "other-programs",
+            section: "other",
+            count: otherPrograms.length,
+          },
+
+          ...otherPrograms.map((program) => ({
+            type: "program",
+            program,
+          })),
+        ]
+      : []),
+  ];
+
+
   /* =====================================================
      PURCHASE
   ===================================================== */
@@ -587,7 +577,15 @@ function ProgramsMarketplace() {
         return;
       }
 
+      if (manualAccessMode && normalizeProgram(program).accessType !== 'class') {
+        navigate(programDestination(program, accessMap[program.id]));
+        return;
+      }
       licenseType = programLicenseForRole(userProfile.role, licenseType);
+      if (manualAccessMode && userProfile.role === "student") {
+        setMessage(text("Payment coming soon", "الدفع قريبًا", "התשלום יתווסף בקרוב"));
+        return;
+      }
       if (!licenseType || !/^pri_[a-z0-9]{26}$/.test(program.paddlePriceIds?.[licenseType] || "")) {
         setMessage(text("This program is not available for purchase yet.", "هذا البرنامج غير متاح للشراء بعد.", "התוכנית עדיין אינה זמינה לרכישה."));
         return;
@@ -749,9 +747,11 @@ function ProgramsMarketplace() {
         page after confirming purchase flow.
       */
 
-      navigate(
-        `/programs/${programId}`
-      );
+      const program = programs.find(item => item.id === programId);
+      if (!manualAccessMode && program?.accessType === 'paid' && !accessMap[programId] && userProfile.role !== 'owner') {
+        startPurchase(program, userProfile.role); return;
+      }
+      navigate(programDestination(program || { id: programId }, userProfile.role === 'owner' || accessMap[programId]));
     };
 
 
@@ -769,9 +769,9 @@ function ProgramsMarketplace() {
 
         <p>
           {text(
-            "Loading TeachLearn programs...",
-            "جارٍ تحميل برامج TeachLearn...",
-            "תוכניות TeachLearn נטענות..."
+            "Loading TechMinds programs...",
+            "جارٍ تحميل برامج TechMinds...",
+            "תוכניות TechMinds נטענות..."
           )}
         </p>
       </div>
@@ -807,7 +807,7 @@ function ProgramsMarketplace() {
                 navigate("/teacher");
 
               } else {
-                navigate("/student");
+                navigate(userProfile.role === "guest" ? "/" : "/student");
               }
             }}
           >
@@ -820,7 +820,7 @@ function ProgramsMarketplace() {
 
 
           <small>
-            TEACHLEARN MARKETPLACE
+            TechMinds MARKETPLACE
           </small>
 
 
@@ -954,22 +954,113 @@ function ProgramsMarketplace() {
 
         <div className="marketplace-program-grid">
 
-          {filteredPrograms.map(
-            (program) => {
+          {sectionedPrograms.map(
+            (item) => {
+
+              if (item.type === "section") {
+                const isMine =
+                  item.section === "mine";
+
+                return (
+                  <div
+                    className={`marketplace-section-header ${isMine ? "mine" : "other"}`}
+                    key={item.id}
+                  >
+                    <div>
+                      <span className="marketplace-section-icon">
+                        {isMine ? "✨" : "🧭"}
+                      </span>
+
+                      <div>
+                        <h2>
+                          {item.section === "available"
+                            ? text(
+                                "Available Programs",
+                                "البرامج المتاحة",
+                                "תוכניות זמינות"
+                              )
+                            : isMine
+                            ? text(
+                                "My Programs",
+                                "برامجي",
+                                "התוכניות שלי"
+                              )
+                            : text(
+                                "Other Programs",
+                                "برامج أخرى",
+                                "תוכניות נוספות"
+                              )}
+                        </h2>
+
+                        <p>
+                          {item.section === "available"
+                            ? text(
+                                "Explore TechMinds learning programs.",
+                                "استكشف برامج TechMinds التعليمية.",
+                                "גלו את תוכניות הלמידה של TechMinds."
+                              )
+                            : isMine
+                            ? text(
+                                "Programs you can open and continue now.",
+                                "البرامج المتاحة لك للفتح والمتابعة الآن.",
+                                "תוכניות שזמינות לך לפתיחה ולהמשך למידה."
+                              )
+                            : text(
+                                "Explore more TechMinds learning programs.",
+                                "استكشف برامج تعليمية إضافية من TechMinds.",
+                                "גלו תוכניות למידה נוספות של TechMinds."
+                              )}
+                        </p>
+                      </div>
+                    </div>
+
+                    <span className="marketplace-section-count">
+                      {item.count}
+                    </span>
+                  </div>
+                );
+              }
+
+
+              if (item.type === "empty-section") {
+                return (
+                  <div
+                    className="marketplace-section-empty"
+                    key={item.id}
+                  >
+                    <span>📚</span>
+
+                    <div>
+                      <strong>
+                        {text(
+                          "No programs here yet",
+                          "ما عندك برامج بعد",
+                          "עדיין אין לך תוכניות"
+                        )}
+                      </strong>
+
+                      <p>
+                        {text(
+                          "Programs you receive access to will appear here.",
+                          "أي برنامج تحصل على وصول إليه سيظهر هنا تلقائيًا.",
+                          "תוכניות שתקבלו אליהן גישה יופיעו כאן אוטומטית."
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                );
+              }
+
+
+              const program =
+                item.program;
+
 
               const hasAccess =
                 Boolean(
                   accessMap[
                     program.id
                   ]
-                );
-
-
-              const studentPrice =
-                Number(
-                  program.pricing
-                    ?.student ||
-                  0
                 );
 
 
@@ -1032,9 +1123,9 @@ function ProgramsMarketplace() {
                       program.description
                     ) ||
                       text(
-                        "Interactive TeachLearn learning program.",
-                        "برنامج تعليمي تفاعلي من TeachLearn.",
-                        "תוכנית למידה אינטראקטיבית של TeachLearn."
+                        "Interactive TechMinds learning program.",
+                        "برنامج تعليمي تفاعلي من TechMinds.",
+                        "תוכנית למידה אינטראקטיבית של TechMinds."
                       )}
 
                   </p>
@@ -1098,92 +1189,45 @@ function ProgramsMarketplace() {
                   )}
 
 
-                  {/* STUDENT */}
-
-                  {userProfile.role ===
-                    "student" && (
-
+                  <span className="marketplace-access-badge">
+                    {normalizeProgram(program).accessType === "free"
+                      ? text("Free", "مجاني", "חינם")
+                      : normalizeProgram(program).accessType === "paid"
+                        ? text("Paid", "مدفوع", "בתשלום")
+                        : normalizeProgram(program).accessType === 'class'
+                          ? text("Class access", "عبر الصف", "דרך הכיתה")
+                          : text("Contact for access", "تواصل لفتح البرنامج", "צרו קשר לקבלת גישה")}
+                  </span>
+                  {userProfile.role === "guest" && <div className="marketplace-purchase-area">
+ <button className="marketplace-open-button" onClick={() => navigate('/programs/' + encodeURIComponent(program.id))}>{text('View program', 'استعرض البرنامج', 'צפייה בתוכנית')}</button>
+ <button className="marketplace-buy-button" onClick={() => navigate(authEntry('/programs/' + encodeURIComponent(program.id), '/register'))}>{text('Create an account to start', 'أنشئ حسابًا للبدء', 'צרו חשבון כדי להתחיל')}</button>
+ </div>}
+ {(userProfile.role === "student" || (userProfile.role === "teacher" && (manualAccessMode || normalizeProgram(program).accessType === "free"))) && (
                     <div className="marketplace-purchase-area">
-                      <small>{text("One-time purchase", "شراء لمرة واحدة", "רכישה חד-פעמית")}</small>
-
-                      <div className="marketplace-price">
-
-                        <small>
-                          {text(
-                            "Student Access",
-                            "وصول الطالب",
-                            "גישה לתלמיד"
-                          )}
-                        </small>
-
-
-                        <strong>
-                          ₪{studentPrice}
-                        </strong>
-
-                      </div>
-
-
-                      {hasAccess ? (
-
-                        <button
-                          type="button"
-                          className="marketplace-open-button"
-                          onClick={() =>
-                            openProgram(
-                              program.id
-                            )
-                          }
-                        >
-                          ✅{" "}
-                          {text(
-                            "Open Program",
-                            "فتح البرنامج",
-                            "פתיחת התוכנית"
-                          )}
-                        </button>
-
-                      ) : (
-
-                        <button
-                          type="button"
-                          className="marketplace-buy-button"
-                          disabled={
-                            processingId ===
-                            `${program.id}-student`
-                          }
-                          onClick={() =>
-                            startPurchase(
-                              program,
-                              "student"
-                            )
-                          }
-                        >
-                          {processingId ===
-                          `${program.id}-student`
-                            ? text(
-                                "Preparing...",
-                                "جارٍ التجهيز...",
-                                "מתכוננים..."
-                              )
-                            : `🔒 ${text(
-                                "Buy Program",
-                                "شراء البرنامج",
-                                "רכישת תוכנית"
-                              )}`}
-                        </button>
-
+                      {normalizeProgram(program).accessType === "paid" && Number(program.price) > 0 && (
+                        <strong className="marketplace-price">₪{program.price}</strong>
                       )}
-
+                      {hasAccess || normalizeProgram(program).accessType === 'free' ? (
+                        <button type="button" className="marketplace-open-button" onClick={() => openProgram(program.id)}>
+                          {text("Open / Continue", "فتح / متابعة", "פתיחה / המשך")}
+                        </button>
+                      ) : (
+                        <button type="button" className="marketplace-buy-button" disabled={manualAccessMode ? normalizeProgram(program).accessType === 'class' : !['paid', 'free'].includes(normalizeProgram(program).accessType)} onClick={() => openProgram(program.id)}>
+                          {accessMap[program.id] === undefined
+                            ? text("Checking access...", "جارٍ التحقق من الوصول...", "בודקים גישה...")
+                            : normalizeProgram(program).accessType === "class"
+                              ? text("Class access required", "يتطلب وصولًا عبر الصف", "נדרשת גישה דרך הכיתה")
+                              : manualAccessMode || normalizeProgram(program).accessType === 'paid'
+                                ? text("Request access", "اطلب فتح البرنامج", "בקשת גישה")
+                                : text("Access unavailable", "الوصول غير متاح", "הגישה אינה זמינה")}
+                        </button>
+                      )}
                     </div>
-
                   )}
-
 
                   {/* TEACHER */}
 
-                  {userProfile.role ===
-                    "teacher" && (
+                  {userProfile.role === "teacher" && !manualAccessMode && normalizeProgram(program).accessType !== "free" && (
 
                     <div className="marketplace-teacher-options">
                       <small>{text("One-time purchase", "شراء لمرة واحدة", "רכישה חד-פעמית")}</small>
