@@ -127,6 +127,26 @@ test('access check returns false without full access while paid programs expose 
   assert.equal(JSON.stringify(await f.checkAccess()), JSON.stringify({ hasAccess: true, source: 'purchase' }));
 });
 
+test('single-lesson responses preserve catalog preview positions and locked content', async () => {
+  const f = fixture();
+  for (const [id, order] of [['first', 1], ['second', 2]]) {
+    f.records.set(`lessons/${id}`, { lessonType: 'commercial', programId: 'p1',
+      status: 'published', order, sections: [{ type: 'content', content: `private-${id}` }] });
+  }
+  const load = lessonId => f.context.exports.getPurchasedProgram({ auth: { uid: 'u1' }, data: { programId: 'p1', lessonId } });
+  const locked = await load('second');
+  assert.equal(locked.lessons.length, 1);
+  assert.equal(locked.lessons[0].locked, true);
+  assert.equal(locked.lessons[0].sections, undefined);
+  assert.equal((await load('first')).lessons[0].previewOnly, true);
+  assert.equal((await load('missing')).lessons.length, 0);
+  await f.purchase();
+  const full = await load('second');
+  assert.equal(full.lessons.length, 1);
+  assert.equal(full.lessons[0].sections[0].content, 'private-second');
+  assert.equal((await load(undefined)).lessons.length, 2);
+});
+
 test('explicitly free programs open directly; unconfigured legacy programs and drafts stay protected', async () => {
   for (const accessType of ['free', undefined]) {
     const f = fixture('student', { program: { accessType } });

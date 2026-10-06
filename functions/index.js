@@ -1910,7 +1910,10 @@ exports.getPurchasedProgram =
 
         lessons:
           serializeValue(
+            // Resolve against the complete ordered catalog first: preview positions
+            // and parent-mission access must not depend on the requested lesson.
             programLessonViews({lessons, program: programData, programId, user: userData, access: accessData})
+              .filter(lesson => !request.data?.lessonId || lesson.id === request.data.lessonId)
           ),
       };
     }

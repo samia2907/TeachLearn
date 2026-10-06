@@ -651,7 +651,7 @@ function ProgramLessonPlayer() {
 
 
 
-    });
+    }, { lessonId });
 
 
 
@@ -3480,6 +3480,7 @@ function ProgramLessonPlayer() {
 
 
 
+                decoding="async"
                 src={lesson.coverImage}
 
 
@@ -3993,7 +3994,8 @@ function ProgramLessonPlayer() {
 
 
 
-                    src={section.visualImage}
+                    decoding="async"
+                src={section.visualImage}
 
 
 

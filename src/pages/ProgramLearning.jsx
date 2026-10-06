@@ -7,6 +7,7 @@ import './ProgramAccess.css';
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -145,6 +146,9 @@ function ProgramLearning() {
      LOAD SECURE PROGRAM
   ===================================================== */
 
+  const errorText = useRef(text);
+  errorText.current = text;
+
   useEffect(() => {
     setLoading(true); setError('');
     return subscribeProgramContent(programId, data => {
@@ -154,9 +158,9 @@ function ProgramLearning() {
     }, failure => {
       console.error('Program access load failed', failure.code, failure.message);
       setProgram(null); setLessons([]); setLoading(false);
-      setError(text('Could not load the program. Please try again.', 'تعذر تحميل البرنامج. حاول مجددًا.', 'לא ניתן לטעון את התוכנית. נסו שוב.'));
+      setError(errorText.current('Could not load the program. Please try again.', 'تعذر تحميل البرنامج. حاول مجددًا.', 'לא ניתן לטעון את התוכנית. נסו שוב.'));
     });
-  }, [programId, language]);
+  }, [programId]);
 
 
   /* =====================================================
@@ -990,6 +994,7 @@ function ProgramLearning() {
 
                   {selectedLesson.coverImage ? (
                     <img
+                      loading="lazy" decoding="async"
                       src={selectedLesson.coverImage}
                       alt={localized(
                         selectedLesson.imageAlt

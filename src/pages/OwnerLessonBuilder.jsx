@@ -2113,6 +2113,7 @@ function OwnerLessonBuilder() {
 
                     {selectedSlide.visualImage && (
                       <img
+                        loading="lazy" decoding="async"
                         src={selectedSlide.visualImage}
                         alt={
                           localized(
@@ -2921,6 +2922,7 @@ function OwnerLessonBuilder() {
                 {lesson.coverImage && (
 
                   <img
+                    loading="lazy" decoding="async"
                     src={
                       lesson.coverImage
                     }
@@ -2977,6 +2979,8 @@ function OwnerLessonBuilder() {
               {selectedSlide.visualImage && (
                 <img
                   className="preview-slide-image"
+                  loading="lazy"
+                  decoding="async"
                   src={selectedSlide.visualImage}
                   alt={
                     localized(
