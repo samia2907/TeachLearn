@@ -899,7 +899,7 @@ function programDocument(
 
     icon:
       program.icon ||
-      "🚀",
+      "✨",
 
     category:
       program.category ||
@@ -1033,10 +1033,10 @@ function lessonDocument(
       lesson.status,
 
     lessonNumber:
-      lessonIndex + 1,
+      lesson.order ?? lessonIndex + 1,
 
     order:
-      lessonIndex + 1,
+      lesson.order ?? lessonIndex + 1,
 
     sections:
       lesson.sections,

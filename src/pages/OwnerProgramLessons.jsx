@@ -1,3 +1,4 @@
+import { lessonImageUrl, lessonImageDimensions } from "../utils/lessonImages";
 import { Fragment } from 'react';
 import { contentPresentation, programContentType } from '../../functions/programContent.mjs';
 import {
@@ -1266,7 +1267,7 @@ function OwnerProgramLessons() {
   ===================================================== */
 
   return (
-    <div className="owner-program-lessons-page">
+    <div className="owner-program-lessons-page" dir={language === "en" ? "ltr" : "rtl"}>
 
       {/* HEADER */}
 
@@ -1290,7 +1291,7 @@ function OwnerProgramLessons() {
 
 
           <small>
-            PROGRAM CONTENT
+            {text('Manage Lessons', 'إدارة الدروس', 'ניהול שיעורים')} · {lessons.length}
           </small>
 
 
@@ -1816,7 +1817,8 @@ function OwnerProgramLessons() {
                       <div className="owner-lesson-cover-wrap">
                         <img
                           decoding="async"
-                          src={lesson.coverImage}
+                          src={lessonImageUrl(lesson.coverImage, true)}
+                {...lessonImageDimensions(lesson.coverImage)}
                           alt={
                             localized(lesson.imageAlt) ||
                             localized(lesson.title) ||
@@ -2543,8 +2545,8 @@ function OwnerProgramLessons() {
                         "حفظ التعديلات"
                       )
                     : text(
-                        "Create Lesson 🚀",
-                        "إنشاء الدرس 🚀"
+                        "Create Lesson ✨",
+                        "إنشاء الدرس ✨"
                       )}
                 </button>
 

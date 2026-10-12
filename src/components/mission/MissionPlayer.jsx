@@ -1,3 +1,4 @@
+import { lessonImageUrl, lessonImageDimensions } from "../../utils/lessonImages";
 import { useContentProgress } from '../../progress/useContentProgress';
 
 
@@ -671,6 +672,7 @@ export default function MissionPlayer({
 
 
   onExit,
+  onNext,
 
 
 
@@ -787,6 +789,7 @@ export default function MissionPlayer({
 
 
   const [completed, setCompleted] = useState(false);
+  const [reviewing, setReviewing] = useState(false);
 
 
 
@@ -1065,6 +1068,7 @@ export default function MissionPlayer({
 
 
         setXp(data.xp);
+          setCompletionResult(data.completionResult || null);
 
 
 
@@ -2013,6 +2017,7 @@ export default function MissionPlayer({
 
 
       setXp(result.xp);
+      setCompletionResult(result);
 
 
 
@@ -2512,7 +2517,7 @@ export default function MissionPlayer({
 
 
 
-      {completed ? (
+      {completed && !reviewing ? (
 
 
 
@@ -2534,7 +2539,7 @@ export default function MissionPlayer({
 
             {completionResult?.programCompleted
 
-              ? t('Program complete!', 'أكملت البرنامج!', 'התוכנית הושלמה!')
+              ? t('🎉 Program Complete!', '🎉 أكملت البرنامج!', '🎉 השלמת את התוכנית!')
 
               : t('Mission complete!', 'اكتملت المهمة!', 'המשימה הושלמה!')}
 
@@ -2546,11 +2551,11 @@ export default function MissionPlayer({
 
               ? t(
 
-                  'Excellent work! You completed every required lesson in this program.',
+                  'Great work! You completed all required lessons and missions.',
 
-                  'عمل رائع! أكملت جميع الدروس المطلوبة في هذا البرنامج.',
+                  'عمل رائع! أكملت جميع الدروس والمهمات المطلوبة.',
 
-                  'עבודה מצוינת! השלמת את כל השיעורים הנדרשים בתוכנית.',
+                  'עבודה מצוינת! השלמת את כל השיעורים והמשימות הנדרשים.',
 
                 )
 
@@ -2566,7 +2571,7 @@ export default function MissionPlayer({
 
           </p>
 
-          <strong>⭐ +{xp} XP</strong>
+          <strong>⭐ <bdi dir="ltr">+{xp} XP</bdi></strong>
 
           {Number.isFinite(completionResult?.totalXp) && (
 
@@ -2582,39 +2587,24 @@ export default function MissionPlayer({
 
           )}
 
-          {!completionResult?.programCompleted && completionResult?.nextLessonId && (
-
-            <button
-
-              className="mission-primary"
-
-              onClick={() => {
-
-                window.location.href = `/programs/${encodeURIComponent(lesson.programId)}/lessons/${encodeURIComponent(completionResult.nextLessonId)}`;
-
-              }}
-
-            >
-
-              {t('Next lesson', 'الدرس التالي', 'השיעור הבא')}
-
-            </button>
-
-          )}
-
-          <button className="mission-primary" onClick={onExit}>
-
-            {completionResult?.programCompleted
-
-              ? t('Back to program', 'العودة إلى البرنامج', 'חזרה לתוכנית')
-
-              : t('Back to lessons', 'العودة إلى الدروس', 'חזרה לשיעורים')}
-
-          </button>
-
-
-
-        </section>
+          {!completionResult?.programCompleted && completionResult?.nextLessonId && onNext && (
+            <div className="mission-next">
+              <h3>✨ {t('Next mission', 'المهمة التالية', 'המשימה הבאה')}</h3>
+              {completionResult.nextLessonTitle && <p>{loc(completionResult.nextLessonTitle)}</p>}
+              <button className="mission-primary" onClick={() => onNext(completionResult.nextLessonId)}>
+                {t('Start Next Mission', 'ابدأ المهمة التالية', 'התחילו את המשימה הבאה')}
+              </button>
+            </div>
+          )}
+          <div className="mission-complete-actions">
+            <button onClick={() => { setReviewing(true); change({ ...latest.current, currentScreen: 0 }); }}>
+              {t('Review Mission', 'مراجعة المهمة', 'חזרה על המשימה')}
+            </button>
+            <button className={completionResult?.programCompleted ? 'mission-primary' : ''} onClick={onExit}>
+              {lesson.programId ? t('Back to Program', 'العودة إلى البرنامج', 'חזרה לתוכנית') : t('Back to lessons', 'العودة إلى الدروس', 'חזרה לשיעורים')}
+            </button>
+          </div>
+        </section>
 
 
 
@@ -2702,7 +2692,9 @@ export default function MissionPlayer({
 
 
 
-              src={screen.image}
+              loading="eager" decoding="async"
+              src={lessonImageUrl(screen.image)}
+                {...lessonImageDimensions(screen.image)}
 
 
 
@@ -4458,7 +4450,7 @@ export default function MissionPlayer({
 
 
 
-                onClick={finish}
+                onClick={completed ? () => setReviewing(false) : finish}
 
 
 
@@ -4466,7 +4458,7 @@ export default function MissionPlayer({
 
 
 
-                {finishing
+                {completed ? t('Back to completion', 'العودة إلى الإنجاز', 'חזרה לסיכום') : finishing
 
 
 

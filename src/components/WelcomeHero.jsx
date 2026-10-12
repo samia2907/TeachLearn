@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./WelcomeHero.css";
 
 const content = {
   ar: {
@@ -6,7 +7,7 @@ const content = {
     title: "لا تتعلّم المستقبل.",
     accent: "اصنعه بنفسك.",
     description:
-      "فكرة صغيرة. تجربة جريئة. مشروع يشبهك. هنا يتحوّل الفضول إلى مهارة، والتعلّم إلى شيء تصنعه بيدك.",
+      "TechMinds منصة تعليمية تفاعلية تجمع بين المعرفة والمتعة والتحدّي. اكتشف دروسًا وبرامج متنوعة، تعلّم من خلال التجربة، حلّ المهمات، وطوّر مهاراتك خطوة بخطوة.",
     action: "ابدأ رحلتك",
     explore: "اكتشف الإمكانيات",
     label: "من الفكرة إلى الإنجاز",
@@ -50,7 +51,7 @@ const content = {
     title: "Don’t just learn",
     accent: "what’s next. Build it.",
     description:
-      "A small idea. A bold experiment. A project that is yours. Turn curiosity into a skill, and learning into something you create.",
+      "TechMinds is an interactive learning platform that brings together knowledge, fun, and challenge. Explore a variety of lessons and programs, learn through experience, complete missions, and develop your skills step by step.",
     action: "Start your journey",
     explore: "Explore the possibilities",
     label: "FROM IDEA TO ACHIEVEMENT",
@@ -95,7 +96,7 @@ const content = {
     title: "לא רק ללמוד את העתיד.",
     accent: "ליצור אותו בעצמכם.",
     description:
-      "רעיון קטן. ניסוי נועז. פרויקט שהוא שלכם. כאן הסקרנות הופכת למיומנות, והלמידה למשהו שאתם יוצרים.",
+      "TechMinds היא פלטפורמת למידה אינטראקטיבית המשלבת ידע, הנאה ואתגר. גלו מגוון שיעורים ותוכניות, למדו דרך התנסות, השלימו משימות ופתחו את הכישורים שלכם צעד אחר צעד.",
     action: "מתחילים את המסע",
     explore: "מגלים את האפשרויות",
     label: "מרעיון להישג",

@@ -41,7 +41,12 @@ const progressData = (lesson, student, mission, completed) => ({
 export async function loadMission(db, lesson, student) {
   const refs = references(db, lesson, student);
   const [progress, completion] = await Promise.all([getDoc(refs.progress), getDoc(refs.completion)]);
-  return { mission: progress.data()?.mission, completed: completion.exists(), xp: completion.data()?.xpReward ?? 0 };
+  const completionResult = completion.exists() && lesson.programId
+    ? await httpsCallable(functions, 'completeLesson')({ lessonId: lesson.id, readOnly: true })
+      .then(response => response.data).catch(() => null)
+    : null;
+  return { mission: progress.data()?.mission, completed: completion.exists(),
+    xp: completion.data()?.xpReward ?? 0, completionResult };
 }
 
 export async function saveMission(db, lesson, student, mission) {

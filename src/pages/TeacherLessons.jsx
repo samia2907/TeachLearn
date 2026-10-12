@@ -27,9 +27,6 @@ import {
   useLanguage,
 } from "../context/LanguageContext";
 
-import lessonTemplates
-  from "../data/lessonTemplates";
-
 import "./TeacherLessons.css";
 import CodingConfigFields from "../components/code/CodingConfigFields";
 import { subscribeProgramContent } from "../access/programAccessClient";
@@ -188,6 +185,7 @@ function TeacherLessons() {
         value[language] ||
         value.en ||
         value.ar ||
+        value.he ||
         ""
       );
     };
@@ -209,6 +207,7 @@ function TeacherLessons() {
         value[language] ||
         value.en ||
         value.ar ||
+        value.he ||
         []
       );
     };
@@ -392,36 +391,42 @@ function TeacherLessons() {
       icon: "📚",
       en: "Lesson",
       ar: "درس",
+      he: "שיעור",
     },
 
     quiz: {
       icon: "🧩",
       en: "Quiz",
       ar: "اختبار",
+      he: "בוחן",
     },
 
     coding: {
       icon: "💻",
       en: "Coding",
       ar: "برمجة",
+      he: "תכנות",
     },
 
     ai: {
       icon: "🤖",
       en: "AI Activity",
       ar: "نشاط ذكاء اصطناعي",
+      he: "פעילות בינה מלאכותית",
     },
 
     cyber: {
       icon: "🔐",
       en: "Cyber Activity",
       ar: "نشاط سايبر",
+      he: "פעילות סייבר",
     },
 
     external: {
       icon: "🌐",
       en: "External Activity",
       ar: "نشاط خارجي",
+      he: "פעילות חיצונית",
     },
   };
 
@@ -435,42 +440,49 @@ function TeacherLessons() {
       icon: "📚",
       en: "Explanation",
       ar: "شرح",
+      he: "הסבר",
     },
 
     question: {
       icon: "💭",
       en: "Thinking Question",
       ar: "سؤال تفكير",
+      he: "שאלת חשיבה",
     },
 
     multipleChoice: {
       icon: "🧩",
       en: "Multiple Choice",
       ar: "اختيار من متعدد",
+      he: "בחירה מרובה",
     },
 
     task: {
-      icon: "🚀",
+      icon: "✨",
       en: "Task",
       ar: "مهمة",
+      he: "משימה",
     },
 
     challenge: {
       icon: "🏆",
       en: "Challenge",
       ar: "تحدي",
+      he: "אתגר",
     },
 
     summary: {
       icon: "🌟",
       en: "Summary",
       ar: "ملخص",
+      he: "סיכום",
     },
 
     reflection: {
       icon: "💬",
       en: "Reflection",
       ar: "تأمل",
+      he: "רפלקציה",
     },
   };
 
@@ -618,10 +630,7 @@ function TeacherLessons() {
 
 
           setError(
-            text(
-              "Could not load lessons.",
-              "تعذر تحميل الدروس."
-            )
+            text("Could not load lessons.", "تعذر تحميل الدروس.", "לא ניתן לטעון את השיעורים.")
           );
 
 
@@ -776,10 +785,11 @@ function TeacherLessons() {
         lesson.titleI18n
       ) {
         return (
-          lesson.titleI18n[
-            language
-          ] ||
-          lesson.title
+          lesson.titleI18n[language] ||
+          lesson.titleI18n.en ||
+          lesson.titleI18n.ar ||
+          lesson.titleI18n.he ||
+          localized(lesson.title)
         );
       }
 
@@ -799,11 +809,11 @@ function TeacherLessons() {
         lesson.descriptionI18n
       ) {
         return (
-          lesson
-            .descriptionI18n[
-            language
-          ] ||
-          lesson.description
+          lesson.descriptionI18n[language] ||
+          lesson.descriptionI18n.en ||
+          lesson.descriptionI18n.ar ||
+          lesson.descriptionI18n.he ||
+          localized(lesson.description)
         );
       }
 
@@ -1048,7 +1058,8 @@ function TeacherLessons() {
               slide.title.trim() ||
               text(
                 `Slide ${index + 1}`,
-                `الشريحة ${index + 1}`
+                `الشريحة ${index + 1}`,
+                `שקופית ${index + 1}`
               ),
           };
 
@@ -1164,7 +1175,7 @@ function TeacherLessons() {
                 "task",
 
               icon:
-                "🚀",
+                "✨",
 
               introduction:
                 slide.introduction.trim(),
@@ -1356,7 +1367,8 @@ function TeacherLessons() {
           setError(
             text(
               `Please add a title to slide ${index + 1}.`,
-              `أضيفي عنوانًا للشريحة ${index + 1}.`
+              `أضيفي عنوانًا للشريحة ${index + 1}.`,
+              `הוסיפו כותרת לשקופית ${index + 1}.`
             )
           );
 
@@ -1373,7 +1385,8 @@ function TeacherLessons() {
           setError(
             text(
               `Add content to slide ${index + 1}.`,
-              `أضيفي محتوى للشريحة ${index + 1}.`
+              `أضيفي محتوى للشريحة ${index + 1}.`,
+              `הוסיפו תוכן לשקופית ${index + 1}.`
             )
           );
 
@@ -1390,7 +1403,8 @@ function TeacherLessons() {
           setError(
             text(
               `Add a question to slide ${index + 1}.`,
-              `أضيفي سؤالًا للشريحة ${index + 1}.`
+              `أضيفي سؤالًا للشريحة ${index + 1}.`,
+              `הוסיפו שאלה לשקופית ${index + 1}.`
             )
           );
 
@@ -1409,7 +1423,8 @@ function TeacherLessons() {
             setError(
               text(
                 `Add the multiple-choice question on slide ${index + 1}.`,
-                `أضيفي سؤال الاختيار من متعدد في الشريحة ${index + 1}.`
+                `أضيفي سؤال الاختيار من متعدد في الشريحة ${index + 1}.`,
+                `הוסיפו שאלת בחירה מרובה בשקופית ${index + 1}.`
               )
             );
 
@@ -1431,7 +1446,8 @@ function TeacherLessons() {
             setError(
               text(
                 `Add at least two choices on slide ${index + 1}.`,
-                `أضيفي خيارين على الأقل في الشريحة ${index + 1}.`
+                `أضيفي خيارين على الأقل في الشريحة ${index + 1}.`,
+                `הוסיפו לפחות שתי אפשרויות בשקופית ${index + 1}.`
               )
             );
 
@@ -1453,7 +1469,8 @@ function TeacherLessons() {
             setError(
               text(
                 `Choose a valid correct answer on slide ${index + 1}.`,
-                `اختاري إجابة صحيحة موجودة في الشريحة ${index + 1}.`
+                `اختاري إجابة صحيحة موجودة في الشريحة ${index + 1}.`,
+                `בחרו תשובה נכונה ותקפה בשקופית ${index + 1}.`
               )
             );
 
@@ -1475,7 +1492,8 @@ function TeacherLessons() {
           setError(
             text(
               `Add instructions to slide ${index + 1}.`,
-              `أضيفي تعليمات للشريحة ${index + 1}.`
+              `أضيفي تعليمات للشريحة ${index + 1}.`,
+              `הוסיפו הנחיות לשקופית ${index + 1}.`
             )
           );
 
@@ -1491,7 +1509,8 @@ function TeacherLessons() {
           setError(
             text(
               `Add summary points to slide ${index + 1}.`,
-              `أضيفي نقاط الملخص في الشريحة ${index + 1}.`
+              `أضيفي نقاط الملخص في الشريحة ${index + 1}.`,
+              `הוסיפו נקודות סיכום לשקופית ${index + 1}.`
             )
           );
 
@@ -1507,7 +1526,8 @@ function TeacherLessons() {
           setError(
             text(
               `Add a reflection question to slide ${index + 1}.`,
-              `أضيفي سؤال التأمل في الشريحة ${index + 1}.`
+              `أضيفي سؤال التأمل في الشريحة ${index + 1}.`,
+              `הוסיפו שאלת רפלקציה לשקופית ${index + 1}.`
             )
           );
 
@@ -1633,10 +1653,7 @@ function TeacherLessons() {
         0
       ) {
         setError(
-          text(
-            "Add a slide first.",
-            "أضيفي شريحة أولًا."
-          )
+          text("Add a slide first.", "أضيفي شريحة أولًا.", "הוסיפו תחילה שקופית.")
         );
 
         return;
@@ -1655,10 +1672,7 @@ function TeacherLessons() {
 
         title:
           title.trim() ||
-          text(
-            "Untitled Lesson",
-            "درس بدون عنوان"
-          ),
+          text("Untitled Lesson", "درس بدون عنوان", "שיעור ללא כותרת"),
 
         summary:
           description.trim(),
@@ -1815,10 +1829,7 @@ function TeacherLessons() {
         !selectedClass
       ) {
         setError(
-          text(
-            "Class not found.",
-            "لم يتم العثور على الصف."
-          )
+          text("Class not found.", "لم يتم العثور على الصف.", "הכיתה לא נמצאה.")
         );
 
         return;
@@ -1841,10 +1852,7 @@ function TeacherLessons() {
         alreadyPublished
       ) {
         setError(
-          text(
-            "This lesson is already added to this class.",
-            "هذا الدرس مضاف إلى هذا الصف مسبقًا."
-          )
+          text("This lesson is already added to this class.", "هذا الدرس مضاف إلى هذا الصف مسبقًا.", "השיעור הזה כבר נוסף לכיתה הזו.")
         );
 
         return;
@@ -1950,10 +1958,7 @@ function TeacherLessons() {
 
 
         setSuccess(
-          text(
-            "Lesson published to the class successfully.",
-            "تم نشر الدرس للصف بنجاح 🎉"
-          )
+          text("Lesson published to the class successfully.", "تم نشر الدرس للصف بنجاح 🎉", "השיעור פורסם לכיתה בהצלחה 🎉")
         );
 
 
@@ -1980,10 +1985,7 @@ function TeacherLessons() {
 
 
         setError(
-          text(
-            "Could not publish the lesson.",
-            "تعذر نشر الدرس."
-          )
+          text("Could not publish the lesson.", "تعذر نشر الدرس.", "לא ניתן לפרסם את השיעור.")
         );
 
       } finally {
@@ -2043,10 +2045,7 @@ function TeacherLessons() {
         !selectedClass
       ) {
         setError(
-          text(
-            "Class not found.",
-            "لم يتم العثور على الصف."
-          )
+          text("Class not found.", "لم يتم العثور على الصف.", "הכיתה לא נמצאה.")
         );
 
         return;
@@ -2179,10 +2178,7 @@ function TeacherLessons() {
 
 
         setSuccess(
-          text(
-            "Interactive lesson created successfully.",
-            "تم إنشاء الدرس التفاعلي بنجاح 🎉"
-          )
+          text("Interactive lesson created successfully.", "تم إنشاء الدرس التفاعلي بنجاح 🎉", "השיעור האינטראקטיבי נוצר בהצלחה 🎉")
         );
 
 
@@ -2201,10 +2197,7 @@ function TeacherLessons() {
 
 
         setError(
-          text(
-            "Could not create the lesson.",
-            "تعذر إنشاء الدرس."
-          )
+          text("Could not create the lesson.", "تعذر إنشاء الدرس.", "לא ניתן ליצור את השיעור.")
         );
 
       } finally {
@@ -2261,10 +2254,7 @@ function TeacherLessons() {
 
 
         setError(
-          text(
-            "Could not update lesson.",
-            "تعذر تحديث الدرس."
-          )
+          text("Could not update lesson.", "تعذر تحديث الدرس.", "לא ניתן לעדכן את השיעור.")
         );
       }
     };
@@ -2536,10 +2526,7 @@ function TeacherLessons() {
 
               👁{" "}
 
-              {text(
-                "Preview mode — students will write an answer here.",
-                "وضع المعاينة — سيكتب الطالب إجابته هنا."
-              )}
+              {text("Preview mode — students will write an answer here.", "وضع المعاينة — سيكتب الطالب إجابته هنا.", "מצב תצוגה מקדימה — התלמידים יכתבו כאן תשובה.")}
 
             </div>
 
@@ -2668,7 +2655,7 @@ function TeacherLessons() {
             <div className="preview-section-icon">
 
               {section.icon ||
-                "🚀"}
+                "✨"}
 
             </div>
 
@@ -2679,10 +2666,7 @@ function TeacherLessons() {
 
                 🏆{" "}
 
-                {text(
-                  "CHALLENGE",
-                  "تحدي"
-                )}
+                {text("CHALLENGE", "تحدي", "אתגר")}
 
               </div>
 
@@ -2765,10 +2749,7 @@ function TeacherLessons() {
 
               👁{" "}
 
-              {text(
-                "Students must complete this activity before continuing.",
-                "يجب على الطالب إكمال هذا النشاط قبل المتابعة."
-              )}
+              {text("Students must complete this activity before continuing.", "يجب على الطالب إكمال هذا النشاط قبل المتابعة.", "התלמידים חייבים להשלים את הפעילות לפני שממשיכים.")}
 
             </div>
 
@@ -2922,7 +2903,7 @@ function TeacherLessons() {
   ) {
 
     return (
-      <div className="teacher-lessons-loading">
+      <div className="teacher-lessons-loading" dir={language === "en" ? "ltr" : "rtl"}>
         📚
       </div>
     );
@@ -2950,7 +2931,7 @@ function TeacherLessons() {
   ===================================================== */
 
   return (
-    <div className="teacher-lessons-page">
+    <div className="teacher-lessons-page" dir={language === "en" ? "ltr" : "rtl"}>
 
       {/* HEADER */}
 
@@ -3118,7 +3099,7 @@ function TeacherLessons() {
           }}
         >
 
-          🚀{" "}
+          ✨{" "}
 
           {text(
             "TechMinds Library",
@@ -3332,7 +3313,7 @@ function TeacherLessons() {
 
                         {lesson.sourceType ===
                         "library"
-                          ? "🚀 TechMinds"
+                          ? "✨ TechMinds"
                           : text(
                               "✏️ Custom Lesson",
                               "✏️ درس خاص"
@@ -3355,10 +3336,7 @@ function TeacherLessons() {
                         {getLessonDescription(
                           lesson
                         ) ||
-                          text(
-                            "No description",
-                            "لا يوجد وصف"
-                          )}
+                          text("No description", "لا يوجد وصف", "אין תיאור")}
 
                       </p>
 
@@ -3380,10 +3358,7 @@ function TeacherLessons() {
                           {lesson.estimatedMinutes ||
                             0}{" "}
 
-                          {text(
-                            "min",
-                            "د"
-                          )}
+                          {text("min", "د", "דק׳")}
 
                         </span>
 
@@ -3410,10 +3385,7 @@ function TeacherLessons() {
                                 .length
                             }{" "}
 
-                            {text(
-                              "slides",
-                              "شرائح"
-                            )}
+                            {text("slides", "شرائح", "שקופיות")}
 
                           </span>
 
@@ -3441,10 +3413,7 @@ function TeacherLessons() {
 
                           👁{" "}
 
-                          {text(
-                            "Preview Lesson",
-                            "معاينة الدرس"
-                          )}
+                          {text("Preview Lesson", "معاينة الدرس", "תצוגה מקדימה של השיעור")}
 
                         </button>
 
@@ -3463,14 +3432,8 @@ function TeacherLessons() {
 
                         {lesson.status ===
                         "published"
-                          ? text(
-                              "Move to Draft",
-                              "تحويل إلى مسودة"
-                            )
-                          : text(
-                              "Publish",
-                              "نشر"
-                            )}
+                          ? text("Move to Draft", "تحويل إلى مسودة", "העברה לטיוטה")
+                          : text("Publish", "نشر", "פרסום")}
 
                       </button>
 
@@ -3536,12 +3499,12 @@ function TeacherLessons() {
                         </div>
 
                         <span className="lesson-status published">
-                          {text("Unlocked", "مفتوح")}
+                          {text("Unlocked", "مفتوح", "פתוח")}
                         </span>
                       </div>
 
                       <div className="lesson-source">
-                        🚀 TechMinds
+                        ✨ TechMinds
                       </div>
 
                       <small
@@ -3553,23 +3516,20 @@ function TeacherLessons() {
                         }}
                       >
                         {lesson._programTitle ||
-                          text("TechMinds Program", "برنامج TechMinds")}
+                          text("TechMinds Program", "برنامج TechMinds", "תוכנית TechMinds")}
                       </small>
 
                       <h3>{getLessonTitle(lesson)}</h3>
 
                       <p>
                         {getLessonDescription(lesson) ||
-                          text(
-                            "This lesson is included in a program unlocked for your account.",
-                            "هذا الدرس ضمن برنامج تم فتحه لحسابك."
-                          )}
+                          text("This lesson is included in a program unlocked for your account.", "هذا الدرس ضمن برنامج تم فتحه لحسابك.", "השיעור הזה כלול בתוכנית שנפתחה לחשבון שלך.")}
                       </p>
 
                       <div className="teacher-lesson-info">
                         <span>
                           ⏱ {lesson.estimatedMinutes || 0}{" "}
-                          {text("min", "د")}
+                          {text("min", "د", "דק׳")}
                         </span>
 
                         <span>
@@ -3579,7 +3539,7 @@ function TeacherLessons() {
                         {Array.isArray(lesson.sections) && (
                           <span>
                             🖥 {lesson.sections.length}{" "}
-                            {text("slides", "شرائح")}
+                            {text("slides", "شرائح", "שקופיות")}
                           </span>
                         )}
                       </div>
@@ -3591,11 +3551,8 @@ function TeacherLessons() {
                           navigate(`/programs/${lesson._programId}`)
                         }
                       >
-                        🚀{" "}
-                        {text(
-                          "Open program lesson",
-                          "فتح الدرس من البرنامج"
-                        )}
+                        ✨{" "}
+                        {text("Open program lesson", "فتح الدرس من البرنامج", "פתיחת השיעור מהתוכנית")}
                       </button>
                     </article>
                   );
@@ -3620,7 +3577,7 @@ function TeacherLessons() {
           <div className="library-intro">
 
             <div className="library-intro-icon">
-              🚀
+              ✨
             </div>
 
 
@@ -3633,20 +3590,14 @@ function TeacherLessons() {
 
               <h2>
 
-                {text(
-                  "Ready-Made Lesson Library",
-                  "مكتبة الدروس الجاهزة"
-                )}
+                {text("Ready-Made Lesson Library", "مكتبة الدروس الجاهزة", "ספריית שיעורים מוכנים")}
 
               </h2>
 
 
               <p>
 
-                {text(
-                  "Complete interactive lessons prepared for your students.",
-                  "دروس كاملة وتفاعلية جاهزة لطلابك."
-                )}
+                {text("Complete interactive lessons prepared for your students.", "دروس كاملة وتفاعلية جاهزة لطلابك.", "שיעורים אינטראקטיביים מלאים ומוכנים לתלמידים שלך.")}
 
               </p>
 
@@ -3683,7 +3634,7 @@ function TeacherLessons() {
                     <div className="library-card-tags">
 
                       <span>
-                        🚀 Tech Explorer
+                        ✨ Tech Explorer
                       </span>
 
 
@@ -3691,7 +3642,8 @@ function TeacherLessons() {
 
                         {text(
                           `Grades ${(Array.isArray(template.grades) ? template.grades : []).join(", ")}`,
-                          `الصفوف ${(Array.isArray(template.grades) ? template.grades : []).join("، ")}`
+                          `الصفوف ${(Array.isArray(template.grades) ? template.grades : []).join("، ")}`,
+                          `כיתות ${(Array.isArray(template.grades) ? template.grades : []).join(", ")}`
                         )}
 
                       </span>
@@ -3756,10 +3708,7 @@ function TeacherLessons() {
                             .sections.length
                         }{" "}
 
-                        {text(
-                          "sections",
-                          "أجزاء"
-                        )}
+                        {text("sections", "أجزاء", "חלקים")}
 
                       </span>
 
@@ -3778,10 +3727,7 @@ function TeacherLessons() {
 
                       👁{" "}
 
-                      {text(
-                        "Preview Lesson",
-                        "معاينة الدرس"
-                      )}
+                      {text("Preview Lesson", "معاينة الدرس", "תצוגה מקדימה של השיעור")}
 
                     </button>
 
@@ -3795,12 +3741,9 @@ function TeacherLessons() {
                       }
                     >
 
-                      🚀{" "}
+                      ✨{" "}
 
-                      {text(
-                        "Add to My Class",
-                        "إضافة إلى صفي"
-                      )}
+                      {text("Add to My Class", "إضافة إلى صفي", "הוספה לכיתה שלי")}
 
                     </button>
 
@@ -3837,30 +3780,21 @@ function TeacherLessons() {
 
               <small>
 
-                {text(
-                  "INTERACTIVE LESSON BUILDER",
-                  "منشئ الدروس التفاعلية"
-                )}
+                {text("INTERACTIVE LESSON BUILDER", "منشئ الدروس التفاعلية", "בונה שיעורים אינטראקטיביים")}
 
               </small>
 
 
               <h2>
 
-                {text(
-                  "Build a PowerPoint-Style Lesson",
-                  "إنشاء درس بأسلوب PowerPoint"
-                )}
+                {text("Build a PowerPoint-Style Lesson", "إنشاء درس بأسلوب PowerPoint", "בניית שיעור בסגנון PowerPoint")}
 
               </h2>
 
 
               <p>
 
-                {text(
-                  "Add explanation, questions, tasks, challenges and interactive slides.",
-                  "أضيفي شرائح شرح وأسئلة ومهام وتحديات تفاعلية."
-                )}
+                {text("Add explanation, questions, tasks, challenges and interactive slides.", "أضيفي شرائح شرح وأسئلة ومهام وتحديات تفاعلية.", "הוסיפו הסברים, שאלות, משימות, אתגרים ושקופיות אינטראקטיביות.")}
 
               </p>
 
@@ -3880,10 +3814,7 @@ function TeacherLessons() {
 
             <label>
 
-              {text(
-                "Class",
-                "الصف"
-              )}
+              {text("Class", "الصف", "כיתה")}
 
               <select
                 value={
@@ -3900,10 +3831,7 @@ function TeacherLessons() {
 
                 <option value="">
 
-                  {text(
-                    "Select class",
-                    "اختاري الصف"
-                  )}
+                  {text("Select class", "اختاري الصف", "בחירת כיתה")}
 
                 </option>
 
@@ -3936,10 +3864,7 @@ function TeacherLessons() {
 
             <label>
 
-              {text(
-                "Lesson Title",
-                "عنوان الدرس"
-              )}
+              {text("Lesson Title", "عنوان الدرس", "כותרת השיעור")}
 
               <input
                 value={
@@ -3952,10 +3877,7 @@ function TeacherLessons() {
                     event.target.value
                   )
                 }
-                placeholder={text(
-                  "Example: Internet Safety",
-                  "مثال: الأمان على الإنترنت"
-                )}
+                placeholder={text("Example: Internet Safety", "مثال: الأمان على الإنترنت", "לדוגמה: בטיחות באינטרנט")}
               />
 
             </label>
@@ -3963,10 +3885,7 @@ function TeacherLessons() {
 
             <label className="custom-full-field">
 
-              {text(
-                "Short Description",
-                "وصف قصير"
-              )}
+              {text("Short Description", "وصف قصير", "תיאור קצר")}
 
               <textarea
                 value={
@@ -3980,10 +3899,7 @@ function TeacherLessons() {
                   )
                 }
                 rows="3"
-                placeholder={text(
-                  "What will students learn?",
-                  "ماذا سيتعلم الطلاب؟"
-                )}
+                placeholder={text("What will students learn?", "ماذا سيتعلم الطلاب؟", "מה התלמידים ילמדו?")}
               />
 
             </label>
@@ -3991,10 +3907,7 @@ function TeacherLessons() {
 
             <label>
 
-              {text(
-                "Activity Type",
-                "نوع الدرس"
-              )}
+              {text("Activity Type", "نوع الدرس", "סוג פעילות")}
 
               <select
                 value={
@@ -4030,7 +3943,8 @@ function TeacherLessons() {
 
                       {text(
                         activity.en,
-                        activity.ar
+                        activity.ar,
+                        activity.he
                       )}
 
                     </option>
@@ -4045,10 +3959,7 @@ function TeacherLessons() {
 
             <label>
 
-              {text(
-                "Optional Resource Link",
-                "رابط إضافي اختياري"
-              )}
+              {text("Optional Resource Link", "رابط إضافي اختياري", "קישור משאב אופציונלי")}
 
               <input
                 type="url"
@@ -4092,10 +4003,7 @@ function TeacherLessons() {
 
             <label>
 
-              {text(
-                "Minutes",
-                "المدة بالدقائق"
-              )}
+              {text("Minutes", "المدة بالدقائق", "דקות")}
 
               <input
                 type="number"
@@ -4117,10 +4025,7 @@ function TeacherLessons() {
 
             <label>
 
-              {text(
-                "Status",
-                "الحالة"
-              )}
+              {text("Status", "الحالة", "סטטוס")}
 
               <select
                 value={
@@ -4137,20 +4042,14 @@ function TeacherLessons() {
 
                 <option value="published">
 
-                  {text(
-                    "Publish Now",
-                    "نشر الآن"
-                  )}
+                  {text("Publish Now", "نشر الآن", "פרסום עכשיו")}
 
                 </option>
 
 
                 <option value="draft">
 
-                  {text(
-                    "Save as Draft",
-                    "حفظ كمسودة"
-                  )}
+                  {text("Save as Draft", "حفظ كمسودة", "שמירה כטיוטה")}
 
                 </option>
 
@@ -4171,10 +4070,7 @@ function TeacherLessons() {
 
                   <small>
 
-                    {text(
-                      "PRESENTATION",
-                      "العرض"
-                    )}
+                    {text("PRESENTATION", "العرض", "מצגת")}
 
                   </small>
 
@@ -4183,10 +4079,7 @@ function TeacherLessons() {
 
                     🖥️{" "}
 
-                    {text(
-                      "Lesson Slides",
-                      "شرائح الدرس"
-                    )}
+                    {text("Lesson Slides", "شرائح الدرس", "שקופיות השיעור")}
 
                   </h3>
 
@@ -4195,7 +4088,8 @@ function TeacherLessons() {
 
                     {text(
                       `${customSlides.length} slides`,
-                      `${customSlides.length} شرائح`
+                      `${customSlides.length} شرائح`,
+                      `${customSlides.length} שקופיות`
                     )}
 
                   </p>
@@ -4272,10 +4166,7 @@ function TeacherLessons() {
 
                             <small>
 
-                              {text(
-                                "SLIDE",
-                                "شريحة"
-                              )}{" "}
+                              {text("SLIDE", "شريحة", "שקופית")}{" "}
 
                               {index + 1}
 
@@ -4286,7 +4177,8 @@ function TeacherLessons() {
 
                               {text(
                                 slideInfo.en,
-                                slideInfo.ar
+                                slideInfo.ar,
+                                slideInfo.he
                               )}
 
                             </strong>
@@ -4300,10 +4192,7 @@ function TeacherLessons() {
 
                           <button
                             type="button"
-                            title={text(
-                              "Move up",
-                              "تحريك للأعلى"
-                            )}
+                            title={text("Move up", "تحريك للأعلى", "הזזה למעלה")}
                             disabled={
                               index === 0
                             }
@@ -4320,10 +4209,7 @@ function TeacherLessons() {
 
                           <button
                             type="button"
-                            title={text(
-                              "Move down",
-                              "تحريك للأسفل"
-                            )}
+                            title={text("Move down", "تحريك للأسفل", "הזזה למטה")}
                             disabled={
                               index ===
                               customSlides.length -
@@ -4343,10 +4229,7 @@ function TeacherLessons() {
                           <button
                             type="button"
                             className="custom-delete-slide"
-                            title={text(
-                              "Delete slide",
-                              "حذف الشريحة"
-                            )}
+                            title={text("Delete slide", "حذف الشريحة", "מחיקת שקופית")}
                             onClick={() =>
                               removeCustomSlide(
                                 slide.id
@@ -4367,10 +4250,7 @@ function TeacherLessons() {
 
                         <label>
 
-                          {text(
-                            "Slide Type",
-                            "نوع الشريحة"
-                          )}
+                          {text("Slide Type", "نوع الشريحة", "סוג שקופית")}
 
                           <select
                             value={
@@ -4411,7 +4291,8 @@ function TeacherLessons() {
 
                                   {text(
                                     item.en,
-                                    item.ar
+                                    item.ar,
+                                    item.he
                                   )}
 
                                 </option>
@@ -4426,10 +4307,7 @@ function TeacherLessons() {
 
                         <label>
 
-                          {text(
-                            "Slide Title",
-                            "عنوان الشريحة"
-                          )}
+                          {text("Slide Title", "عنوان الشريحة", "כותרת השקופית")}
 
                           <input
                             value={
@@ -4446,10 +4324,7 @@ function TeacherLessons() {
                                   .value
                               )
                             }
-                            placeholder={text(
-                              "Example: What is AI?",
-                              "مثال: ما هو الذكاء الاصطناعي؟"
-                            )}
+                            placeholder={text("Example: What is AI?", "مثال: ما هو الذكاء الاصطناعي؟", "לדוגמה: מהי בינה מלאכותית?")}
                           />
 
                         </label>
@@ -4464,10 +4339,7 @@ function TeacherLessons() {
 
                           <label className="custom-slide-full">
 
-                            {text(
-                              "Explanation",
-                              "الشرح"
-                            )}
+                            {text("Explanation", "الشرح", "הסבר")}
 
                             <textarea
                               rows="7"
@@ -4485,10 +4357,7 @@ function TeacherLessons() {
                                     .value
                                 )
                               }
-                              placeholder={text(
-                                "Write the explanation. Start a new line for each paragraph.",
-                                "اكتبي الشرح. ابدئي سطرًا جديدًا لكل فقرة."
-                              )}
+                              placeholder={text("Write the explanation. Start a new line for each paragraph.", "اكتبي الشرح. ابدئي سطرًا جديدًا لكل فقرة.", "כתבו את ההסבר. התחילו שורה חדשה לכל פסקה.")}
                             />
 
                           </label>
@@ -4507,10 +4376,7 @@ function TeacherLessons() {
 
                             <label className="custom-slide-full">
 
-                              {text(
-                                "Question",
-                                "السؤال"
-                              )}
+                              {text("Question", "السؤال", "שאלה")}
 
                               <textarea
                                 rows="4"
@@ -4528,10 +4394,7 @@ function TeacherLessons() {
                                       .value
                                   )
                                 }
-                                placeholder={text(
-                                  "Ask students a thinking question...",
-                                  "اكتبي سؤالًا يحتاج إلى التفكير..."
-                                )}
+                                placeholder={text("Ask students a thinking question...", "اكتبي سؤالًا يحتاج إلى التفكير...", "כתבו שאלה שמעודדת חשיבה...")}
                               />
 
                             </label>
@@ -4539,10 +4402,7 @@ function TeacherLessons() {
 
                             <label className="custom-slide-full">
 
-                              {text(
-                                "Teacher Hint / Note (optional)",
-                                "تلميح أو ملاحظة (اختياري)"
-                              )}
+                              {text("Teacher Hint / Note (optional)", "تلميح أو ملاحظة (اختياري)", "רמז / הערה למורה (אופציונלי)")}
 
                               <input
                                 value={
@@ -4579,10 +4439,7 @@ function TeacherLessons() {
 
                             <label className="custom-slide-full">
 
-                              {text(
-                                "Question",
-                                "السؤال"
-                              )}
+                              {text("Question", "السؤال", "שאלה")}
 
                               <textarea
                                 rows="3"
@@ -4621,12 +4478,13 @@ function TeacherLessons() {
 
                                     {text(
                                       `Option ${String.fromCharCode(
-                                        65 +
-                                          optionIndex
+                                        65 + optionIndex
                                       )}`,
                                       `الخيار ${String.fromCharCode(
-                                        65 +
-                                          optionIndex
+                                        65 + optionIndex
+                                      )}`,
+                                      `אפשרות ${String.fromCharCode(
+                                        65 + optionIndex
                                       )}`
                                     )}
 
@@ -4659,10 +4517,7 @@ function TeacherLessons() {
 
                               ✅{" "}
 
-                              {text(
-                                "Correct Answer",
-                                "الإجابة الصحيحة"
-                              )}
+                              {text("Correct Answer", "الإجابة الصحيحة", "תשובה נכונה")}
 
                               <select
                                 value={
@@ -4717,10 +4572,7 @@ function TeacherLessons() {
 
                             <label>
 
-                              {text(
-                                "Explanation (optional)",
-                                "تفسير الإجابة (اختياري)"
-                              )}
+                              {text("Explanation (optional)", "تفسير الإجابة (اختياري)", "הסבר (אופציונלי)")}
 
                               <input
                                 value={
@@ -4764,10 +4616,7 @@ function TeacherLessons() {
 
                               <label>
 
-                                {text(
-                                  "Challenge Level",
-                                  "مستوى التحدي"
-                                )}
+                                {text("Challenge Level", "مستوى التحدي", "רמת האתגר")}
 
                                 <select
                                   value={
@@ -4790,10 +4639,7 @@ function TeacherLessons() {
 
                                     🟢{" "}
 
-                                    {text(
-                                      "Easy",
-                                      "سهل"
-                                    )}
+                                    {text("Easy", "سهل", "קל")}
 
                                   </option>
 
@@ -4802,10 +4648,7 @@ function TeacherLessons() {
 
                                     🟡{" "}
 
-                                    {text(
-                                      "Medium",
-                                      "متوسط"
-                                    )}
+                                    {text("Medium", "متوسط", "בינוני")}
 
                                   </option>
 
@@ -4814,10 +4657,7 @@ function TeacherLessons() {
 
                                     🔥{" "}
 
-                                    {text(
-                                      "Hard",
-                                      "متقدم"
-                                    )}
+                                    {text("Hard", "متقدم", "קשה")}
 
                                   </option>
 
@@ -4832,10 +4672,7 @@ function TeacherLessons() {
 
                             <label className="custom-slide-full">
 
-                              {text(
-                                "Task Introduction",
-                                "وصف المهمة"
-                              )}
+                              {text("Task Introduction", "وصف المهمة", "מבוא למשימה")}
 
                               <textarea
                                 rows="4"
@@ -4853,10 +4690,7 @@ function TeacherLessons() {
                                       .value
                                   )
                                 }
-                                placeholder={text(
-                                  "Explain what students need to do...",
-                                  "اشرحي للطلاب ماذا عليهم أن يفعلوا..."
-                                )}
+                                placeholder={text("Explain what students need to do...", "اشرحي للطلاب ماذا عليهم أن يفعلوا...", "הסבירו לתלמידים מה עליהם לעשות...")}
                               />
 
                             </label>
@@ -4864,10 +4698,7 @@ function TeacherLessons() {
 
                             <label className="custom-slide-full">
 
-                              {text(
-                                "Steps — one step per line",
-                                "الخطوات — كل خطوة في سطر"
-                              )}
+                              {text("Steps — one step per line", "الخطوات — كل خطوة في سطر", "שלבים — שלב אחד בכל שורה")}
 
                               <textarea
                                 rows="5"
@@ -4896,10 +4727,7 @@ function TeacherLessons() {
 
                             <label className="custom-slide-full">
 
-                              {text(
-                                "Student Answer Prompt",
-                                "طلب الإجابة من الطالب"
-                              )}
+                              {text("Student Answer Prompt", "طلب الإجابة من الطالب", "הנחיה לתשובת התלמיד")}
 
                               <input
                                 value={
@@ -4916,10 +4744,7 @@ function TeacherLessons() {
                                       .value
                                   )
                                 }
-                                placeholder={text(
-                                  "Write your answer here...",
-                                  "اكتب إجابتك هنا..."
-                                )}
+                                placeholder={text("Write your answer here...", "اكتب إجابتك هنا...", "כתבו כאן את התשובה...")}
                               />
 
                             </label>
@@ -4938,10 +4763,7 @@ function TeacherLessons() {
 
                           <label className="custom-slide-full">
 
-                            {text(
-                              "Summary Points — one point per line",
-                              "نقاط الملخص — كل نقطة في سطر"
-                            )}
+                            {text("Summary Points — one point per line", "نقاط الملخص — كل نقطة في سطر", "נקודות סיכום — נקודה אחת בכל שורה")}
 
                             <textarea
                               rows="6"
@@ -4975,10 +4797,7 @@ function TeacherLessons() {
 
                           <label className="custom-slide-full">
 
-                            {text(
-                              "Reflection Question",
-                              "سؤال التأمل"
-                            )}
+                            {text("Reflection Question", "سؤال التأمل", "שאלת רפלקציה")}
 
                             <textarea
                               rows="4"
@@ -4996,10 +4815,7 @@ function TeacherLessons() {
                                     .value
                                 )
                               }
-                              placeholder={text(
-                                "What did you learn today?",
-                                "ماذا تعلمت اليوم؟"
-                              )}
+                              placeholder={text("What did you learn today?", "ماذا تعلمت اليوم؟", "מה למדתם היום?")}
                             />
 
                           </label>
@@ -5020,10 +4836,7 @@ function TeacherLessons() {
 
                 <small>
 
-                  {text(
-                    "ADD SLIDE",
-                    "إضافة شريحة"
-                  )}
+                  {text("ADD SLIDE", "إضافة شريحة", "הוספת שקופית")}
 
                 </small>
 
@@ -5055,9 +4868,10 @@ function TeacherLessons() {
                         </span>
 
                         {text(
-                          item.en,
-                          item.ar
-                        )}
+                                    item.en,
+                                    item.ar,
+                                    item.he
+                                  )}
 
                       </button>
 
@@ -5087,10 +4901,7 @@ function TeacherLessons() {
 
                 👁{" "}
 
-                {text(
-                  "Preview Presentation",
-                  "معاينة العرض"
-                )}
+                {text("Preview Presentation", "معاينة العرض", "תצוגה מקדימה של המצגת")}
 
               </button>
 
@@ -5104,20 +4915,11 @@ function TeacherLessons() {
               >
 
                 {creating
-                  ? text(
-                      "Creating...",
-                      "جارٍ الإنشاء..."
-                    )
+                  ? text("Creating...", "جارٍ الإنشاء...", "יוצר...")
                   : status ===
                     "published"
-                  ? text(
-                      "Publish Lesson 🚀",
-                      "نشر الدرس 🚀"
-                    )
-                  : text(
-                      "Save Draft",
-                      "حفظ المسودة"
-                    )}
+                  ? text("Publish Lesson ✨", "نشر الدرس ✨", "פרסום השיעור ✨")
+                  : text("Save Draft", "حفظ المسودة", "שמירת טיוטה")}
 
               </button>
 
@@ -5209,10 +5011,7 @@ function TeacherLessons() {
 
                   👁{" "}
 
-                  {text(
-                    "TEACHER PREVIEW",
-                    "معاينة المعلّم"
-                  )}
+                  {text("TEACHER PREVIEW", "معاينة المعلّم", "תצוגה מקדימה למורה")}
 
                 </small>
 
@@ -5522,10 +5321,7 @@ function TeacherLessons() {
                 }}
               >
 
-                {language ===
-                "ar"
-                  ? "→ السابق"
-                  : "← Previous"}
+                {text("← Previous", "→ السابق", "→ הקודם")}
 
               </button>
 
@@ -5562,12 +5358,9 @@ function TeacherLessons() {
                   }}
                 >
 
-                  🚀{" "}
+                  ✨{" "}
 
-                  {text(
-                    "Add to My Class",
-                    "إضافة إلى صفي"
-                  )}
+                  {text("Add to My Class", "إضافة إلى صفي", "הוספה לכיתה שלי")}
 
                 </button>
 
@@ -5630,10 +5423,7 @@ function TeacherLessons() {
                 }}
               >
 
-                {language ===
-                "ar"
-                  ? "التالي ←"
-                  : "Next →"}
+                {text("Next →", "التالي ←", "הבא ←")}
 
               </button>
 
@@ -5651,9 +5441,9 @@ function TeacherLessons() {
 
       {selectedTemplate && (
 
-        <div className="lesson-library-modal-overlay">
+        <div className="lesson-library-modal-overlay" dir={language === "en" ? "ltr" : "rtl"}>
 
-          <div className="lesson-library-modal">
+          <div className="lesson-library-modal" dir={language === "en" ? "ltr" : "rtl"}>
 
             <button
               type="button"
@@ -5740,10 +5530,7 @@ function TeacherLessons() {
                     .sections.length
                 }{" "}
 
-                {text(
-                  "sections",
-                  "أجزاء"
-                )}
+                {text("sections", "أجزاء", "חלקים")}
 
               </span>
 
@@ -5772,20 +5559,14 @@ function TeacherLessons() {
 
               👁{" "}
 
-              {text(
-                "Preview Lesson",
-                "معاينة الدرس"
-              )}
+              {text("Preview Lesson", "معاينة الدرس", "תצוגה מקדימה של השיעור")}
 
             </button>
 
 
             <label className="library-class-select">
 
-              {text(
-                "Which class should receive this lesson?",
-                "لأي صف تريدين نشر هذا الدرس؟"
-              )}
+              {text("Which class should receive this lesson?", "لأي صف تريدين نشر هذا الدرس؟", "לאיזו כיתה לפרסם את השיעור?")}
 
               <select
                 value={
@@ -5802,10 +5583,7 @@ function TeacherLessons() {
 
                 <option value="">
 
-                  {text(
-                    "Select class",
-                    "اختاري الصف"
-                  )}
+                  {text("Select class", "اختاري الصف", "בחירת כיתה")}
 
                 </option>
 
@@ -5849,14 +5627,8 @@ function TeacherLessons() {
             >
 
               {publishingTemplate
-                ? text(
-                    "Publishing...",
-                    "جارٍ النشر..."
-                  )
-                : text(
-                    "Publish to Students 🚀",
-                    "نشر للطلاب 🚀"
-                  )}
+                ? text("Publishing...", "جارٍ النشر...", "מפרסם...")
+                : text("Publish to Students ✨", "نشر للطلاب ✨", "פרסום לתלמידים ✨")}
 
             </button>
 

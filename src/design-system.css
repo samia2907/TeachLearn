@@ -140,3 +140,61 @@ button:disabled { cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* TechMinds – lightweight rendering improvements */
+
+/* Isolate the complex hero decoration */
+.welcome-hero {
+  isolation: isolate;
+}
+
+/* Limit painting outside animated/decorative areas */
+.innovation-art {
+  contain: layout paint;
+}
+
+/* Render the lower section when needed */
+.idea-lab {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 230px;
+}
+
+/* Smooth transitions without expensive all-property changes */
+.idea-lab-controls button {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+/* Lighter effects on smaller devices */
+@media (max-width: 700px) {
+  .welcome-hero {
+    box-shadow: 0 10px 26px #19294412;
+  }
+
+  .studio-window {
+    box-shadow: 0 12px 26px #050d2930;
+  }
+
+  .innovation-orbits {
+    opacity: 0.3;
+  }
+
+  .innovation-features {
+    box-shadow: none;
+  }
+
+  .idea-lab {
+    box-shadow: 0 4px 14px #24365908;
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .innovation-core,
+  .welcome-copy {
+    animation: none !important;
+  }
+}
+

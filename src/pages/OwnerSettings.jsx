@@ -1061,7 +1061,7 @@ function OwnerSettings() {
           <div className="owner-settings-card-header">
 
             <span>
-              🚀
+              ✨
             </span>
 
 

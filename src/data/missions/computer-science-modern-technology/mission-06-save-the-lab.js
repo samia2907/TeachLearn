@@ -578,9 +578,9 @@ What will you do?`,
       type: 'multipleChoice',
 
       title: {
-        ar: '🚀 إعادة تشغيل T-LAB',
-        en: '🚀 Restart T-LAB',
-        he: '🚀 הפעלה מחדש של T-LAB',
+        ar: '✨ إعادة تشغيل T-LAB',
+        en: '✨ Restart T-LAB',
+        he: '✨ הפעלה מחדש של T-LAB',
       },
 
       text: {
@@ -674,7 +674,7 @@ Before pressing RESTART, Byte asks:
 
 🏅 رتبتك النهائية:
 
-🚀 T-LAB DIGITAL EXPLORER
+✨ T-LAB DIGITAL EXPLORER
 
 🎉 أنهيت برنامج رحلة علوم الحاسوب والتكنولوجيا الحديثة.`,
 
@@ -700,7 +700,7 @@ During your journey you learned:
 
 🏅 Your final rank:
 
-🚀 T-LAB DIGITAL EXPLORER
+✨ T-LAB DIGITAL EXPLORER
 
 🎉 You completed the Computer Science & Modern Technology Journey.`,
 
@@ -726,7 +726,7 @@ During your journey you learned:
 
 🏅 הדרגה הסופית שלך:
 
-🚀 T-LAB DIGITAL EXPLORER
+✨ T-LAB DIGITAL EXPLORER
 
 🎉 השלמת את מסע מדעי המחשב והטכנולוגיה המודרנית.`,
       },

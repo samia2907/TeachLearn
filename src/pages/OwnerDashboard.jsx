@@ -661,7 +661,7 @@ function OwnerDashboard() {
         <div className="owner-brand">
 
           <div className="owner-brand-icon">
-            🚀
+            ✨
           </div>
 
           <div>
@@ -1692,7 +1692,7 @@ function OwnerDashboard() {
 
                       <div className="owner-dashboard-program-icon">
                         {program.icon ||
-                          "🚀"}
+                          "✨"}
                       </div>
 
 
@@ -2071,7 +2071,7 @@ function OwnerDashboard() {
               <div className="owner-small-panel-header">
 
                 <span>
-                  🚀
+                  ✨
                 </span>
 
                 <div>

@@ -261,7 +261,7 @@ function Plans() {
         "techExplorer",
 
       icon:
-        "🚀",
+        "✨",
 
       className:
         "track-tech",
@@ -492,7 +492,7 @@ function Plans() {
         "allAccess",
 
       icon:
-        "🚀",
+        "✨",
 
       nameEn:
         "All Access",
@@ -989,7 +989,7 @@ function Plans() {
       <div className="plans-loading">
 
         <div className="plans-loader">
-          🚀
+          ✨
         </div>
 
         <p>
@@ -1202,7 +1202,7 @@ function Plans() {
       <header className="plans-header">
 
         <div className="plans-logo">
-          🚀
+          ✨
         </div>
 
         <h1>

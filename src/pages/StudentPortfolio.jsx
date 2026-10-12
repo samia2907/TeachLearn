@@ -210,7 +210,7 @@ function StudentPortfolio() {
           return "🎨";
 
         default:
-          return "🚀";
+          return "✨";
       }
     };
 
@@ -414,7 +414,7 @@ function StudentPortfolio() {
         <section className="portfolio-empty">
 
           <div>
-            🚀
+            ✨
           </div>
 
 

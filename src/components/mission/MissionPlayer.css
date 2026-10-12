@@ -519,3 +519,20 @@ body {
     transform: translateY(0) scale(1);
   }
 }
+
+/* Completion-only layout; preserve the mission activities. */
+.mission-complete { overflow-wrap: anywhere; }
+.mission-complete .mission-next { margin: 24px 0 16px; padding: 18px; border-radius: 16px; background: #f5f3ff; }
+.mission-complete .mission-next h3 { margin: 0 0 8px; }
+.mission-complete .mission-next > button { width: 100%; min-height: 48px; }
+.mission-complete .mission-complete-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+.mission-complete .mission-complete-actions button { min-height: 44px; white-space: normal; max-width: 100%; }
+@media (max-width: 480px) {
+  .mission-complete .mission-complete-actions { flex-direction: column; }
+}
+
+.mission-card.mission-complete { gap: 12px; padding: clamp(20px, 4vw, 32px); }
+.mission-complete > h2, .mission-complete > p { margin: 0; }
+.mission-complete .mission-mascot { font-size: 4rem; padding: 0; }
+.mission-complete .mission-next { width: min(100%, 420px); min-width: 0; box-sizing: border-box; margin: 12px 0 0; }
+.mission-complete .mission-next > button { white-space: normal; overflow-wrap: anywhere; }

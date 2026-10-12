@@ -66,13 +66,14 @@ function StudentLessonDetails() {
 
   const text = (
     english,
-    arabic
+    arabic,
+    hebrew = hebrewText(english)
   ) =>
     language === "ar"
       ? arabic
       : language === "he"
-        ? hebrewText(english)
-      : english;
+        ? hebrew
+        : english;
 
 
   const localized =
@@ -101,6 +102,7 @@ function StudentLessonDetails() {
         value[language] ||
         value.en ||
         value.ar ||
+        value.he ||
         ""
       );
     };
@@ -339,7 +341,7 @@ function StudentLessonDetails() {
           return "🌐";
 
         default:
-          return "🚀";
+          return "✨";
       }
     };
 
@@ -374,7 +376,7 @@ function StudentLessonDetails() {
           return "🧩";
 
         case "task":
-          return "🚀";
+          return "✨";
 
         case "summary":
           return "🌟";
@@ -763,10 +765,7 @@ function StudentLessonDetails() {
 
 
           setError(
-            text(
-              "The lesson could not be loaded.",
-              "تعذر تحميل الدرس."
-            )
+            text("The lesson could not be loaded.", "تعذر تحميل الدرس.", "לא ניתן לטעון את השיעור.")
           );
 
         } finally {
@@ -1449,10 +1448,7 @@ const addTaskToPortfolio =
 
 
       setPortfolioError(
-        text(
-          "Could not add this work to your portfolio.",
-          "تعذر إضافة هذا العمل إلى معرض أعمالك."
-        )
+        text("Could not add this work to your portfolio.", "تعذر إضافة هذا العمل إلى معرض أعمالك.", "לא ניתן להוסיף את העבודה לתיק העבודות שלך.")
       );
 
 
@@ -1613,10 +1609,7 @@ const addTaskToPortfolio =
 
 
         setCompletionError(
-          text(
-            "Could not complete the lesson.",
-            "تعذر إنهاء الدرس."
-          )
+          text("Could not complete the lesson.", "تعذر إنهاء الدرس.", "לא ניתן להשלים את השיעור.")
         );
 
       } finally {
@@ -1782,10 +1775,7 @@ const addTaskToPortfolio =
                 {localized(
                   section.answerPrompt
                 ) ||
-                  text(
-                    "Write your answer:",
-                    "اكتب إجابتك:"
-                  )}
+                  text("Write your answer:", "اكتب إجابتك:", "כתבו את התשובה שלכם:")}
 
               </label>
 
@@ -1808,10 +1798,7 @@ const addTaskToPortfolio =
                 onBlur={() =>
                   saveProgress()
                 }
-                placeholder={text(
-                  "Write your idea here...",
-                  "اكتب فكرتك هنا..."
-                )}
+                placeholder={text("Write your idea here...", "اكتب فكرتك هنا...", "כתבו כאן את הרעיון שלכם...")}
               />
 
             </div>
@@ -2125,10 +2112,7 @@ const addTaskToPortfolio =
                 }
               >
 
-                {text(
-                  "Check Answer",
-                  "تحقق من الإجابة"
-                )}
+                {text("Check Answer", "تحقق من الإجابة", "בדיקת תשובה")}
 
               </button>
 
@@ -2144,10 +2128,7 @@ const addTaskToPortfolio =
 
                   ✅{" "}
 
-                  {text(
-                    "Correct!",
-                    "إجابة صحيحة!"
-                  )}
+                  {text("Correct!", "إجابة صحيحة!", "נכון!")}
 
                 </strong>
 
@@ -2178,10 +2159,7 @@ const addTaskToPortfolio =
 
                   ❌{" "}
 
-                  {text(
-                    "Try again",
-                    "حاول مرة أخرى"
-                  )}
+                  {text("Try again", "حاول مرة أخرى", "נסו שוב")}
 
                 </strong>
 
@@ -2210,10 +2188,7 @@ const addTaskToPortfolio =
 
                   🔄{" "}
 
-                  {text(
-                    "Retry",
-                    "إعادة المحاولة"
-                  )}
+                  {text("Retry", "إعادة المحاولة", "ניסיון נוסף")}
 
                 </button>
 
@@ -2334,10 +2309,7 @@ const addTaskToPortfolio =
   onBlur={() =>
     saveProgress()
   }
-  placeholder={text(
-    "Write your work here...",
-    "اكتب عملك هنا..."
-  )}
+  placeholder={text("Write your work here...", "اكتب عملك هنا...", "כתבו כאן את העבודה שלכם...")}
   style={{
     width: "100%",
     minHeight: "150px",
@@ -2367,14 +2339,14 @@ const addTaskToPortfolio =
     caretColor: "#7c3aed",
 
     direction:
-      language === "ar"
-        ? "rtl"
-        : "ltr",
+      language === "en"
+        ? "ltr"
+        : "rtl",
 
     textAlign:
-      language === "ar"
-        ? "right"
-        : "left",
+      language === "en"
+        ? "left"
+        : "right",
   }}
 />
 
@@ -2400,10 +2372,7 @@ const addTaskToPortfolio =
 
                     ✅{" "}
 
-                    {text(
-                      "Added to My Portfolio",
-                      "تمت الإضافة إلى معرض أعمالي"
-                    )}
+                    {text("Added to My Portfolio", "تمت الإضافة إلى معرض أعمالي", "נוסף לתיק העבודות שלי")}
 
                   </div>
 
@@ -2425,14 +2394,8 @@ const addTaskToPortfolio =
 
                     {portfolioSavingId ===
                     section.id
-                      ? text(
-                          "Saving...",
-                          "جارٍ الحفظ..."
-                        )
-                      : `📁 ${text(
-                          "Add to My Portfolio",
-                          "أضف إلى معرض أعمالي"
-                        )}`
+                      ? text("Saving...", "جارٍ الحفظ...", "שומר...")
+                      : `📁 ${text("Add to My Portfolio", "أضف إلى معرض أعمالي", "הוספה לתיק העבודות שלי")}`
                     }
 
                   </button>
@@ -2542,10 +2505,7 @@ const addTaskToPortfolio =
               onBlur={() =>
                 saveProgress()
               }
-              placeholder={text(
-                "Share your reflection...",
-                "اكتب تأملك هنا..."
-              )}
+              placeholder={text("Share your reflection...", "اكتب تأملك هنا...", "שתפו את הרפלקציה שלכם...")}
             />
 
           </>
@@ -2583,9 +2543,9 @@ const addTaskToPortfolio =
     loading
   ) {
     return (
-      <div className="lesson-details-loading">
+      <div className="lesson-details-loading" dir={language === "en" ? "ltr" : "rtl"}>
 
-        🚀
+        ✨
 
       </div>
     );
@@ -2601,7 +2561,7 @@ const addTaskToPortfolio =
     !lesson
   ) {
     return (
-      <div className="lesson-details-error-page">
+      <div className="lesson-details-error-page" dir={language === "en" ? "ltr" : "rtl"}>
 
         <div>
           📚
@@ -2611,10 +2571,7 @@ const addTaskToPortfolio =
         <h2>
 
           {error ||
-            text(
-              "Lesson not found.",
-              "لم يتم العثور على الدرس."
-            )}
+            text("Lesson not found.", "لم يتم العثور على الدرس.", "השיעור לא נמצא.")}
 
         </h2>
 
@@ -2628,10 +2585,7 @@ const addTaskToPortfolio =
           }
         >
 
-          {text(
-            "Back to Lessons",
-            "العودة إلى الدروس"
-          )}
+          {text("Back to Lessons", "العودة إلى الدروس", "חזרה לשיעורים")}
 
         </button>
 
@@ -2641,7 +2595,7 @@ const addTaskToPortfolio =
 
 
   if (lesson.activityType === "mission") {
-    return <Suspense fallback={<div className="lesson-details-loading">🤖</div>}>
+    return <Suspense fallback={<div className="lesson-details-loading" dir={language === "en" ? "ltr" : "rtl"}>🤖</div>}>
       <MissionPlayer key={lesson.id} lesson={lesson} student={studentProfile}
         onExit={() => navigate("/student/lessons")} />
     </Suspense>;
@@ -2656,7 +2610,7 @@ const addTaskToPortfolio =
   ) {
 
     return (
-      <div className="student-lesson-details-page">
+      <div className="student-lesson-details-page" dir={language === "en" ? "ltr" : "rtl"}>
 
         <div className="lesson-details-top">
 
@@ -2669,9 +2623,7 @@ const addTaskToPortfolio =
             }
           >
 
-            {language === "ar"
-              ? "↩ الدروس"
-              : "← Lessons"}
+            {text("← Lessons", "↩ الدروس", "↩ שיעורים")}
 
           </button>
 
@@ -2707,7 +2659,22 @@ const addTaskToPortfolio =
               عربي
             </button>
 
-          </div>
+          
+
+            <button
+              type="button"
+              className={
+                language === "he"
+                  ? "active"
+                  : ""
+              }
+              onClick={() =>
+                setLanguage("he")
+              }
+            >
+              עברית
+            </button>
+</div>
 
         </div>
 
@@ -2758,7 +2725,7 @@ const addTaskToPortfolio =
             <div>
 
               <small>
-                LESSON
+                {text("LESSON", "درس", "שיעור")}
               </small>
 
               <h2>
@@ -2778,10 +2745,7 @@ const addTaskToPortfolio =
 
               <h3>
 
-                {text(
-                  "About this lesson",
-                  "عن هذا الدرس"
-                )}
+                {text("About this lesson", "عن هذا الدرس", "על השיעור הזה")}
 
               </h3>
 
@@ -2803,10 +2767,7 @@ const addTaskToPortfolio =
 
               <h3>
 
-                {text(
-                  "Instructions",
-                  "التعليمات"
-                )}
+                {text("Instructions", "التعليمات", "הנחיות")}
 
               </h3>
 
@@ -2838,15 +2799,12 @@ const addTaskToPortfolio =
                 <div>
 
                   <small>
-                    RESOURCE
+                    {text("RESOURCE", "مورد", "משאב")}
                   </small>
 
                   <h3>
 
-                    {text(
-                      "Lesson Resource",
-                      "رابط النشاط"
-                    )}
+                    {text("Lesson Resource", "رابط النشاط", "משאב לשיעור")}
 
                   </h3>
 
@@ -2863,10 +2821,7 @@ const addTaskToPortfolio =
                 rel="noreferrer"
               >
 
-                {text(
-                  "Open",
-                  "فتح"
-                )}
+                {text("Open", "فتح", "פתיחה")}
 
               </a>
 
@@ -2886,10 +2841,7 @@ const addTaskToPortfolio =
 
               <h2>
 
-                {text(
-                  "Finish this lesson",
-                  "إنهاء هذا الدرس"
-                )}
+                {text("Finish this lesson", "إنهاء هذا الدرس", "סיום השיעור")}
 
               </h2>
 
@@ -2915,14 +2867,8 @@ const addTaskToPortfolio =
               >
 
                 {completingLesson
-                  ? text(
-                      "Saving...",
-                      "جارٍ الحفظ..."
-                    )
-                  : text(
-                      "Complete Lesson ✓",
-                      "إنهاء الدرس ✓"
-                    )}
+                  ? text("Saving...", "جارٍ الحفظ...", "שומר...")
+                  : text("Complete Lesson ✓", "إنهاء الدرس ✓", "סיום השיעור ✓")}
 
               </button>
 
@@ -2939,10 +2885,7 @@ const addTaskToPortfolio =
 
               <h2>
 
-                {text(
-                  "Lesson Completed!",
-                  "تم إكمال الدرس!"
-                )}
+                {text("Lesson Completed!", "تم إكمال الدرس!", "השיעור הושלם!")}
 
               </h2>
 
@@ -2999,7 +2942,7 @@ const addTaskToPortfolio =
   ===================================================== */
 
   return (
-    <div className="student-lesson-details-page">
+    <div className="student-lesson-details-page" dir={language === "en" ? "ltr" : "rtl"}>
 
       {/* =================================================
           TOP
@@ -3016,9 +2959,7 @@ const addTaskToPortfolio =
           }
         >
 
-          {language === "ar"
-            ? "↩ الدروس"
-            : "← Lessons"}
+          {text("← Lessons", "↩ الدروس", "↩ שיעורים")}
 
         </button>
 
@@ -3054,7 +2995,22 @@ const addTaskToPortfolio =
             عربي
           </button>
 
-        </div>
+        
+
+            <button
+              type="button"
+              className={
+                language === "he"
+                  ? "active"
+                  : ""
+              }
+              onClick={() =>
+                setLanguage("he")
+              }
+            >
+              עברית
+            </button>
+</div>
 
       </div>
 
@@ -3076,10 +3032,7 @@ const addTaskToPortfolio =
 
           <span>
 
-            {text(
-              "TechMinds INTERACTIVE LESSON",
-              "درس تفاعلي من TechMinds"
-            )}
+            {text("TechMinds INTERACTIVE LESSON", "درس تفاعلي من TechMinds", "שיעור אינטראקטיבי של TechMinds")}
 
           </span>
 
@@ -3106,10 +3059,7 @@ const addTaskToPortfolio =
 
             ✅{" "}
 
-            {text(
-              "Completed",
-              "مكتمل"
-            )}
+            {text("Completed", "مكتمل", "הושלם")}
 
           </div>
 
@@ -3130,10 +3080,7 @@ const addTaskToPortfolio =
 
           <span>
 
-            {text(
-              "Duration",
-              "المدة"
-            )}
+            {text("Duration", "المدة", "משך זמן")}
 
           </span>
 
@@ -3142,10 +3089,7 @@ const addTaskToPortfolio =
             {lesson.estimatedMinutes ||
               0}{" "}
 
-            {text(
-              "min",
-              "دقيقة"
-            )}
+            {text("min", "دقيقة", "דקות")}
 
           </strong>
 
@@ -3176,10 +3120,7 @@ const addTaskToPortfolio =
 
           <span>
 
-            {text(
-              "Slides",
-              "الشرائح"
-            )}
+            {text("Slides", "الشرائح", "שקופיות")}
 
           </span>
 
@@ -3198,10 +3139,7 @@ const addTaskToPortfolio =
 
           <span>
 
-            {text(
-              "Progress",
-              "التقدم"
-            )}
+            {text("Progress", "التقدم", "התקדמות")}
 
           </span>
 
@@ -3288,10 +3226,7 @@ const addTaskToPortfolio =
                       {localized(
                         section.title
                       ) ||
-                        text(
-                          "Slide",
-                          "شريحة"
-                        )}
+                        text("Slide", "شريحة", "שקופית")}
 
                     </p>
 
@@ -3427,14 +3362,8 @@ const addTaskToPortfolio =
 
                   {currentSection.type ===
                   "multipleChoice"
-                    ? text(
-                        "🧩 Find the correct answer before continuing.",
-                        "🧩 اختر الإجابة الصحيحة قبل المتابعة."
-                      )
-                    : text(
-                        "✍️ Complete your answer before continuing.",
-                        "✍️ أكمل إجابتك قبل المتابعة."
-                      )}
+                    ? text("🧩 Find the correct answer before continuing.", "🧩 اختر الإجابة الصحيحة قبل المتابعة.", "🧩 מצאו את התשובה הנכונה לפני שממשיכים.")
+                    : text("✍️ Complete your answer before continuing.", "✍️ أكمل إجابتك قبل المتابعة.", "✍️ השלימו את התשובה לפני שממשיכים.")}
 
                 </div>
 
@@ -3468,10 +3397,7 @@ const addTaskToPortfolio =
 
                       <h2>
 
-                        {text(
-                          "You reached the end!",
-                          "وصلت إلى نهاية الدرس!"
-                        )}
+                        {text("You reached the end!", "وصلت إلى نهاية الدرس!", "הגעתם לסוף השיעור!")}
 
                       </h2>
 
@@ -3480,7 +3406,8 @@ const addTaskToPortfolio =
 
                         {text(
                           `Complete the lesson and earn ${lesson.xpReward || 0} XP.`,
-                          `أنهِ الدرس واحصل على ${lesson.xpReward || 0} XP.`
+                          `أنهِ الدرس واحصل على ${lesson.xpReward || 0} XP.`,
+                          `השלימו את השיעור וקבלו ${lesson.xpReward || 0} XP.`
                         )}
 
                       </p>
@@ -3498,14 +3425,8 @@ const addTaskToPortfolio =
                       >
 
                         {completingLesson
-                          ? text(
-                              "Completing...",
-                              "جارٍ إنهاء الدرس..."
-                            )
-                          : `🏆 ${text(
-                              "Complete Lesson",
-                              "إنهاء الدرس"
-                            )}`
+                          ? text("Completing...", "جارٍ إنهاء الدرس...", "מסיים...")
+                          : `🏆 ${text("Complete Lesson", "إنهاء الدرس", "סיום השיעור")}`
                         }
 
                       </button>
@@ -3551,10 +3472,7 @@ const addTaskToPortfolio =
 
                         📚{" "}
 
-                        {text(
-                          "Back to My Lessons",
-                          "العودة إلى دروسي"
-                        )}
+                        {text("Back to My Lessons", "العودة إلى دروسي", "חזרה לשיעורים שלי")}
 
                       </button>
 
@@ -3602,9 +3520,7 @@ const addTaskToPortfolio =
               }
             >
 
-              {language === "ar"
-                ? "التالي للخلف ←"
-                : "← Previous"}
+              {text("← Previous", "السابق →", "הקודם →")}
 
             </button>
 
@@ -3619,9 +3535,11 @@ const addTaskToPortfolio =
 
                   <button
                     type="button"
-                    aria-label={
-                      `Slide ${index + 1}`
-                    }
+                    aria-label={text(
+                      `Slide ${index + 1}`,
+                      `الشريحة ${index + 1}`,
+                      `שקופית ${index + 1}`
+                    )}
                     key={
                       section.id ||
                       index
@@ -3666,9 +3584,7 @@ const addTaskToPortfolio =
               }
             >
 
-              {language === "ar"
-                ? "التالي ←"
-                : "Next →"}
+              {text("Next →", "التالي ←", "הבא ←")}
 
             </button>
 

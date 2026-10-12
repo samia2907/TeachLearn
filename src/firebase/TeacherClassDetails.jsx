@@ -711,7 +711,7 @@ function TeacherClassDetails() {
       <div className="class-details-loading">
 
         <div>
-          🚀
+          ✨
         </div>
 
         <p>
@@ -1226,8 +1226,8 @@ function TeacherClassDetails() {
                         "جارٍ الإنشاء..."
                       )
                     : text(
-                        "Create Student 🚀",
-                        "إنشاء الطالب 🚀"
+                        "Create Student ✨",
+                        "إنشاء الطالب ✨"
                       )}
                 </button>
 

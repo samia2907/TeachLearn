@@ -48,7 +48,7 @@ export default function GuestNavigation({ destination = "/programs" }) {
             )}
           >
             <div className="guest-menu-heading">
-              <span className="guest-menu-logo">🚀</span>
+              <span className="guest-menu-logo">✨</span>
 
               <div>
                 <strong>TechMinds</strong>
@@ -74,7 +74,7 @@ export default function GuestNavigation({ destination = "/programs" }) {
               </Link>
 
               <Link to="/programs" onClick={closeMenu}>
-                <span>🚀</span>
+                <span>✨</span>
                 {t("Programs", "البرامج", "תוכניות")}
               </Link>
 

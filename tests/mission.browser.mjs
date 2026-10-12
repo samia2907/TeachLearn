@@ -31,7 +31,7 @@ try {
       window.createRoot = window.domModule.createRoot || window.domModule.default.createRoot;
       window.Provider = (await import('/src/context/LanguageContext.jsx')).LanguageProvider;
       window.Mission = (await import('/src/components/mission/MissionPlayer.jsx')).default;
-      window.lesson = {...(await import('/src/data/missions/mission01.js')).default, id:'browser-mission', teacherId:'teacher', classId:'class'};
+      window.lesson = {...(await import('/src/data/missions/computer-science-modern-technology/mission01.js')).default, id:'browser-mission', teacherId:'teacher', classId:'class'};
       window.readRemote = () => JSON.parse(localStorage.getItem('test:mission:remote') || '{}');
       window.repository = {
         loadMission: async () => window.readRemote(),

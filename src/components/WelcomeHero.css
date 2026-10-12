@@ -1,0 +1,123 @@
+/* Component-scoped presentation, independent of the shared login theme. */
+.welcome-section .welcome-hero {
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+  gap: 40px;
+  padding: 52px;
+  background: #f0edf9;
+  color: #18243e;
+  border: 1px solid #dfd9ef;
+  border-radius: 30px;
+  box-shadow: 0 16px 48px #2436590c;
+}
+.welcome-section .welcome-hero::before {
+  background: radial-gradient(ellipse at 85% 20%, #d8cff580, transparent 60%), radial-gradient(ellipse at 10% 100%, #d7f3e5a0, transparent 55%);
+}
+.welcome-section .welcome-eyebrow {
+  color: #51417c;
+  background: #ffffffb3;
+  border-color: #d8d0e9;
+  font-size: 12px;
+  letter-spacing: .04em;
+  line-height: 1.7;
+}
+.welcome-section .welcome-eyebrow i { background: #427860; box-shadow: none; flex-shrink: 0; }
+.welcome-section .welcome-copy h2 {
+  color: #18243e;
+  font-size: clamp(36px, 3.8vw, 54px);
+  line-height: 1.2;
+  letter-spacing: -1.4px;
+  margin: 24px 0 20px;
+  text-wrap: balance;
+}
+.welcome-section[dir="rtl"] .welcome-copy h2 { line-height: 1.5; letter-spacing: 0; }
+.welcome-section .welcome-copy h2 span { color: #6650a8; }
+.welcome-section .welcome-copy > p { max-width: 540px; font-size: 17px; line-height: 1.9; color: #47516a; }
+.welcome-section .welcome-actions { gap: 12px; margin-top: 28px; }
+.welcome-section .welcome-start,
+.welcome-section .welcome-explore {
+  min-height: 52px;
+  padding: 12px 20px;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.welcome-section .welcome-start { background: #5141ab; color: white; box-shadow: 0 6px 16px #5141ab26; }
+.welcome-section .welcome-start:hover { background: #40318c; color: white; }
+.welcome-section .welcome-explore { background: #ffffffa6; color: #263451; border: 1px solid #cec6e0; }
+.welcome-section .welcome-explore:hover { background: white; color: #5141ab; }
+.welcome-section :is(a, button):focus-visible { outline: 3px solid #6650a8; outline-offset: 4px; }
+.welcome-section .welcome-signature { color: #5d6077; font-size: 11px; margin-top: 26px; opacity: 1; }
+.welcome-section .innovation-art { height: 400px; max-width: 500px; margin-inline: auto; }
+.welcome-section .innovation-grid { background-image: linear-gradient(#6650a810 1px, transparent 1px), linear-gradient(90deg, #6650a810 1px, transparent 1px); }
+.welcome-section .innovation-orbits { color: #8873bb; opacity: .3; }
+.welcome-section .innovation-core { top: 28px; left: 70%; width: 44px; height: 44px; border-radius: 12px; box-shadow: inset 1px 1px 2px #ffffff66, 0 6px 14px #5141ab20; }
+.welcome-section .innovation-core span { font-size: 30px; }
+.welcome-section .innovation-stage-1 .innovation-core span { font-size: 18px; }
+.welcome-section .innovation-stage-2 .innovation-core { border-radius: 50%; }
+.welcome-section .studio-window { inset-inline: 3%; top: 60px; transform: rotate(-2deg); background: #18243e; box-shadow: 0 20px 36px #18243e24; }
+.welcome-section .studio-window-bar { color: #c2cde0; font-size: 12px; }
+.welcome-section .studio-code { font-size: 13px; padding: 20px 14px; white-space: normal; overflow-wrap: anywhere; }
+.welcome-section .studio-code em { color: #9eacc3; }
+.welcome-section .studio-output { font-size: 13px; }
+.welcome-section .innovation-chip { font-size: 14px; transform: none; }
+.welcome-section .chip-top { top: 12px; }
+.welcome-section .chip-bottom { bottom: 18px; right: 4%; }
+.welcome-section .innovation-coordinate { bottom: 0; color: #5d6077; font-size: 10px; }
+.welcome-section .innovation-index { color: #51417c; }
+.welcome-section .innovation-index span { color: #656078; font-size: 12px; }
+.welcome-section .innovation-features { gap: 16px; padding: 20px 24px; background: white; }
+.welcome-section .innovation-features > span { font-size: 15px; color: #47516a; }
+.welcome-section .innovation-features b { flex-shrink: 0; color: #6650a8; }
+.welcome-section .idea-lab { grid-template-columns: minmax(0, .9fr) minmax(0, 1.2fr); gap: 28px; padding: 30px; margin-top: 24px; }
+.welcome-section .idea-lab-nav > span { color: #5d6077; font-size: 12px; line-height: 1.7; }
+.welcome-section .idea-lab-controls button { font-size: 14px; min-height: 48px; padding: 10px 14px; }
+.welcome-section .idea-lab-controls button span { font-size: 11px; opacity: 1; }
+.welcome-section .idea-lab-content > div { min-width: 0; }
+.welcome-section .idea-lab-tag { font-size: 13px; }
+.welcome-section .idea-lab-content h3 { font-size: 23px; line-height: 1.5; }
+.welcome-section .idea-lab-content p { font-size: 16px; line-height: 1.8; color: #505b70; }
+.welcome-section .welcome-section-heading p { font-size: 16px; color: #505b70; }
+
+@media (max-width: 1000px) {
+  .welcome-section .welcome-hero { grid-template-columns: minmax(0, 1fr); padding: 36px; gap: 24px; }
+  .welcome-section .welcome-copy > p { max-width: 680px; }
+  .welcome-section .innovation-art { width: 100%; }
+  .welcome-section .idea-lab { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Existing Login.css has !important mobile rules; override only inside this component. */
+@media (max-width: 760px) {
+  .welcome-section .welcome-hero { padding: 26px 20px !important; gap: 24px !important; }
+  .welcome-section .welcome-eyebrow { font-size: 12px !important; margin-bottom: 18px; }
+  .welcome-section .welcome-copy h2 { font-size: clamp(29px, 6.5vw, 42px) !important; line-height: 1.25 !important; letter-spacing: -.6px !important; }
+  .welcome-section[dir="rtl"] .welcome-copy h2 { line-height: 1.5 !important; letter-spacing: 0 !important; }
+  .welcome-section .welcome-copy > p { font-size: 16px !important; line-height: 1.9 !important; }
+  .welcome-section .welcome-start,
+  .welcome-section .welcome-explore { font-size: 15px !important; min-height: 52px; }
+  .welcome-section .welcome-signature { font-size: 11px !important; opacity: 1; }
+  .welcome-section .innovation-art { height: 390px !important; min-height: 390px !important; max-width: 460px; }
+  .login-page .welcome-section .innovation-art .studio-window,
+  .welcome-section .innovation-art .studio-window {
+    width: 94% !important;
+    max-width: none;
+    inset-inline: 3% !important;
+    top: 60px !important;
+    transform: none !important;
+  }
+  .welcome-section .studio-code { font-size: 12px; line-height: 2.1; padding: 18px 10px; }
+  .welcome-section .studio-code em { width: 22px; }
+  .welcome-section .innovation-index { font-size: 22px !important; }
+  .welcome-section .innovation-features { padding: 14px; gap: 8px !important; }
+  .welcome-section .innovation-features > span { font-size: 14px !important; padding: 6px !important; }
+  .welcome-section .idea-lab { padding: 22px 16px !important; }
+  .welcome-section .idea-lab-controls { display: flex !important; gap: 8px !important; margin-top: 0; }
+  .welcome-section .idea-lab-controls button { flex: 1 1 auto; font-size: 14px !important; padding: 10px 12px !important; }
+  .welcome-section .idea-lab-content { grid-template-columns: minmax(0, 1fr) !important; margin-top: 0 !important; padding: 0 !important; }
+  .welcome-section .idea-lab-content h3 { font-size: 22px !important; line-height: 1.5 !important; }
+  .welcome-section .idea-lab-content p { font-size: 16px !important; line-height: 1.8 !important; }
+  .welcome-section .idea-lab-symbol { display: none; }
+  .welcome-section .welcome-section-heading h2 { line-height: 1.5 !important; }
+  .welcome-section .welcome-section-heading p { font-size: 15px !important; }
+}

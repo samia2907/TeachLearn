@@ -1,700 +1,481 @@
-import { authEntry } from '../auth/returnTo.mjs';
-import {
-  useEffect,
-  useState,
-} from "react";
 
-import {
-  Navigate,
-  useNavigate,
-  useLocation,
-} from "react-router-dom";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 
-import {
-  onAuthStateChanged,
-  signOut,
-} from "firebase/auth";
-
-import {
-  doc,
-  getDoc,
-} from "firebase/firestore";
-
-import {
-  auth,
-  db,
-} from "../firebase/firebase";
-
-import {
-  useLanguage,
-} from "../context/LanguageContext";
-
+import { authEntry } from "../auth/returnTo.mjs";
+import { auth, db } from "../firebase/firebase";
+import { useLanguage } from "../context/LanguageContext";
 
 const manualAccessMode =
-  String(import.meta.env.VITE_MANUAL_ACCESS_MODE ?? "true").toLowerCase() !== "false";
+  String(import.meta.env.VITE_MANUAL_ACCESS_MODE ?? "true")
+    .toLowerCase() !== "false";
 
-function ProtectedRoute({
-  children,
-  allowedRole,
-  requiredPlan,
-}) {
-  const location = useLocation();
-  const navigate =
-    useNavigate();
+/*
+ * One shared account observer for protected routes.
+ * Unlike a getDoc per route, the same profile listener
+ * is reused when navigating across protected pages.
+ */
 
-  const {
-    language,
-  } = useLanguage();
+let accountState = {
+  loading: true,
+  user: null,
+  profile: null,
+  blocked: false,
+  error: null,
+};
 
+const subscribers = new Set();
+let authObserverStarted = false;
+let stopProfileObserver = null;
+let currentUid = null;
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
+function notifyAccountSubscribers() {
+  for (const subscriber of subscribers) {
+    subscriber();
+  }
+}
 
-  const [
-    allowed,
-    setAllowed,
-  ] = useState(false);
+function updateAccountState(changes) {
+  accountState = { ...accountState, ...changes };
+  notifyAccountSubscribers();
+}
 
-  const [
-    blockedStudent,
-    setBlockedStudent,
-  ] = useState(false);
+function getAccountSnapshot() {
+  return accountState;
+}
 
-  const [
-    planAllowed,
-    setPlanAllowed,
-  ] = useState(manualAccessMode || !requiredPlan);
+function subscribeToAccount(callback) {
+  subscribers.add(callback);
 
-  const [
-    checkingPlan,
-    setCheckingPlan,
-  ] = useState(Boolean(requiredPlan) && !manualAccessMode);
+  if (!authObserverStarted) {
+    authObserverStarted = true;
 
+    onAuthStateChanged(
+      auth,
+      user => {
+        if (stopProfileObserver) {
+          stopProfileObserver();
+          stopProfileObserver = null;
+        }
 
-  const text = (
-    english,
-    arabic
-  ) =>
-    language === "ar"
-      ? arabic
-      : english;
+        if (!user) {
+          currentUid = null;
 
+          updateAccountState({
+            loading: false,
+            user: null,
+            profile: null,
+            error: null,
+            // Keep the blocked message after an automatic sign-out.
+            blocked: accountState.blocked,
+          });
+          return;
+        }
 
-  /* =====================================================
-     CHECK USER
-  ===================================================== */
+        currentUid = user.uid;
+
+        updateAccountState({
+          loading: true,
+          user,
+          profile: null,
+          blocked: false,
+          error: null,
+        });
+
+        const uid = user.uid;
+
+        stopProfileObserver = onSnapshot(
+          doc(db, "users", uid),
+          async snapshot => {
+            if (currentUid !== uid) return;
+
+            if (!snapshot.exists()) {
+              updateAccountState({
+                loading: false,
+                profile: null,
+                error: "profile-not-found",
+              });
+
+              await signOut(auth).catch(console.error);
+              return;
+            }
+
+            const profile = snapshot.data();
+
+            const blocked =
+              profile.role === "student" &&
+              ["inactive", "blocked", "suspended"].includes(
+                profile.accountStatus
+              );
+
+            if (blocked) {
+              updateAccountState({
+                loading: false,
+                user,
+                profile,
+                blocked: true,
+                error: null,
+              });
+
+              await signOut(auth).catch(console.error);
+              return;
+            }
+
+            updateAccountState({
+              loading: false,
+              user,
+              profile,
+              blocked: false,
+              error: null,
+            });
+          },
+          error => {
+            if (currentUid !== uid) return;
+
+            console.error("Account profile listener error:", error);
+
+            updateAccountState({
+              loading: false,
+              profile: null,
+              error: error.code || "profile-error",
+            });
+          }
+        );
+      },
+      error => {
+        console.error("Authentication observer error:", error);
+
+        updateAccountState({
+          loading: false,
+          user: null,
+          profile: null,
+          error: error.code || "auth-error",
+        });
+      }
+    );
+  }
+
+  return () => {
+    subscribers.delete(callback);
+  };
+}
+
+function translate(language, en, ar, he) {
+  if (language === "ar") return ar;
+  if (language === "he") return he;
+  return en;
+}
+
+function LoadingScreen({ language, subscription = false }) {
+  return (
+    <div
+      style={{
+        minHeight: "100dvh",
+        display: "grid",
+        placeItems: "center",
+        padding: 20,
+        background: "#f7f8fc",
+        fontFamily: '"Segoe UI", Tahoma, Arial, sans-serif',
+        direction: language === "en" ? "ltr" : "rtl",
+      }}
+    >
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: 45, marginBottom: 12 }}>✨</div>
+        <p style={{ color: "#64748b", fontWeight: 700 }}>
+          {subscription
+            ? translate(
+                language,
+                "Checking your subscription...",
+                "جارٍ التحقق من اشتراكك...",
+                "בודקים את המנוי שלך..."
+              )
+            : translate(
+                language,
+                "Checking your account...",
+                "جارٍ التحقق من الحساب...",
+                "בודקים את החשבון שלך..."
+              )}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function MessageScreen({ language, icon, title, message, action, onAction }) {
+  return (
+    <div
+      style={{
+        minHeight: "100dvh",
+        padding: 20,
+        display: "grid",
+        placeItems: "center",
+        direction: language === "en" ? "ltr" : "rtl",
+        background: "linear-gradient(135deg, #f8fafc, #f5f3ff)",
+        fontFamily: '"Segoe UI", Tahoma, Arial, sans-serif',
+      }}
+    >
+      <div
+        style={{
+          width: "min(480px, 100%)",
+          padding: "32px 24px",
+          background: "#ffffff",
+          borderRadius: 20,
+          textAlign: "center",
+          boxShadow: "0 18px 48px rgba(15,23,42,.09)",
+        }}
+      >
+        <div style={{ fontSize: 42, marginBottom: 14 }}>{icon}</div>
+        <h1 style={{ color: "#172033", fontSize: 24, margin: "0 0 12px" }}>
+          {title}
+        </h1>
+        <p style={{ color: "#64748b", lineHeight: 1.7 }}>
+          {message}
+        </p>
+        <button
+          type="button"
+          onClick={onAction}
+          style={{
+            width: "100%",
+            minHeight: 48,
+            marginTop: 12,
+            border: 0,
+            borderRadius: 12,
+            color: "#ffffff",
+            background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
+            cursor: "pointer",
+            fontSize: 15,
+            fontWeight: 800,
+          }}
+        >
+          {action}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PlanGate({ children, userId, requiredPlan, language }) {
+  const navigate = useNavigate();
+  const [result, setResult] = useState({
+    key: null,
+    status: "loading",
+  });
+
+  const key = `${userId}:${requiredPlan}`;
 
   useEffect(() => {
-    const unsubscribe =
-      onAuthStateChanged(
-        auth,
-
-        async (user) => {
-          /*
-            If the student was blocked and
-            signOut triggers auth state again,
-            keep showing the blocked message.
-          */
-
-          if (!user) {
-            setAllowed(false);
-            setLoading(false);
-
-            return;
-          }
-
-
-          try {
-            setLoading(true);
-
-
-            const snapshot =
-              await getDoc(
-                doc(
-                  db,
-                  "users",
-                  user.uid
-                )
-              );
-
-
-            /* USER PROFILE DOES NOT EXIST */
-
-            if (
-              !snapshot.exists()
-            ) {
-              setAllowed(false);
-
-              await signOut(
-                auth
-              );
-
-              return;
-            }
-
-
-            const data =
-              snapshot.data();
-
-
-            /* =================================================
-               BLOCK INACTIVE STUDENT
-            ================================================= */
-
-            if (
-              data.role ===
-                "student" &&
-              (
-                data.accountStatus ===
-                  "inactive" ||
-                data.accountStatus ===
-                  "blocked"
-              )
-            ) {
-              setBlockedStudent(
-                true
-              );
-
-              setAllowed(
-                false
-              );
-
-
-              /*
-                Sign the student out so they
-                cannot stay authenticated.
-              */
-
-              await signOut(
-                auth
-              );
-
-
-              return;
-            }
-
-
-            /* =================================================
-               CHECK ROLE
-            ================================================= */
-
-            if (
-              allowedRole &&
-              data.role !==
-                allowedRole
-            ) {
-              setCheckingPlan(false);
-              setAllowed(
-                false
-              );
-
-              return;
-            }
-
-            if (requiredPlan && !manualAccessMode) {
-              const subscriptionSnapshot =
-                await getDoc(
-                  doc(
-                    db,
-                    "subscriptions",
-                    user.uid
-                  )
-                );
-
-              const subscription =
-                subscriptionSnapshot.exists()
-                  ? subscriptionSnapshot.data()
-                  : null;
-
-              setPlanAllowed(
-                subscription?.status === "active" &&
-                subscription.planId === requiredPlan
-              );
-              setCheckingPlan(false);
-            } else {
-              // In the manual-access MVP, route-level plan gates are disabled.
-              // Program and lesson access is enforced by the centralized access system.
-              setPlanAllowed(true);
-              setCheckingPlan(false);
-            }
-
-
-            /* EVERYTHING IS OK */
-
-            setBlockedStudent(
-              false
-            );
-
-            setAllowed(
-              true
-            );
-
-          } catch (error) {
-            console.error(
-              "Protected route error:",
-              error
-            );
-
-
-            setAllowed(
-              false
-            );
-
-          } finally {
-            setLoading(
-              false
-            );
-          }
-        }
-      );
-
-
-    return () =>
-      unsubscribe();
-
-  }, [
-    allowedRole,
-    requiredPlan,
-  ]);
-
-
-  /* =====================================================
-     LOADING
-  ===================================================== */
-
-  if (
-    loading
-  ) {
-    return (
-      <div
-        style={{
-          width: "100%",
-          minHeight:
-            "100vh",
-
-          display:
-            "flex",
-
-          flexDirection:
-            "column",
-
-          alignItems:
-            "center",
-
-          justifyContent:
-            "center",
-
-          gap: "12px",
-
-          background:
-            "#f7f8fc",
-
-          fontFamily:
-            '"Segoe UI", Tahoma, Arial, sans-serif',
-        }}
-      >
-
-        <div
-          style={{
-            width:
-              "76px",
-
-            height:
-              "76px",
-
-            display:
-              "flex",
-
-            alignItems:
-              "center",
-
-            justifyContent:
-              "center",
-
-            borderRadius:
-              "22px",
-
-            background:
-              "linear-gradient(135deg, #ede9fe, #dbeafe)",
-
-            fontSize:
-              "38px",
-
-            boxShadow:
-              "0 12px 30px rgba(99,102,241,0.13)",
-          }}
-        >
-          🚀
-        </div>
-
-
-        <p
-          style={{
-            margin: 0,
-
-            color:
-              "#64748b",
-
-            fontSize:
-              "13px",
-
-            fontWeight:
-              "700",
-          }}
-        >
-          {text(
-            "Checking your account...",
-            "جارٍ التحقق من الحساب..."
-          )}
-        </p>
-
-      </div>
-    );
+    let cancelled = false;
+
+    getDoc(doc(db, "subscriptions", userId))
+      .then(snapshot => {
+        if (cancelled) return;
+
+        const subscription = snapshot.exists()
+          ? snapshot.data()
+          : null;
+
+        const valid =
+          subscription?.status === "active" &&
+          subscription?.planId === requiredPlan;
+
+        setResult({
+          key,
+          status: valid ? "allowed" : "denied",
+        });
+      })
+      .catch(error => {
+        if (cancelled) return;
+
+        console.error("Subscription check error:", error);
+
+        setResult({
+          key,
+          status: "error",
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, requiredPlan, key]);
+
+  if (result.key !== key || result.status === "loading") {
+    return <LoadingScreen language={language} subscription />;
   }
 
-  if (allowed && requiredPlan && !manualAccessMode && checkingPlan) {
+  if (result.status === "error") {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "grid",
-          placeItems: "center",
-          background: "#f7f8fc",
-          color: "#475569",
-          fontFamily: '"Segoe UI", Tahoma, Arial, sans-serif',
-        }}
-      >
-        {text(
-          "Checking your subscription...",
-          "جارٍ التحقق من اشتراكك..."
+      <MessageScreen
+        language={language}
+        icon="⚠️"
+        title={translate(
+          language,
+          "Could not check subscription",
+          "تعذر التحقق من الاشتراك",
+          "לא ניתן לבדוק את המנוי"
         )}
-      </div>
+        message={translate(
+          language,
+          "Please try again.",
+          "حاولي مجددًا.",
+          "יש לנסות שוב."
+        )}
+        action={translate(
+          language,
+          "Retry",
+          "إعادة المحاولة",
+          "ניסיון חוזר"
+        )}
+        onAction={() => window.location.reload()}
+      />
     );
   }
 
-  if (allowed && requiredPlan && !manualAccessMode && !planAllowed) {
+  if (result.status === "denied") {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          padding: "24px",
-          display: "grid",
-          placeItems: "center",
-          background: "linear-gradient(135deg, #f8fafc, #f5f3ff)",
-          direction: language === "ar" || language === "he" ? "rtl" : "ltr",
-          fontFamily: '"Segoe UI", Tahoma, Arial, sans-serif',
-        }}
-      >
-        <div
-          style={{
-            width: "min(480px, 100%)",
-            padding: "36px 30px",
-            borderRadius: "20px",
-            background: "#ffffff",
-            textAlign: "center",
-            boxShadow: "0 20px 55px rgba(15,23,42,0.12)",
-          }}
-        >
-          <div style={{ fontSize: "42px", marginBottom: "14px" }}>🔒</div>
-          <h1 style={{ margin: "0 0 10px", color: "#172033", fontSize: "25px" }}>
-            {text(
-              "This feature requires an upgrade",
-              "هذه الميزة تتطلب ترقية الخطة"
-            )}
-          </h1>
-          <p style={{ margin: "0 0 24px", color: "#64748b", lineHeight: "1.7" }}>
-            {text(
-              "Upgrade your subscription to access this feature.",
-              "قم بترقية اشتراكك للوصول إلى هذه الميزة."
-            )}
-          </p>
-          <button
-            type="button"
-            onClick={() => navigate("/plans")}
-            style={{
-              width: "100%",
-              minHeight: "48px",
-              border: "none",
-              borderRadius: "12px",
-              background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
-              color: "#ffffff",
-              fontSize: "15px",
-              fontWeight: "800",
-              cursor: "pointer",
-            }}
-          >
-            {text(
-              "Upgrade Plan",
-              "ترقية الخطة"
-            )}
-          </button>
-        </div>
-      </div>
+      <MessageScreen
+        language={language}
+        icon="🔒"
+        title={translate(
+          language,
+          "This feature requires an upgrade",
+          "هذه الميزة تتطلب ترقية الخطة",
+          "התכונה הזו דורשת שדרוג"
+        )}
+        message={translate(
+          language,
+          "Upgrade your subscription to access this feature.",
+          "قومي بترقية الاشتراك للوصول إلى هذه الميزة.",
+          "שדרגו את המנוי כדי לגשת לתכונה הזו."
+        )}
+        action={translate(
+          language,
+          "Upgrade Plan",
+          "ترقية الخطة",
+          "שדרוג התוכנית"
+        )}
+        onAction={() => navigate("/plans")}
+      />
     );
   }
 
+  return children;
+}
 
-  /* =====================================================
-     INACTIVE STUDENT
-  ===================================================== */
+function ProtectedRoute({ children, allowedRole, requiredPlan }) {
+  const { language } = useLanguage();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  if (
-    blockedStudent
-  ) {
+  const account = useSyncExternalStore(
+    subscribeToAccount,
+    getAccountSnapshot,
+    getAccountSnapshot
+  );
+
+  const returnPath =
+    location.pathname + location.search + location.hash;
+
+  if (account.loading) {
+    return <LoadingScreen language={language} />;
+  }
+
+  if (account.blocked) {
     return (
-      <div
-        style={{
-          width: "100%",
-          minHeight:
-            "100vh",
-
-          padding:
-            "20px",
-
-          display:
-            "flex",
-
-          alignItems:
-            "center",
-
-          justifyContent:
-            "center",
-
-          background:
-            "linear-gradient(135deg, #f8fafc, #f5f3ff)",
-
-          fontFamily:
-            '"Segoe UI", Tahoma, Arial, sans-serif',
-
-          direction:
-            language ===
-            "ar"
-              ? "rtl"
-              : "ltr",
-        }}
-      >
-
-        <div
-          style={{
-            width:
-              "min(500px, 100%)",
-
-            padding:
-              "38px 32px",
-
-            border:
-              "1px solid #e7e5e4",
-
-            borderRadius:
-              "24px",
-
-            background:
-              "#ffffff",
-
-            textAlign:
-              "center",
-
-            boxShadow:
-              "0 25px 70px rgba(15,23,42,0.12)",
-          }}
-        >
-
-          {/* ICON */}
-
-          <div
-            style={{
-              width:
-                "78px",
-
-              height:
-                "78px",
-
-              margin:
-                "0 auto 18px",
-
-              display:
-                "flex",
-
-              alignItems:
-                "center",
-
-              justifyContent:
-                "center",
-
-              borderRadius:
-                "22px",
-
-              background:
-                "#fef2f2",
-
-              fontSize:
-                "38px",
-            }}
-          >
-            ⛔
-          </div>
-
-
-          {/* LABEL */}
-
-          <small
-            style={{
-              color:
-                "#dc2626",
-
-              fontSize:
-                "10px",
-
-              fontWeight:
-                "900",
-
-              letterSpacing:
-                "0.08em",
-            }}
-          >
-            {text(
-              "ACCOUNT INACTIVE",
-              "الحساب غير فعّال"
-            )}
-          </small>
-
-
-          {/* TITLE */}
-
-          <h1
-            style={{
-              margin:
-                "7px 0 10px",
-
-              color:
-                "#172033",
-
-              fontSize:
-                "25px",
-
-              fontWeight:
-                "900",
-            }}
-          >
-            {text(
-              "Your account has been deactivated",
-              "تم تعطيل حسابك"
-            )}
-          </h1>
-
-
-          {/* MESSAGE */}
-
-          <p
-            style={{
-              maxWidth:
-                "390px",
-
-              margin:
-                "0 auto 24px",
-
-              color:
-                "#64748b",
-
-              fontSize:
-                "13px",
-
-              lineHeight:
-                "1.75",
-            }}
-          >
-            {text(
-              "You currently cannot access TechMinds. Please contact your teacher if you believe this was a mistake.",
-              "لا يمكنك حاليًا الدخول إلى TechMinds. يرجى التواصل مع المعلّم إذا كنت تعتقد أن الحساب تم تعطيله بالخطأ."
-            )}
-          </p>
-
-
-          {/* BUTTON */}
-
-          <button
-            type="button"
-            onClick={() =>
-              navigate(
-                "/login",
-                {
-                  replace:
-                    true,
-                }
-              )
-            }
-            style={{
-              width:
-                "100%",
-
-              minHeight:
-                "48px",
-
-              border:
-                "none",
-
-              borderRadius:
-                "12px",
-
-              background:
-                "linear-gradient(135deg, #7c3aed, #4f46e5)",
-
-              color:
-                "#ffffff",
-
-              fontFamily:
-                "inherit",
-
-              fontSize:
-                "13px",
-
-              fontWeight:
-                "850",
-
-              cursor:
-                "pointer",
-
-              boxShadow:
-                "0 9px 22px rgba(79,70,229,0.18)",
-            }}
-          >
-            {text(
-              "Return to Login",
-              "العودة لتسجيل الدخول"
-            )}
-          </button>
-
-        </div>
-
-      </div>
+      <MessageScreen
+        language={language}
+        icon="⛔"
+        title={translate(
+          language,
+          "Your account has been deactivated",
+          "تم تعطيل حسابك",
+          "החשבון שלך הושבת"
+        )}
+        message={translate(
+          language,
+          "Please contact your teacher for assistance.",
+          "يرجى التواصل مع المعلّم للحصول على المساعدة.",
+          "יש לפנות למורה לקבלת עזרה."
+        )}
+        action={translate(
+          language,
+          "Return to Login",
+          "العودة لتسجيل الدخول",
+          "חזרה להתחברות"
+        )}
+        onAction={() => navigate("/login", { replace: true })}
+      />
     );
   }
 
-
-  /* =====================================================
-     NOT AUTHORIZED
-  ===================================================== */
-
-  if (
-    !allowed
-  ) {
+  if (!account.user) {
     return (
       <Navigate
-        to={authEntry(location.pathname + location.search + location.hash)}
+        to={authEntry(returnPath)}
         replace
       />
     );
   }
 
+  if (account.error) {
+    return (
+      <MessageScreen
+        language={language}
+        icon="⚠️"
+        title={translate(
+          language,
+          "Could not verify your account",
+          "تعذر التحقق من الحساب",
+          "לא ניתן לאמת את החשבון"
+        )}
+        message={translate(
+          language,
+          "Please check your connection and try again.",
+          "تأكدي من اتصال الإنترنت وحاولي مجددًا.",
+          "בדקו את החיבור ונסו שוב."
+        )}
+        action={translate(
+          language,
+          "Retry",
+          "إعادة المحاولة",
+          "ניסיון חוזר"
+        )}
+        onAction={() => window.location.reload()}
+      />
+    );
+  }
 
-  /* =====================================================
-     ACCESS ALLOWED
-  ===================================================== */
+  if (!account.profile) {
+    return <LoadingScreen language={language} />;
+  }
+
+  if (
+    allowedRole &&
+    account.profile.role !== allowedRole
+  ) {
+    return (
+      <Navigate
+        to={authEntry(returnPath)}
+        replace
+      />
+    );
+  }
+
+  if (requiredPlan && !manualAccessMode) {
+    return (
+      <PlanGate
+        userId={account.user.uid}
+        requiredPlan={requiredPlan}
+        language={language}
+      >
+        {children}
+      </PlanGate>
+    );
+  }
 
   return children;
 }
-
 
 export default ProtectedRoute;

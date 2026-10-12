@@ -468,6 +468,13 @@ service cloud.firestore {
           || (request.resource.data.status == 'draft' && request.resource.data.publishedAt == null));
     }
 
+    // The lesson editor touches the parent timestamp after saving its content.
+    // Imported catalogs can carry metadata outside the interactive form schema.
+    function ownerProgramTimestampUpdate() {
+      return isOwner()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['updatedAt']);
+    }
+
     match /programs/{programId} {
       allow read: if (resource.data.status == 'published') || isOwner();
       allow create: if isOwner()
@@ -476,7 +483,7 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time
         && request.resource.data.updatedAt == request.time;
       allow update: if isOwner()
-        && (validProgram(request.resource.data) || legacyProgramStatusUpdate())
+        && (validProgram(request.resource.data) || legacyProgramStatusUpdate() || ownerProgramTimestampUpdate())
         && request.resource.data.createdBy == resource.data.createdBy
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.updatedAt == request.time;
@@ -555,6 +562,45 @@ service cloud.firestore {
         && nonNegativeNumber(data.get('xpReward', data.get('xp', 0)), 10000);
     }
 
+    // Preserve imported metadata verbatim; this exception only edits content.
+    function ownerLessonContentUpdate() {
+      return isOwner()
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['sections', 'slideCount', 'updatedAt'])
+        && request.resource.data.status in ['draft', 'published', 'archived']
+        && request.resource.data.sections is list
+        && request.resource.data.sections.size() <= 300
+        && request.resource.data.slideCount is int
+        && request.resource.data.slideCount == request.resource.data.sections.size()
+        && nonNegativeNumber(request.resource.data.get('xpReward', request.resource.data.get('xp', 0)), 10000);
+    }
+
+    // Owner-only status transitions for legacy lessons with extra metadata.
+    // Other lesson fields stay unchanged; shared identity checks remain active.
+    function ownerLessonStatusUpdate() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      let previousStatus = resource.data.get('status', 'draft');
+      let nextStatus = request.resource.data.get('status', 'draft');
+
+      return isOwner()
+        && changed.hasOnly(['status', 'publishedAt', 'archivedAt', 'updatedAt'])
+        && previousStatus in ['draft', 'published', 'archived']
+        && (
+          (previousStatus == 'draft'
+            && nextStatus == 'published'
+            && request.resource.data.publishedAt == request.time
+            && request.resource.data.get('archivedAt', null) == resource.data.get('archivedAt', null))
+          || (previousStatus == 'published'
+            && nextStatus == 'draft'
+            && request.resource.data.publishedAt == null
+            && request.resource.data.get('archivedAt', null) == resource.data.get('archivedAt', null))
+          || (previousStatus in ['draft', 'published']
+            && nextStatus == 'archived'
+            && request.resource.data.archivedAt == request.time
+            && request.resource.data.get('publishedAt', null) == resource.data.get('publishedAt', null))
+        );
+    }
+
     match /lessons/{lessonId} {
       allow read: if isOwner()
         || (isTeacher() && resource.data.teacherId == request.auth.uid)
@@ -571,7 +617,7 @@ service cloud.firestore {
             && exists(/databases/$(database)/documents/classes/$(request.resource.data.classId))
             && get(/databases/$(database)/documents/classes/$(request.resource.data.classId)).data.teacherId
               == request.auth.uid));
-      allow update: if validLesson(request.resource.data)
+      allow update: if (validLesson(request.resource.data) || ownerLessonContentUpdate() || ownerLessonStatusUpdate())
         && request.resource.data.get('parentLessonId', null) == resource.data.get('parentLessonId', null)
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.get('createdBy', null) == resource.data.get('createdBy', null)
@@ -723,15 +769,18 @@ service cloud.firestore {
           'taskAnswers', 'status', 'updatedAt'
         ])
         && data.keys().hasOnly([
-          'studentId', 'studentName', 'lessonId', 'lessonTitle', 'teacherId',
-          'classId', 'className', 'currentSlide', 'maxUnlockedSlide',
-          'selectedAnswers', 'answerResults', 'taskAnswers', 'status',
-          'teacherFeedback', 'teacherReviewedAt', 'createdAt', 'completedAt',
-          'updatedAt', 'mission', 'programAccessClassId'
+          'studentId', 'studentName', 'lessonId', 'lessonTitle',
+  'teacherId', 'classId', 'className', 'programId',
+  'currentSlide', 'maxUnlockedSlide',
+  'selectedAnswers', 'answerResults', 'taskAnswers',
+  'status', 'teacherFeedback', 'teacherReviewedAt',
+  'createdAt', 'completedAt', 'updatedAt',
+  'mission', 'programAccessClassId'
         ])
         && data.studentId == request.auth.uid
         && progressId == request.auth.uid + '_' + data.lessonId
         && exists(/databases/$(database)/documents/lessons/$(data.lessonId))
+        && data.get('programId', null) == lesson.get('programId', null)
         && studentCanPersistMission(lesson, data.get('programAccessClassId', ''), data.lessonId)
         && data.teacherId == lesson.get('teacherId', null)
         && data.classId == lesson.get('classId', null)
@@ -981,64 +1030,8 @@ service cloud.firestore {
     match /{document=**} {
       allow read, write: if false;
     }
-    // Add this inside your main match /databases/{database}/documents { ... } block
-
-match /courseRegistrations/{registrationId} {
-  // Public visitors can send a registration request.
-  // They cannot read, update, or delete requests.
-  allow create: if
-    request.resource.data.keys().hasOnly([
-      "studentName",
-      "parentName",
-      "grade",
-      "phone",
-      "courseId",
-      "courseTitle",
-      "preferredTime",
-      "notes",
-      "language",
-      "status",
-      "source",
-      "createdAt"
-    ])
-    && request.resource.data.studentName is string
-    && request.resource.data.studentName.size() >= 2
-    && request.resource.data.studentName.size() <= 120
-    && request.resource.data.parentName is string
-    && request.resource.data.parentName.size() >= 2
-    && request.resource.data.parentName.size() <= 120
-    && request.resource.data.grade is string
-    && request.resource.data.grade.size() >= 1
-    && request.resource.data.grade.size() <= 60
-    && request.resource.data.phone is string
-    && request.resource.data.phone.size() >= 8
-    && request.resource.data.phone.size() <= 20
-    && request.resource.data.courseId in [
-      "private-math",
-      "little-programmer",
-      "cs-lessons"
-    ]
-    && request.resource.data.courseTitle is string
-    && request.resource.data.preferredTime is string
-    && request.resource.data.preferredTime.size() >= 2
-    && request.resource.data.preferredTime.size() <= 120
-    && request.resource.data.notes is string
-    && request.resource.data.notes.size() <= 1000
-    && request.resource.data.language in ["ar", "en", "he"]
-    && request.resource.data.status == "new"
-    && request.resource.data.source == "public-courses-page"
-    && request.resource.data.createdAt == request.time;
-
-  allow read, update, delete: if false;
-}
-
-// Add this inside:
-// match /databases/{database}/documents { ... }
-//
-// If you already added a courseRegistrations match,
-// replace that entire block with this version.
-
-match /courseRegistrations/{registrationId} {
+    // Public course registration requests.
+    match /courseRegistrations/{registrationId} {
 
   // Public visitors may submit a registration request.
   allow create: if

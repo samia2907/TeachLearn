@@ -782,7 +782,7 @@ Cyber Defender
 🤖 Byte:
 "نحتاج كل ما تعلمته حتى الآن!"
 
-🚀 Mission 06:
+✨ Mission 06:
 إنقاذ المختبر
 
 هذه المرة...
@@ -810,7 +810,7 @@ But the system is not safe yet...
 🤖 Byte:
 "We need everything you have learned so far!"
 
-🚀 Mission 06:
+✨ Mission 06:
 Save the Lab
 
 This time...
@@ -838,7 +838,7 @@ Cyber Defender
 🤖 Byte:
 "אנחנו צריכים את כל מה שלמדת עד עכשיו!"
 
-🚀 משימה 06:
+✨ משימה 06:
 הצלת המעבדה
 
 הפעם...

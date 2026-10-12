@@ -1,0 +1,74 @@
+{
+  "/lesson-covers/algorithms-smart-solutions.png": {
+    "width": 1672,
+    "height": 941,
+    "full": "/lesson-covers/optimized/algorithms-smart-solutions-full-fb5d9cbfef7b.webp",
+    "fullBytes": 219496,
+    "thumbnail": "/lesson-covers/optimized/algorithms-smart-solutions-thumbnail-7f6aa5c9ed30.webp",
+    "thumbnailBytes": 26320,
+    "originalBytes": 1830495
+  },
+  "/lesson-covers/coding-building-blocks.png": {
+    "width": 1672,
+    "height": 941,
+    "full": "/lesson-covers/optimized/coding-building-blocks-full-16a43c15eb42.webp",
+    "fullBytes": 200322,
+    "thumbnail": "/lesson-covers/optimized/coding-building-blocks-thumbnail-8224cbdd1545.webp",
+    "thumbnailBytes": 21954,
+    "originalBytes": 1897080
+  },
+  "/lesson-covers/cybersecurity-digital-citizenship.png": {
+    "width": 1672,
+    "height": 941,
+    "full": "/lesson-covers/optimized/cybersecurity-digital-citizenship-full-6cb4ad330055.webp",
+    "fullBytes": 257988,
+    "thumbnail": "/lesson-covers/optimized/cybersecurity-digital-citizenship-thumbnail-9c39b955eed3.webp",
+    "thumbnailBytes": 27560,
+    "originalBytes": 2005702
+  },
+  "/lesson-covers/data-ai-responsibility.png": {
+    "width": 1672,
+    "height": 941,
+    "full": "/lesson-covers/optimized/data-ai-responsibility-full-1b5ff413676b.webp",
+    "fullBytes": 278922,
+    "thumbnail": "/lesson-covers/optimized/data-ai-responsibility-thumbnail-20f4bffefdcf.webp",
+    "thumbnailBytes": 26760,
+    "originalBytes": 2123558
+  },
+  "/lesson-covers/data-binary-patterns.png": {
+    "width": 1672,
+    "height": 941,
+    "full": "/lesson-covers/optimized/data-binary-patterns-full-96b119d44055.webp",
+    "fullBytes": 223836,
+    "thumbnail": "/lesson-covers/optimized/data-binary-patterns-thumbnail-0dc615f7e628.webp",
+    "thumbnailBytes": 24258,
+    "originalBytes": 1798318
+  },
+  "/lesson-covers/innovation-capstone.png": {
+    "width": 1672,
+    "height": 941,
+    "full": "/lesson-covers/optimized/innovation-capstone-full-1e217995a01a.webp",
+    "fullBytes": 229164,
+    "thumbnail": "/lesson-covers/optimized/innovation-capstone-thumbnail-f2f57d22a2c3.webp",
+    "thumbnailBytes": 26690,
+    "originalBytes": 1860699
+  },
+  "/lesson-covers/inside-a-computer.png": {
+    "width": 1672,
+    "height": 941,
+    "full": "/lesson-covers/optimized/inside-a-computer-full-a568083dcc46.webp",
+    "fullBytes": 245942,
+    "thumbnail": "/lesson-covers/optimized/inside-a-computer-thumbnail-234f8224aac5.webp",
+    "thumbnailBytes": 23702,
+    "originalBytes": 1965659
+  },
+  "/lesson-covers/internet-networks-web.png": {
+    "width": 1672,
+    "height": 941,
+    "full": "/lesson-covers/optimized/internet-networks-web-full-de26e0ef1eb7.webp",
+    "fullBytes": 274936,
+    "thumbnail": "/lesson-covers/optimized/internet-networks-web-thumbnail-17ed9c38d19b.webp",
+    "thumbnailBytes": 26594,
+    "originalBytes": 2072579
+  }
+}

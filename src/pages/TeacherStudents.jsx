@@ -713,10 +713,7 @@ function TeacherStudents() {
         )
       ) {
         setError(
-          text(
-            "Username must contain 3–24 letters or numbers.",
-            "اسم المستخدم يجب أن يحتوي على 3 إلى 24 حرفًا أو رقمًا."
-          )
+          text("Username must contain 3–24 letters or numbers.", "اسم المستخدم يجب أن يحتوي على 3 إلى 24 حرفًا أو رقمًا.", "שם המשתמש חייב להכיל 3–24 אותיות או מספרים.")
         );
 
         return;
@@ -1050,7 +1047,8 @@ function TeacherStudents() {
         setSuccess(
           text(
             `Student created successfully. Student code: ${studentCode}`,
-            `تم إنشاء الطالب بنجاح. رمز الطالب: ${studentCode}`
+            `تم إنشاء الطالب بنجاح. رمز الطالب: ${studentCode}`,
+            `התלמיד נוצר בהצלחה. קוד התלמיד: ${studentCode}`
           )
         );
 
@@ -1097,10 +1095,7 @@ function TeacherStudents() {
           "permission-denied"
         ) {
           setError(
-            text(
-              "Firestore permissions do not allow adding this student.",
-              "صلاحيات Firestore لا تسمح بإضافة الطالب."
-            )
+            text("Firestore permissions do not allow adding this student.", "صلاحيات Firestore لا تسمح بإضافة الطالب.", "הרשאות Firestore אינן מאפשרות להוסיף את התלמיד.")
           );
 
         } else if (
@@ -1108,10 +1103,7 @@ function TeacherStudents() {
           "auth/weak-password"
         ) {
           setError(
-            text(
-              "Please choose a stronger password.",
-              "اختر كلمة مرور أقوى."
-            )
+            text("Please choose a stronger password.", "اختر كلمة مرور أقوى.", "בחרו סיסמה חזקה יותר.")
           );
 
         } else {
@@ -1339,7 +1331,8 @@ function TeacherStudents() {
         setSuccess(
           text(
             `${selectedStudent.name} was removed from the class. The account and progress were kept.`,
-            `تمت إزالة ${selectedStudent.name} من الصف مع الاحتفاظ بالحساب والتقدم.`
+            `تمت إزالة ${selectedStudent.name} من الصف مع الاحتفاظ بالحساب والتقدم.`,
+            `${selectedStudent.name} הוסר מהכיתה. החשבון וההתקדמות נשמרו.`
           )
         );
 
@@ -1358,14 +1351,8 @@ function TeacherStudents() {
         setStudentActionError(
           actionError.code ===
           "permission-denied"
-            ? text(
-                "Firestore permissions do not allow this action.",
-                "صلاحيات Firestore لا تسمح بهذه العملية."
-              )
-            : text(
-                "Could not remove this student from the class.",
-                "تعذر إزالة الطالب من الصف."
-              )
+            ? text("Firestore permissions do not allow this action.", "صلاحيات Firestore لا تسمح بهذه العملية.", "הרשאות Firestore אינן מאפשרות לבצע פעולה זו.")
+            : text("Could not remove this student from the class.", "تعذر إزالة الطالب من الصف.", "לא ניתן להסיר את התלמיד מהכיתה.")
         );
 
       } finally {
@@ -1474,11 +1461,13 @@ function TeacherStudents() {
           currentlyInactive
             ? text(
                 `${selectedStudent.name}'s account was reactivated.`,
-                `تمت إعادة تفعيل حساب ${selectedStudent.name}.`
+                `تمت إعادة تفعيل حساب ${selectedStudent.name}.`,
+                `החשבון של ${selectedStudent.name} הופעל מחדש.`
               )
             : text(
                 `${selectedStudent.name}'s account was deactivated.`,
-                `تم تعطيل حساب ${selectedStudent.name}.`
+                `تم تعطيل حساب ${selectedStudent.name}.`,
+                `החשבון של ${selectedStudent.name} הושבת.`
               )
         );
 
@@ -1497,14 +1486,8 @@ function TeacherStudents() {
         setStudentActionError(
           actionError.code ===
           "permission-denied"
-            ? text(
-                "Firestore permissions do not allow this action.",
-                "صلاحيات Firestore لا تسمح بهذه العملية."
-              )
-            : text(
-                "Could not update this student.",
-                "تعذر تحديث حساب الطالب."
-              )
+            ? text("Firestore permissions do not allow this action.", "صلاحيات Firestore لا تسمح بهذه العملية.", "הרשאות Firestore אינן מאפשרות לבצע פעולה זו.")
+            : text("Could not update this student.", "تعذر تحديث حساب الطالب.", "לא ניתן לעדכן את חשבון התלמיד.")
         );
 
       } finally {
@@ -1681,10 +1664,7 @@ function TeacherStudents() {
           "functions/not-found"
         ) {
           setResetPasswordError(
-            text(
-              "Student was not found.",
-              "لم يتم العثور على الطالب."
-            )
+            text("Student was not found.", "لم يتم العثور على الطالب.", "התלמיד לא נמצא.")
           );
         } else {
           setResetPasswordError(
@@ -1820,7 +1800,7 @@ function TeacherStudents() {
 
   if (loading) {
     return (
-      <div className="students-loading">
+      <div className="students-loading" dir={language === "en" ? "ltr" : "rtl"}>
 
         <div>
           🎓
@@ -1843,7 +1823,7 @@ function TeacherStudents() {
   ===================================================== */
 
   return (
-    <div className="teacher-students-page">
+    <div className="teacher-students-page" dir={language === "en" ? "ltr" : "rtl"}>
 
       {/* =================================================
           HEADER
@@ -2590,31 +2570,19 @@ function TeacherStudents() {
               <div className="students-list-head">
 
                 <span>
-                  {text(
-                    "Student",
-                    "الطالب"
-                  )}
+                  {text("Student", "الطالب", "תלמיד")}
                 </span>
 
                 <span>
-                  {text(
-                    "Username",
-                    "اسم المستخدم"
-                  )}
+                  {text("Username", "اسم المستخدم", "שם משתמש")}
                 </span>
 
                 <span>
-                  {text(
-                    "Student Code",
-                    "رمز الطالب"
-                  )}
+                  {text("Student Code", "رمز الطالب", "קוד תלמיד")}
                 </span>
 
                 <span>
-                  {text(
-                    "Class",
-                    "الصف"
-                  )}
+                  {text("Class", "الصف", "כיתה")}
                 </span>
 
                 <span>
@@ -2697,14 +2665,14 @@ function TeacherStudents() {
 
                       {/* USERNAME */}
 
-                      <span className="student-username">
+                      <span className="student-username" dir="ltr">
                         {student.username}
                       </span>
 
 
                       {/* CODE */}
 
-                      <strong className="student-list-code">
+                      <strong className="student-list-code" dir="ltr">
                         {student.studentCode}
                       </strong>
 
@@ -2779,10 +2747,7 @@ function TeacherStudents() {
                           type="button"
                           className="student-more-actions-button"
                           title={
-                            text(
-                              "More options",
-                              "خيارات إضافية"
-                            )
+                            text("More options", "خيارات إضافية", "אפשרויות נוספות")
                           }
                           onClick={() =>
                             openStudentActions(
@@ -2824,6 +2789,7 @@ function TeacherStudents() {
 
           <div
             className="student-add-modal student-manage-modal"
+            dir={language === "en" ? "ltr" : "rtl"}
             onClick={(event) =>
               event.stopPropagation()
             }
@@ -2882,10 +2848,7 @@ function TeacherStudents() {
               <div>
 
                 <small>
-                  {text(
-                    "Username",
-                    "اسم المستخدم"
-                  )}
+                  {text("Username", "اسم المستخدم", "שם משתמש")}
                 </small>
 
                 <strong>
@@ -2898,10 +2861,7 @@ function TeacherStudents() {
               <div>
 
                 <small>
-                  {text(
-                    "Current Class",
-                    "الصف الحالي"
-                  )}
+                  {text("Current Class", "الصف الحالي", "הכיתה הנוכחית")}
                 </small>
 
                 <strong>
@@ -2981,8 +2941,8 @@ function TeacherStudents() {
 
                 </div>
 
-                <b>
-                  ›
+                <b aria-hidden="true">
+                  {language === "en" ? "›" : "‹"}
                 </b>
 
               </button>
@@ -3009,25 +2969,19 @@ function TeacherStudents() {
                   <div>
 
                     <strong>
-                      {text(
-                        "Remove from Class",
-                        "إزالة من الصف"
-                      )}
+                      {text("Remove from Class", "إزالة من الصف", "הסרה מהכיתה")}
                     </strong>
 
 
                     <small>
-                      {text(
-                        "The account, progress and portfolio will remain saved.",
-                        "سيبقى الحساب والتقدم والأعمال محفوظة."
-                      )}
+                      {text("The account, progress and portfolio will remain saved.", "سيبقى الحساب والتقدم والأعمال محفوظة.", "החשבון, ההתקדמות ותיק העבודות יישארו שמורים.")}
                     </small>
 
                   </div>
 
-                  <b>
-                    ›
-                  </b>
+                  <b aria-hidden="true">
+                  {language === "en" ? "›" : "‹"}
+                </b>
 
                 </button>
 
@@ -3063,34 +3017,22 @@ function TeacherStudents() {
                   <strong>
                     {selectedStudent.accountStatus ===
                     "inactive"
-                      ? text(
-                          "Reactivate Account",
-                          "إعادة تفعيل الحساب"
-                        )
-                      : text(
-                          "Deactivate Account",
-                          "تعطيل الحساب"
-                        )}
+                      ? text("Reactivate Account", "إعادة تفعيل الحساب", "הפעלה מחדש של החשבון")
+                      : text("Deactivate Account", "تعطيل الحساب", "השבתת החשבון")}
                   </strong>
 
 
                   <small>
                     {selectedStudent.accountStatus ===
                     "inactive"
-                      ? text(
-                          "Return this account to active status.",
-                          "إعادة الحساب إلى الحالة الفعّالة."
-                        )
-                      : text(
-                          "Keep all data while marking the account inactive.",
-                          "الاحتفاظ بكل البيانات مع تعطيل الحساب."
-                        )}
+                      ? text("Return this account to active status.", "إعادة الحساب إلى الحالة الفعّالة.", "החזרת החשבון למצב פעיל.")
+                      : text("Keep all data while marking the account inactive.", "الاحتفاظ بكل البيانات مع تعطيل الحساب.", "שמירת כל הנתונים תוך סימון החשבון כלא פעיל.")}
                   </small>
 
                 </div>
 
-                <b>
-                  ›
+                <b aria-hidden="true">
+                  {language === "en" ? "›" : "‹"}
                 </b>
 
               </button>
@@ -3121,14 +3063,8 @@ function TeacherStudents() {
                 }
               >
                 {studentActionLoading
-                  ? text(
-                      "Please wait...",
-                      "يرجى الانتظار..."
-                    )
-                  : text(
-                      "Close",
-                      "إغلاق"
-                    )}
+                  ? text("Please wait...", "يرجى الانتظار...", "נא להמתין...")
+                  : text("Close", "إغلاق", "סגירה")}
               </button>
 
             </div>
@@ -3156,6 +3092,7 @@ function TeacherStudents() {
 
           <div
             className="student-add-modal student-reset-modal"
+            dir={language === "en" ? "ltr" : "rtl"}
             onClick={(event) =>
               event.stopPropagation()
             }
@@ -3235,6 +3172,7 @@ function TeacherStudents() {
                       )
                     }
                     placeholder="Tm-483726"
+                    dir="ltr"
                   />
 
                 </label>
@@ -3332,14 +3270,11 @@ function TeacherStudents() {
 
                 <label>
 
-                  {text(
-                    "Temporary Password",
-                    "كلمة المرور المؤقتة"
-                  )}
+                  {text("Temporary Password", "كلمة المرور المؤقتة", "סיסמה זמנית")}
 
                   <div className="student-password-display">
 
-                    <code>
+                    <code dir="ltr">
                       {
                         sessionTempPasswords[
                           resetPasswordTarget.id
@@ -3437,6 +3372,7 @@ function TeacherStudents() {
 
           <div
             className="student-add-modal"
+            dir={language === "en" ? "ltr" : "rtl"}
             onClick={(event) =>
               event.stopPropagation()
             }
@@ -3467,10 +3403,7 @@ function TeacherStudents() {
 
 
                   <p>
-                    {text(
-                      "Create a TechMinds account for your student.",
-                      "أنشئ حساب TechMinds جديد للطالب."
-                    )}
+                    {text("Create a TechMinds account for your student.", "أنشئ حساب TechMinds جديد للطالب.", "צרו חשבון TechMinds עבור התלמיד.")}
                   </p>
 
                 </div>
@@ -3504,10 +3437,7 @@ function TeacherStudents() {
 
               <label>
 
-                {text(
-                  "Class",
-                  "الصف"
-                )}
+                {text("Class", "الصف", "כיתה")}
 
                 <select
                   value={
@@ -3522,10 +3452,7 @@ function TeacherStudents() {
                 >
 
                   <option value="">
-                    {text(
-                      "Choose a class",
-                      "اختر الصف"
-                    )}
+                    {text("Choose a class", "اختر الصف", "בחרו כיתה")}
                   </option>
 
 
@@ -3555,10 +3482,7 @@ function TeacherStudents() {
 
               <label>
 
-                {text(
-                  "Student Name",
-                  "اسم الطالب"
-                )}
+                {text("Student Name", "اسم الطالب", "שם התלמיד")}
 
                 <input
                   type="text"
@@ -3571,10 +3495,7 @@ function TeacherStudents() {
                     )
                   }
                   placeholder={
-                    text(
-                      "Full name",
-                      "الاسم الكامل"
-                    )
+                    text("Full name", "الاسم الكامل", "שם מלא")
                   }
                   required
                 />
@@ -3584,10 +3505,7 @@ function TeacherStudents() {
 
               <label>
 
-                {text(
-                  "Username",
-                  "اسم المستخدم"
-                )}
+                {text("Username", "اسم المستخدم", "שם משתמש")}
 
                 <input
                   type="text"
@@ -3600,6 +3518,7 @@ function TeacherStudents() {
                     )
                   }
                   placeholder="adam23"
+                  dir="ltr"
                   required
                 />
 
@@ -3608,10 +3527,7 @@ function TeacherStudents() {
 
               <label>
 
-                {text(
-                  "Password",
-                  "كلمة المرور"
-                )}
+                {text("Password", "كلمة المرور", "סיסמה")}
 
                 <input
                   type="password"
@@ -3643,10 +3559,7 @@ function TeacherStudents() {
                 </span>
 
                 <p>
-                  {text(
-                    "TechMinds creates a unique student code automatically. The student can log in using either the username or student code.",
-                    "سيقوم TechMinds بإنشاء رمز خاص للطالب تلقائيًا، ويمكن للطالب تسجيل الدخول باسم المستخدم أو رمز الطالب."
-                  )}
+                  {text("TechMinds creates a unique student code automatically. The student can log in using either the username or student code.", "سيقوم TechMinds بإنشاء رمز خاص للطالب تلقائيًا، ويمكن للطالب تسجيل الدخول باسم المستخدم أو رمز الطالب.", "TechMinds יוצר אוטומטית קוד תלמיד ייחודי. התלמיד יכול להתחבר באמצעות שם המשתמש או קוד התלמיד.")}
                 </p>
 
               </div>
@@ -3690,14 +3603,8 @@ function TeacherStudents() {
                   }
                 >
                   {saving
-                    ? text(
-                        "Creating...",
-                        "جارٍ الإنشاء..."
-                      )
-                    : text(
-                        "Create Student 🚀",
-                        "إنشاء الطالب 🚀"
-                      )}
+                    ? text("Creating...", "جارٍ الإنشاء...", "יוצר...")
+                    : text("Create Student ✨", "إنشاء الطالب ✨", "יצירת תלמיד ✨")}
                 </button>
 
               </div>
@@ -3781,24 +3688,15 @@ function TeacherStudents() {
               <tr>
 
                 <th>
-                  {text(
-                    "Student",
-                    "الطالب"
-                  )}
+                  {text("Student", "الطالب", "תלמיד")}
                 </th>
 
                 <th>
-                  {text(
-                    "Username",
-                    "اسم المستخدم"
-                  )}
+                  {text("Username", "اسم المستخدم", "שם משתמש")}
                 </th>
 
                 <th>
-                  {text(
-                    "Student Code",
-                    "رمز الطالب"
-                  )}
+                  {text("Student Code", "رمز الطالب", "קוד תלמיד")}
                 </th>
 
                 {printMode ===
@@ -3806,17 +3704,11 @@ function TeacherStudents() {
 
                   <>
                     <th>
-                      {text(
-                        "Class",
-                        "الصف"
-                      )}
+                      {text("Class", "الصف", "כיתה")}
                     </th>
 
                     <th>
-                      {text(
-                        "Grade",
-                        "الصف الدراسي"
-                      )}
+                      {text("Grade", "الصف الدراسي", "כיתה/שכבה")}
                     </th>
                   </>
 
@@ -3826,10 +3718,7 @@ function TeacherStudents() {
                   "logins" && (
 
                   <th>
-                    {text(
-                      "Temporary Password",
-                      "كلمة المرور المؤقتة"
-                    )}
+                    {text("Temporary Password", "كلمة المرور المؤقتة", "סיסמה זמנית")}
                   </th>
 
                 )}

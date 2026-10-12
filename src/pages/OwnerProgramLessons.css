@@ -2319,4 +2319,42 @@
     grid-template-columns:
       repeat(2, minmax(0, 1fr));
   }
+}/* Compact Owner lesson layout. Scoped to avoid affecting student cards. */
+.owner-program-lessons-page .owner-lesson-card {
+  display: grid; grid-template-columns: 52px minmax(0, 1fr) 44px;
+  gap: 12px; padding: 16px; min-height: 0; align-items: start;
+}
+.owner-program-lessons-page .owner-lesson-number { grid-column: 1; grid-row: 1; width: 52px; height: 52px; }
+.owner-program-lessons-page .owner-lesson-info { grid-column: 2; grid-row: 1; min-width: 0; }
+.owner-program-lessons-page .owner-lesson-cover-wrap { grid-column: 1; grid-row: 2; width: 52px; height: 44px; margin: 0; }
+.owner-program-lessons-page .owner-lesson-cover { width: 100%; height: 100%; object-fit: cover; }
+.owner-program-lessons-page .owner-lesson-order-actions { grid-column: 3; grid-row: 1; display: flex; flex-direction: column; gap: 4px; }
+.owner-program-lessons-page .owner-lesson-order-actions button { width: 44px; height: 44px; }
+.owner-program-lessons-page .owner-lesson-actions { grid-column: 2 / -1; grid-row: 2; display: flex; flex-wrap: wrap; gap: 8px; }
+.owner-program-lessons-page .owner-lesson-actions button { min-height: 44px; padding: 8px 14px; font-size: 12px; white-space: normal; overflow-wrap: anywhere; }
+.owner-program-lessons-page .owner-lesson-title-row { flex-wrap: wrap; gap: 8px; }
+.owner-program-lessons-page .owner-lesson-title-row h3 { font-size: 17px; white-space: normal; overflow-wrap: anywhere; line-height: 1.45; }
+.owner-program-lessons-page .owner-lesson-status { font-size: 11px; flex-shrink: 0; }
+.owner-program-lessons-page .owner-lesson-info > p { font-size: 13px; line-height: 1.5; white-space: normal; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.owner-program-lessons-page .owner-lesson-meta span { font-size: 12px; }
+.owner-program-lessons-page .owner-lessons-header { flex-wrap: wrap; padding: 20px; }
+.owner-program-lessons-page .owner-lessons-header > div { min-width: 0; }
+.owner-program-lessons-page .owner-lessons-header h1 { overflow-wrap: anywhere; }
+.owner-program-lessons-page .owner-lessons-header-actions { flex-wrap: wrap; }
+.owner-program-lessons-page .owner-lessons-back,
+.owner-program-lessons-page .owner-lessons-language button,
+.owner-program-lessons-page .owner-add-lesson-button { min-height: 44px; font-size: 12px; }
+@media (max-width: 800px) {
+  .owner-program-lessons-page { padding: 16px; }
+  .owner-program-lessons-page .owner-lessons-panel { padding: 14px; }
+  .owner-program-lessons-page .owner-lessons-toolbar { grid-template-columns: minmax(0, 1fr); }
+  .owner-program-lessons-page .owner-lessons-toolbar > select { min-height: 44px; }
+}
+@media (max-width: 580px) {
+  .owner-program-lessons-page .owner-lesson-card { grid-template-columns: 52px minmax(0, 1fr); gap: 10px; padding: 12px; }
+  .owner-program-lessons-page .owner-lesson-order-actions { grid-column: 2; grid-row: 1; flex-direction: row; justify-content: flex-end; }
+  .owner-program-lessons-page .owner-lesson-info { grid-column: 1 / -1; grid-row: 2; }
+  .owner-program-lessons-page .owner-lesson-cover-wrap { grid-column: 1; grid-row: 3; }
+  .owner-program-lessons-page .owner-lesson-actions { grid-column: 1 / -1; grid-row: 4; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .owner-program-lessons-page .owner-lessons-header-actions { width: 100%; justify-content: space-between; }
 }

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import mission from '../src/data/missions/mission01.js';
+import mission from '../src/data/missions/computer-science-modern-technology/mission01.js';
 import { checkAnswer, mergeProgress, missionReady, newProgress, runRobot, updateScreen, validateMission } from '../src/components/mission/missionEngine.js';
 import { commitMission } from '../src/components/mission/missionRepository.js';
 

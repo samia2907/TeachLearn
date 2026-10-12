@@ -152,7 +152,7 @@ function TeacherDashboard() {
     },
 
     techExplorer: {
-      icon: "🚀",
+      icon: "✨",
 
       en:
         "Tech Explorer",
@@ -798,7 +798,7 @@ function TeacherDashboard() {
         }
       >
         <div>
-          🚀
+          ✨
         </div>
 
         <p>
@@ -845,7 +845,7 @@ function TeacherDashboard() {
         <div className="teacher-logo">
 
           <div className="teacher-logo-icon">
-            🚀
+            ✨
           </div>
 
           <div>

@@ -30,7 +30,7 @@ async function main() {
     projectId: PROJECT_ID,
   });
   const database = getFirestore(app, DATABASE_ID);
-  const mission = (await import("../../src/data/missions/mission01.js")).default;
+  const mission = (await import("../../src/data/missions/computer-science-modern-technology/mission01.js")).default;
   const programReference = database.collection("programs").doc(PROGRAM_ID);
   const lessonReference = database.collection("lessons").doc(LESSON_DOCUMENT_ID);
   const [programSnapshot, lessonSnapshot] = await database.getAll(
@@ -47,8 +47,7 @@ async function main() {
     .where("programId", "==", PROGRAM_ID)
     .get();
 
-  const lessonNumber = existingLesson.lessonNumber ||
-    existingLessons.size + (lessonSnapshot.exists ? 0 : 1);
+  const lessonNumber = 5;
   const now = FieldValue.serverTimestamp();
   const lessonDocument = {
     ...existingLesson,

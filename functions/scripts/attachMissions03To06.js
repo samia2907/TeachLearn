@@ -8,6 +8,7 @@ async function main() {
   const target = {projectId: "techminds-63e30", databaseId: "default"};
   assertImportTarget(target);
   const files = ["mission-03-secret-message", "mission-04-data-packet-journey", "mission-05-lab-intrusion", "mission-06-save-the-lab"];
+  const lessonOrders = [7, 11, 13, 17];
   const {validateMission} = await import("../../src/components/mission/missionEngine.js");
   const missions = await Promise.all(files.map(async (file, index) => {
     const mission = (await import(`../../src/data/missions/computer-science-modern-technology/${file}.js`)).default;
@@ -36,7 +37,9 @@ async function main() {
         templateId: mission.id, activityType: "mission", title: mission.title,
         description: mission.summary || mission.title,
         minutes: mission.estimatedMinutes, xp: mission.xpReward, xpReward: mission.xpReward,
-        status: "published", lessonNumber: index + 3, order: index + 3,
+        status: "published",
+        lessonNumber: lessonOrders[index],
+        order: lessonOrders[index],
         sections: mission.sections, slideCount: mission.sections.length,
         createdAt: existing.createdAt || now, updatedAt: now,
       });

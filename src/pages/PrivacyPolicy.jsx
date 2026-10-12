@@ -37,7 +37,7 @@ function PrivacyPolicy() {
             href="/"
             className="legal-logo"
           >
-            🚀 TechMinds
+            ✨ TechMinds
           </a>
 
 

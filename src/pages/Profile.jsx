@@ -14,6 +14,7 @@ import {
 } from "../firebase/accountLinking";
 import { authMessage } from "../firebase/authMessages";
 import { useLanguage } from "../context/LanguageContext";
+import StudentNavigation from "../components/StudentNavigation";
 import "./Profile.css";
 
 const profileServices = {
@@ -414,6 +415,8 @@ export default function Profile({
   }[success];
 
   return (
+    <>
+    {profile?.role === "student" && <StudentNavigation />}
     <main
       className="profile-page"
       dir={direction}
@@ -967,5 +970,6 @@ export default function Profile({
         )}
       </section>
     </main>
+    </>
   );
 }

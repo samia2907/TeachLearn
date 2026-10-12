@@ -52,6 +52,10 @@
     space-between;
 }
 
+.student-dashboard .student-topbar {
+  display: none;
+}
+
 .student-brand {
   display: flex;
 

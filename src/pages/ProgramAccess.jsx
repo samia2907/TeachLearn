@@ -196,7 +196,7 @@ export default function ProgramAccess() {
             </p>
           )}
 
-          <h2>{t("What you’ll gain 🚀", "شو رح تستفيد من البرنامج؟ 🚀", "מה תרוויחו מהתוכנית? 🚀")}</h2>
+          <h2>{t("What you’ll gain ✨", "شو رح تستفيد من البرنامج؟ ✨", "מה תרוויחו מהתוכנית? ✨")}</h2>
           <p>
             {t(
               "Full access to lessons, missions, and interactive challenges, with clear progress and a flexible learning pace.",
@@ -250,9 +250,9 @@ export default function ProgramAccess() {
                 : approved
                 ? t("Access approved", "تمت الموافقة", "הגישה אושרה")
                 : t(
-                    "🚀 Request program access",
-                    "🚀 اطلب فتح البرنامج الآن",
-                    "🚀 בקשו לפתוח את התוכנית"
+                    "✨ Request program access",
+                    "✨ اطلب فتح البرنامج الآن",
+                    "✨ בקשו לפתוח את התוכנית"
                   )}
             </button>
 

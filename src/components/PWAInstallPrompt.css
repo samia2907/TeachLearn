@@ -1,0 +1,17 @@
+.pwa-install-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: flex-end; justify-content: center; padding: 18px; background: rgba(24, 20, 34, .52); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); animation: pwaFade .22s ease-out; }
+.pwa-install-dialog { position: relative; width: min(100%, 520px); max-height: calc(100dvh - 36px); overflow: auto; padding: 30px 24px 22px; border: 1px solid rgba(255,255,255,.65); border-radius: 30px; background: #fff; color: #2f2440; box-shadow: 0 24px 70px rgba(28,18,44,.25); text-align: center; animation: pwaUp .28s ease-out; outline: none; }
+.pwa-install-close { position: absolute; top: 14px; inset-inline-end: 16px; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #f3eff8; color: #5c4b70; font-size: 28px; line-height: 1; cursor: pointer; }
+.pwa-install-icon { width: 62px; height: 62px; margin: 2px auto 12px; display: grid; place-items: center; border-radius: 19px; background: linear-gradient(145deg,#f1eaff,#e5f7f4); font-size: 31px; }
+.pwa-install-dialog h2 { margin: 0; font-size: clamp(25px, 6vw, 32px); line-height: 1.25; }
+.pwa-install-subtitle { margin: 10px 0 22px; color: #766985; font-size: 16px; }
+.pwa-install-steps { display: grid; gap: 12px; margin: 0 0 22px; text-align: start; }
+.pwa-install-step { display: grid; grid-template-columns: 38px 1fr; align-items: center; gap: 12px; min-height: 52px; padding: 8px 10px; border-radius: 16px; background: #faf8fc; font-size: 16px; font-weight: 600; line-height: 1.55; }
+.pwa-install-number { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: #7654b4; color: white; font-weight: 800; }
+.pwa-install-primary,.pwa-install-secondary { width: 100%; min-height: 54px; border-radius: 17px; font: inherit; font-size: 17px; font-weight: 800; cursor: pointer; }
+.pwa-install-primary { margin-bottom: 10px; border: 0; background: #7654b4; color: #fff; box-shadow: 0 8px 20px rgba(118,84,180,.2); }
+.pwa-install-secondary { border: 1px solid #e5ddef; background: #f7f3fb; color: #503b69; }
+.pwa-install-primary:focus-visible,.pwa-install-secondary:focus-visible,.pwa-install-close:focus-visible { outline: 3px solid rgba(118,84,180,.35); outline-offset: 2px; }
+@media (min-width: 700px) { .pwa-install-overlay { align-items: center; } }
+@keyframes pwaFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pwaUp { from { opacity: 0; transform: translateY(24px) scale(.98); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .pwa-install-overlay,.pwa-install-dialog { animation: none; } }

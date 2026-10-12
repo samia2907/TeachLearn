@@ -35,7 +35,7 @@ function TermsConditions() {
             href="/"
             className="legal-logo"
           >
-            🚀 TechMinds
+            ✨ TechMinds
           </a>
 
 

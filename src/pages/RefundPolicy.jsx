@@ -27,24 +27,18 @@ function RefundPolicy() {
   return (
     <div
       className="legal-page"
-      dir={
-        language === "en"
-          ? "ltr"
-          : "rtl"
-      }
+      dir={language === "en" ? "ltr" : "rtl"}
     >
-
       <div className="legal-container">
 
+        {/* Header */}
         <header className="legal-header">
-
           <a
             href="/"
             className="legal-logo"
           >
-            🚀 TechMinds
+            ✨ TechMinds
           </a>
-
 
           <div className="legal-language">
 
@@ -62,7 +56,6 @@ function RefundPolicy() {
               EN
             </button>
 
-
             <button
               type="button"
               className={
@@ -76,7 +69,6 @@ function RefundPolicy() {
             >
               عربي
             </button>
-
 
             <button
               type="button"
@@ -93,10 +85,10 @@ function RefundPolicy() {
             </button>
 
           </div>
-
         </header>
 
 
+        {/* Hero */}
         <section className="legal-hero">
 
           <div className="legal-icon">
@@ -117,17 +109,17 @@ function RefundPolicy() {
 
           <p>
             {text(
-              "Information about paid programs, subscription cancellation and refund requests on TechMinds.",
-              "معلومات حول البرامج المدفوعة وإلغاء الاشتراكات وطلبات استرداد الأموال في TechMinds.",
-              "מידע על תוכניות בתשלום, ביטול מנויים ובקשות להחזר כספי ב-TechMinds."
+              "Information about purchases, access to digital learning content, and the TechMinds refund policy.",
+              "معلومات حول عمليات الشراء والوصول إلى المحتوى التعليمي الرقمي وسياسة الاسترجاع في TechMinds.",
+              "מידע על רכישות, גישה לתוכן לימודי דיגיטלי ומדיניות ההחזרים של TechMinds."
             )}
           </p>
 
           <small>
             {text(
-              "Last updated: September 28, 2026",
-              "آخر تحديث: 28 سبتمبر 2026",
-              "עודכן לאחרונה: 28 בספטמבר 2026"
+              "Last updated: October 7, 2026",
+              "آخر تحديث: 7 أكتوبر 2026",
+              "עודכן לאחרונה: 7 באוקטובר 2026"
             )}
           </small>
 
@@ -136,6 +128,7 @@ function RefundPolicy() {
 
         <main className="legal-content">
 
+          {/* 1 */}
           <section>
             <h2>
               1.{" "}
@@ -148,96 +141,98 @@ function RefundPolicy() {
 
             <p>
               {text(
-                "TechMinds may offer free programs as well as paid programs or paid access options. The price, access type and included features will be shown before any payment is requested.",
-                "قد توفّر TechMinds برامج مجانية إلى جانب برامج مدفوعة أو خيارات وصول مدفوعة. يتم عرض السعر ونوع الوصول والميزات المشمولة قبل طلب أي دفعة.",
-                "TechMinds עשויה להציע תוכניות חינמיות לצד תוכניות בתשלום או אפשרויות גישה בתשלום. המחיר, סוג הגישה והתכונות הכלולות יוצגו לפני בקשת תשלום."
+                "TechMinds may offer free learning content as well as paid learning paths, programs, lessons, or other digital educational content. Where payment is required, the price and the access provided will be displayed before purchase.",
+                "قد توفّر TechMinds محتوى تعليميًا مجانيًا، بالإضافة إلى مسارات تعليمية أو برامج أو دروس أو محتوى تعليمي رقمي مدفوع. عندما يكون الدفع مطلوبًا، يتم عرض السعر ونوع الوصول الذي يحصل عليه المستخدم قبل الشراء.",
+                "TechMinds עשויה להציע תוכן לימודי חינמי לצד מסלולי לימוד, תוכניות, שיעורים או תוכן חינוכי דיגיטלי בתשלום. כאשר נדרש תשלום, המחיר וסוג הגישה שיינתנו למשתמש יוצגו לפני הרכישה."
               )}
             </p>
 
             <p>
               {text(
-                "Some programs may also be available through class access or access granted directly by the platform owner without a separate payment by the student.",
-                "قد تكون بعض البرامج متاحة أيضًا من خلال وصول صفّي أو من خلال منح وصول مباشر من مالك المنصة دون حاجة الطالب إلى دفع منفصل.",
-                "חלק מהתוכניות עשויות להיות זמינות גם באמצעות גישה כיתתית או באמצעות הרשאה ישירה שניתנת על ידי בעל הפלטפורמה ללא תשלום נפרד מצד התלמיד."
+                "Some programs may also be made available through class access, promotional access, or access granted directly by TechMinds without a separate online payment.",
+                "قد تكون بعض البرامج متاحة أيضًا من خلال وصول صفّي، أو وصول ترويجي، أو وصول يتم منحه مباشرة من TechMinds دون الحاجة إلى دفع منفصل عبر الإنترنت.",
+                "חלק מהתוכניות עשויות להיות זמינות גם באמצעות גישה כיתתית, גישה במסגרת מבצע או גישה שניתנת ישירות על ידי TechMinds ללא תשלום מקוון נפרד."
               )}
             </p>
           </section>
 
 
+          {/* 2 */}
           <section>
             <h2>
               2.{" "}
               {text(
-                "Payment Processing",
-                "معالجة الدفع",
-                "עיבוד תשלומים"
+                "Before Purchase",
+                "قبل الشراء",
+                "לפני הרכישה"
               )}
             </h2>
 
             <p>
               {text(
-                "When payment is enabled for a TechMinds product or program, payment may be processed through Paddle. Paddle may act as the Merchant of Record for the transaction and may handle payment processing, billing-related support and applicable refunds according to its terms.",
-                "عند تفعيل الدفع لمنتج أو برنامج في TechMinds، قد تتم معالجة الدفع من خلال Paddle. وقد تعمل Paddle كـ Merchant of Record للمعاملة وتتولى معالجة الدفع ودعم الفوترة وعمليات الاسترجاع المطبقة وفقًا لشروطها.",
-                "כאשר תשלום מופעל עבור מוצר או תוכנית ב-TechMinds, התשלום עשוי להתבצע באמצעות Paddle. Paddle עשויה לפעול כ-Merchant of Record לעסקה ולטפל בעיבוד התשלום, בתמיכה הקשורה לחיוב ובהחזרים החלים בהתאם לתנאיה."
+                "Before purchasing a paid learning path or other digital content, please review the program description, intended audience, included content, price, and access conditions.",
+                "قبل شراء مسار تعليمي مدفوع أو أي محتوى رقمي آخر، يرجى مراجعة وصف البرنامج والفئة المستهدفة والمحتوى المشمول والسعر وشروط الوصول.",
+                "לפני רכישת מסלול לימוד בתשלום או תוכן דיגיטלי אחר, יש לעיין בתיאור התוכנית, בקהל היעד, בתוכן הכלול, במחיר ובתנאי הגישה."
               )}
             </p>
 
             <p>
               {text(
-                "TechMinds does not store full credit card numbers or card security codes.",
-                "لا تقوم TechMinds بتخزين أرقام بطاقات الائتمان الكاملة أو رموز أمان البطاقات.",
-                "TechMinds אינה שומרת מספרי כרטיס אשראי מלאים או קודי אבטחה של הכרטיס."
+                "Where free introductory lessons, previews, or trial content are available, we recommend using them before completing a purchase in order to better understand the learning experience and whether the program is suitable.",
+                "عندما تتوفر دروس تمهيدية مجانية أو معاينة أو محتوى تجريبي، نوصي باستخدامها قبل إتمام عملية الشراء للتعرّف بشكل أفضل على تجربة التعلم ومدى ملاءمة البرنامج.",
+                "כאשר זמינים שיעורי מבוא חינמיים, תצוגה מקדימה או תוכן לניסיון, מומלץ להשתמש בהם לפני השלמת הרכישה כדי להכיר טוב יותר את חוויית הלמידה ואת התאמת התוכנית."
               )}
             </p>
           </section>
 
 
+          {/* 3 */}
           <section>
             <h2>
               3.{" "}
               {text(
-                "Before Payment",
-                "قبل الدفع",
-                "לפני התשלום"
+                "Digital Content and Access",
+                "المحتوى الرقمي وتفعيل الوصول",
+                "תוכן דיגיטלי והפעלת גישה"
               )}
             </h2>
 
             <p>
               {text(
-                "Before completing a paid purchase, customers should review the displayed price, access period, whether the payment is one-time or recurring, and the content or features included.",
-                "قبل إتمام أي عملية شراء مدفوعة، يجب مراجعة السعر الظاهر ومدة الوصول وما إذا كانت الدفعة لمرة واحدة أو متجددة والمحتوى أو الميزات المشمولة.",
-                "לפני השלמת רכישה בתשלום, יש לעיין במחיר המוצג, בתקופת הגישה, האם התשלום הוא חד-פעמי או מתחדש, ובתוכן או בתכונות הכלולות."
+                "TechMinds provides digital educational content. After a paid purchase is completed, access to the purchased learning path, program, lessons, or other digital content may be activated for the relevant account.",
+                "تقدّم TechMinds محتوى تعليميًا رقميًا. بعد إتمام عملية شراء مدفوعة، قد يتم تفعيل الوصول إلى المسار التعليمي أو البرنامج أو الدروس أو المحتوى الرقمي الذي تم شراؤه للحساب المعني.",
+                "TechMinds מספקת תוכן חינוכי דיגיטלי. לאחר השלמת רכישה בתשלום, ניתן להפעיל בחשבון הרלוונטי גישה למסלול הלימוד, לתוכנית, לשיעורים או לתוכן הדיגיטלי שנרכש."
               )}
             </p>
           </section>
 
 
+          {/* 4 */}
           <section>
             <h2>
               4.{" "}
               {text(
-                "Statutory Consumer Rights",
-                "حقوق المستهلك القانونية",
-                "זכויות צרכן על פי חוק"
+                "Refund Policy",
+                "سياسة الاسترجاع",
+                "מדיניות החזרים"
               )}
             </h2>
 
             <div className="legal-highlight">
 
               <strong>
-                14{" "}
                 {text(
-                  "days",
-                  "يومًا",
-                  "ימים"
+                  "Please review before purchasing",
+                  "يرجى المراجعة قبل الشراء",
+                  "נא לעיין לפני הרכישה"
                 )}
               </strong>
 
               <p>
                 {text(
-                  "Eligible consumers may have a statutory right to withdraw from certain digital content or service transactions within 14 days, subject to applicable law and the circumstances of the transaction.",
-                  "قد يكون للمستهلكين المؤهلين حق قانوني في الانسحاب من بعض معاملات الخدمات أو المحتوى الرقمي خلال 14 يومًا، وفقًا للقانون المعمول به وظروف المعاملة.",
-                  "לצרכנים זכאים עשויה לעמוד זכות חוקית לבטל עסקאות מסוימות של תוכן דיגיטלי או שירותים בתוך 14 ימים, בכפוף לדין החל ולנסיבות העסקה."
+                  "Once a purchase has been completed and access to the purchased learning path, program, lessons, or other digital content has been activated, TechMinds generally does not offer refunds or exchanges, except where otherwise required by applicable law.",
+                  "بعد إتمام عملية الشراء وتفعيل الوصول إلى المسار التعليمي أو البرنامج أو الدروس أو أي محتوى رقمي تم شراؤه، لا تقدم TechMinds بشكل عام استرجاعًا أو استبدالًا للمبلغ المدفوع، إلا في الحالات التي يوجب فيها القانون المعمول به خلاف ذلك.",
+                  "לאחר השלמת הרכישה והפעלת הגישה למסלול הלימוד, לתוכנית, לשיעורים או לתוכן דיגיטלי אחר שנרכש, TechMinds בדרך כלל אינה מציעה החזר כספי או החלפה, אלא במקרים שבהם הדין החל מחייב אחרת."
                 )}
               </p>
 
@@ -245,125 +240,117 @@ function RefundPolicy() {
 
             <p>
               {text(
-                "Nothing in this policy limits consumer rights that cannot legally be waived.",
-                "لا تحد هذه السياسة من حقوق المستهلك التي لا يجوز التنازل عنها قانونيًا.",
-                "אין במדיניות זו כדי להגביל זכויות צרכניות שלא ניתן לוותר עליהן על פי חוק."
+                "For this reason, customers are encouraged to carefully review the program information and use any available free or preview content before making a purchase.",
+                "لهذا السبب، نوصي بمراجعة معلومات البرنامج بعناية والاستفادة من أي محتوى مجاني أو تجريبي متاح قبل إتمام عملية الشراء.",
+                "מסיבה זו, מומלץ לעיין היטב בפרטי התוכנית ולהשתמש בכל תוכן חינמי או תוכן לניסיון הזמין לפני ביצוע הרכישה."
               )}
             </p>
           </section>
 
 
+          {/* 5 */}
           <section>
             <h2>
               5.{" "}
               {text(
-                "Subscriptions and Renewals",
-                "الاشتراكات والتجديد",
-                "מנויים וחידושים"
+                "Consumer Rights",
+                "حقوق المستهلك",
+                "זכויות צרכן"
               )}
             </h2>
 
             <p>
               {text(
-                "If TechMinds offers a recurring subscription, the renewal terms will be shown before purchase. Cancelling a recurring subscription normally prevents future renewal charges.",
-                "إذا قدّمت TechMinds اشتراكًا متجددًا، فسيتم عرض شروط التجديد قبل الشراء. ويمنع إلغاء الاشتراك المتجدد عادةً رسوم التجديد المستقبلية.",
-                "אם TechMinds תציע מנוי מתחדש, תנאי החידוש יוצגו לפני הרכישה. ביטול מנוי מתחדש בדרך כלל ימנע חיובי חידוש עתידיים."
+                "Nothing in this policy is intended to limit, exclude, or waive consumer rights that cannot legally be limited, excluded, or waived under applicable law.",
+                "لا تهدف هذه السياسة إلى تقييد أو استبعاد أو التنازل عن أي حقوق للمستهلك لا يجوز قانونيًا تقييدها أو استبعادها أو التنازل عنها بموجب القانون المعمول به.",
+                "אין במדיניות זו כוונה להגביל, לשלול או לוותר על זכויות צרכניות שלא ניתן על פי דין להגבילן, לשלול אותן או לוותר עליהן."
               )}
             </p>
 
             <p>
               {text(
-                "Unless a refund is approved or legally required, access may continue until the end of the already-paid billing period.",
-                "ما لم تتم الموافقة على استرجاع أو يكن الاسترجاع مطلوبًا قانونيًا، فقد يستمر الوصول حتى نهاية فترة الفوترة المدفوعة.",
-                "אלא אם אושר החזר או שהחזר נדרש על פי חוק, הגישה עשויה להימשך עד סוף תקופת החיוב שכבר שולמה."
+                "Where applicable law gives a customer a mandatory right to cancel a transaction or receive a refund, that legal right will apply regardless of this general policy.",
+                "إذا منح القانون المعمول به للمستهلك حقًا إلزاميًا في إلغاء المعاملة أو الحصول على استرجاع، فسيتم احترام هذا الحق القانوني بغض النظر عن السياسة العامة المذكورة أعلاه.",
+                "כאשר הדין החל מעניק ללקוח זכות מחייבת לבטל עסקה או לקבל החזר, זכות חוקית זו תחול ללא קשר למדיניות הכללית שלעיל."
               )}
             </p>
           </section>
 
 
+          {/* 6 */}
           <section>
             <h2>
               6.{" "}
               {text(
-                "Refund Requests",
-                "طلبات الاسترجاع",
-                "בקשות להחזר"
+                "Technical Problems",
+                "المشاكل التقنية",
+                "בעיות טכניות"
               )}
             </h2>
 
             <p>
               {text(
-                "Refund requests may be reviewed based on applicable consumer rights, the payment provider's terms, the type of purchase and the circumstances of the transaction.",
-                "قد تتم مراجعة طلبات الاسترجاع وفقًا لحقوق المستهلك المطبقة وشروط مزود الدفع ونوع الشراء وظروف المعاملة.",
-                "בקשות להחזר עשויות להיבחן בהתאם לזכויות הצרכן החלות, לתנאי ספק התשלום, לסוג הרכישה ולנסיבות העסקה."
+                "If a technical problem prevents you from accessing or using paid TechMinds content, please contact us so that we can investigate the issue and provide appropriate assistance.",
+                "إذا منعتك مشكلة تقنية من الوصول إلى محتوى TechMinds المدفوع أو استخدامه، يرجى التواصل معنا حتى نتمكن من فحص المشكلة وتقديم المساعدة المناسبة.",
+                "אם בעיה טכנית מונעת מכם לגשת לתוכן בתשלום של TechMinds או להשתמש בו, אנא פנו אלינו כדי שנוכל לבדוק את הבעיה ולספק סיוע מתאים."
               )}
             </p>
 
             <p>
               {text(
-                "Where Paddle processed the payment, the refund request may also be handled through Paddle according to its applicable buyer and refund terms.",
-                "عندما تتم معالجة الدفع بواسطة Paddle، قد تتم معالجة طلب الاسترجاع أيضًا من خلال Paddle وفقًا لشروط المشترين وسياسة الاسترجاع المطبقة لديها.",
-                "כאשר Paddle עיבדה את התשלום, בקשת ההחזר עשויה להיות מטופלת גם באמצעות Paddle בהתאם לתנאי הקונה ולמדיניות ההחזרים החלים שלה."
+                "Where possible, TechMinds may first attempt to restore access or resolve the technical issue.",
+                "عندما يكون ذلك ممكنًا، قد تحاول TechMinds أولًا إعادة تفعيل الوصول أو حل المشكلة التقنية.",
+                "ככל שניתן, TechMinds עשויה לנסות תחילה לשחזר את הגישה או לפתור את הבעיה הטכנית."
               )}
             </p>
           </section>
 
 
+          {/* 7 */}
           <section>
             <h2>
               7.{" "}
               {text(
-                "Problems With a Paid Service",
-                "مشاكل الخدمة المدفوعة",
-                "בעיות בשירות בתשלום"
+                "Refunds Required by Law",
+                "الاسترجاع المطلوب قانونيًا",
+                "החזרים הנדרשים על פי חוק"
               )}
             </h2>
 
             <p>
               {text(
-                "If a technical problem prevents you from using a paid TechMinds program or service, please contact support so the issue can be reviewed and assistance can be provided.",
-                "إذا منعتك مشكلة تقنية من استخدام برنامج أو خدمة مدفوعة في TechMinds، يرجى التواصل مع الدعم حتى يتم فحص المشكلة وتقديم المساعدة.",
-                "אם בעיה טכנית מונעת מכם להשתמש בתוכנית או בשירות בתשלום של TechMinds, אנא פנו לתמיכה כדי שניתן יהיה לבדוק את הבעיה ולספק סיוע."
+                "If a refund is required under applicable law, the request will be reviewed according to the circumstances of the transaction and the applicable legal requirements.",
+                "إذا كان الاسترجاع مطلوبًا بموجب القانون المعمول به، فسيتم فحص الطلب وفقًا لظروف عملية الشراء والمتطلبات القانونية المطبقة.",
+                "אם החזר נדרש בהתאם לדין החל, הבקשה תיבחן בהתאם לנסיבות העסקה ולדרישות החוק החלות."
+              )}
+            </p>
+
+            <p>
+              {text(
+                "If a full refund is issued, access to the digital content associated with that purchase may be removed.",
+                "إذا تم إصدار استرجاع كامل للمبلغ، فقد يتم إلغاء الوصول إلى المحتوى الرقمي المرتبط بعملية الشراء.",
+                "אם יינתן החזר כספי מלא, ייתכן שהגישה לתוכן הדיגיטלי הקשור לאותה רכישה תוסר."
               )}
             </p>
           </section>
 
 
+          {/* 8 */}
           <section>
             <h2>
               8.{" "}
               {text(
-                "Access After Refund",
-                "الوصول بعد الاسترجاع",
-                "גישה לאחר החזר"
+                "Contact Us",
+                "تواصل معنا",
+                "יצירת קשר"
               )}
             </h2>
 
             <p>
               {text(
-                "When a payment is fully refunded, access to the paid program, service or features associated with that purchase may be removed.",
-                "عند استرداد دفعة بالكامل، قد يتم إلغاء الوصول إلى البرنامج أو الخدمة أو الميزات المدفوعة المرتبطة بعملية الشراء.",
-                "כאשר תשלום מוחזר במלואו, ייתכן שהגישה לתוכנית, לשירות או לתכונות בתשלום הקשורות לרכישה תוסר."
-              )}
-            </p>
-          </section>
-
-
-          <section>
-            <h2>
-              9.{" "}
-              {text(
-                "How to Request Help",
-                "كيفية طلب المساعدة",
-                "כיצד לבקש עזרה"
-              )}
-            </h2>
-
-            <p>
-              {text(
-                "Please provide the email address connected to your TechMinds account and enough information for us to identify the program, subscription or payment.",
-                "يرجى تزويدنا بالبريد الإلكتروني المرتبط بحساب TechMinds ومعلومات كافية لتحديد البرنامج أو الاشتراك أو عملية الدفع.",
-                "אנא ספקו את כתובת הדוא״ל המקושרת לחשבון TechMinds שלכם ומידע מספיק כדי שנוכל לזהות את התוכנית, המנוי או התשלום."
+                "If you have a question about a purchase, access to a paid program, or this refund policy, please contact TechMinds. Please provide the email address associated with your account and enough information for us to identify the relevant program or purchase.",
+                "إذا كان لديك سؤال حول عملية شراء أو الوصول إلى برنامج مدفوع أو حول سياسة الاسترجاع هذه، يرجى التواصل مع TechMinds. يرجى تزويدنا بالبريد الإلكتروني المرتبط بحسابك ومعلومات كافية لتحديد البرنامج أو عملية الشراء ذات الصلة.",
+                "אם יש לכם שאלה בנוגע לרכישה, גישה לתוכנית בתשלום או למדיניות החזרים זו, אנא פנו ל-TechMinds. יש לצרף את כתובת הדוא״ל המקושרת לחשבון ומידע מספיק כדי לזהות את התוכנית או הרכישה הרלוונטית."
               )}
             </p>
 
@@ -382,7 +369,6 @@ function RefundPolicy() {
         />
 
       </div>
-
     </div>
   );
 }
@@ -399,6 +385,7 @@ function LegalFooter({
       </span>
 
       <div>
+
         <a href="/privacy">
           {text(
             "Privacy",
@@ -430,6 +417,7 @@ function LegalFooter({
             "תוכניות"
           )}
         </a>
+
       </div>
 
     </footer>

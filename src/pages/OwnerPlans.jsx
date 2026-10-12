@@ -118,7 +118,7 @@ const DEFAULT_PLANS = [
   {
     id: "allAccess",
     audience: "student",
-    icon: "🚀",
+    icon: "✨",
     order: 3,
     active: true,
     recommended: true,
@@ -1057,7 +1057,7 @@ function OwnerPlans() {
   if (loading && !owner) {
     return (
       <div className="owner-plans-loading">
-        🚀 Loading...
+        ✨ Loading...
       </div>
     );
   }
@@ -1681,7 +1681,7 @@ function OwnerPlans() {
                             updateField("programIds", nextIds);
                           }}
                         />
-                        {program.icon || "🚀"} {programTitle}
+                        {program.icon || "✨"} {programTitle}
                       </label>
                     );
                   })

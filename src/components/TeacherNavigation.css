@@ -1,0 +1,254 @@
+.teacher-navigation {
+  position: relative;
+  z-index: 100;
+  width: 100%;
+  color: #172554;
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+}
+
+.teacher-navigation-header {
+  min-height: 68px;
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 3px 14px rgba(15, 23, 42, 0.06);
+}
+
+.teacher-navigation-trigger,
+.teacher-navigation-close {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 14px;
+  color: #0f766e;
+  background: #ecfdf5;
+  font: inherit;
+  font-size: 25px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.teacher-navigation-trigger:hover,
+.teacher-navigation-close:hover {
+  background: #d1fae5;
+}
+
+.teacher-navigation-trigger:focus-visible,
+.teacher-navigation-close:focus-visible,
+.teacher-navigation-links a:focus-visible,
+.teacher-navigation-languages button:focus-visible,
+.teacher-navigation-logout:focus-visible {
+  outline: 3px solid #0ea5e9;
+  outline-offset: 2px;
+}
+
+.teacher-navigation-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  color: #0f766e;
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.teacher-navigation-brand > span {
+  font-size: 24px;
+}
+
+.teacher-navigation-overlay {
+  position: fixed;
+  z-index: 1100;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: rgba(15, 23, 42, 0.48);
+  cursor: default;
+}
+
+.teacher-navigation-drawer {
+  position: fixed;
+  z-index: 1101;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: min(360px, 88vw);
+  max-width: calc(100vw - 16px);
+  height: 100vh;
+  height: 100dvh;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #fff;
+  box-shadow: 0 0 40px rgba(15, 23, 42, 0.24);
+}
+
+.teacher-navigation-drawer-header {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-inline-start: 4px;
+  color: #1e293b;
+  font-size: 18px;
+}
+
+.teacher-navigation-close {
+  color: #475569;
+  background: #f1f5f9;
+  font-size: 31px;
+}
+
+.teacher-navigation-links {
+  display: grid;
+  gap: 6px;
+  margin-block: 18px 22px;
+}
+
+.teacher-navigation-links a {
+  min-height: 48px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 12px;
+  color: #334155;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.teacher-navigation-links a > span {
+  width: 25px;
+  flex: 0 0 25px;
+  text-align: center;
+  font-size: 20px;
+}
+
+.teacher-navigation-links a:hover {
+  background: #f1f5f9;
+}
+
+.teacher-navigation-links a.active {
+  color: #0f766e;
+  background: #ecfdf5;
+  box-shadow: inset 3px 0 #0d9488;
+}
+
+[dir="rtl"] .teacher-navigation-links a.active {
+  box-shadow: inset -3px 0 #0d9488;
+}
+
+.teacher-navigation-languages {
+  padding: 16px 4px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.teacher-navigation-languages h2 {
+  margin: 0 0 10px;
+  color: #475569;
+  font-size: 14px;
+}
+
+.teacher-navigation-languages > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.teacher-navigation-languages button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  color: #334155;
+  background: #fff;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.teacher-navigation-languages button.active {
+  border-color: #0d9488;
+  color: #fff;
+  background: #0d9488;
+}
+
+.teacher-navigation-logout {
+  min-height: 48px;
+  margin-block-start: auto;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  color: #b91c1c;
+  background: #fff;
+  font: inherit;
+  font-weight: 700;
+  text-align: start;
+  cursor: pointer;
+}
+
+.teacher-navigation-error {
+  margin: 0 0 12px;
+  color: #b91c1c;
+  font-size: 14px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .teacher-navigation-drawer {
+    animation: teacher-drawer-enter 160ms ease-out;
+  }
+}
+
+@keyframes teacher-drawer-enter {
+  from {
+    opacity: 0.8;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+[dir="rtl"] .teacher-navigation-drawer {
+  animation-name: teacher-drawer-enter-rtl;
+}
+
+@keyframes teacher-drawer-enter-rtl {
+  from {
+    opacity: 0.8;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 360px) {
+  .teacher-navigation-header {
+    padding-inline: 12px;
+    gap: 12px;
+  }
+
+  .teacher-navigation-brand {
+    font-size: 19px;
+  }
+}

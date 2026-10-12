@@ -1,3 +1,4 @@
+import { lessonImageUrl, lessonImageDimensions } from "../utils/lessonImages";
 import {
   useEffect,
   useState,
@@ -1174,7 +1175,7 @@ function OwnerLessonBuilder() {
   ===================================================== */
 
   return (
-    <div className="owner-lesson-builder-page">
+    <div className="owner-lesson-builder-page" dir={language === "en" ? "ltr" : "rtl"}>
 
       {/* =================================================
           HEADER
@@ -1187,6 +1188,7 @@ function OwnerLessonBuilder() {
           <button
             type="button"
             className="owner-builder-back"
+            aria-label={text("Back to lessons", "العودة إلى الدروس")}
             onClick={() =>
               navigate(
                 `/owner/programs/${programId}/lessons`
@@ -1848,7 +1850,7 @@ function OwnerLessonBuilder() {
                             event.target.value,
                         })
                       }
-                      placeholder="🤖  💡  🚀  🧠"
+                      placeholder="🤖  💡  ✨  🧠"
                       maxLength="6"
                     />
                   </label>
@@ -2114,7 +2116,8 @@ function OwnerLessonBuilder() {
                     {selectedSlide.visualImage && (
                       <img
                         loading="lazy" decoding="async"
-                        src={selectedSlide.visualImage}
+                        src={lessonImageUrl(selectedSlide.visualImage)}
+                {...lessonImageDimensions(selectedSlide.visualImage)}
                         alt={
                           localized(
                             selectedSlide.visualAlt
@@ -2797,7 +2800,7 @@ function OwnerLessonBuilder() {
             style={{
               "--preview-cover":
                 lesson.coverImage
-                  ? `url("${lesson.coverImage}")`
+                  ? `url("${lessonImageUrl(lesson.coverImage)}")`
                   : "none",
               "--preview-theme":
                 selectedSlide.themeColor ||
@@ -2923,9 +2926,8 @@ function OwnerLessonBuilder() {
 
                   <img
                     loading="lazy" decoding="async"
-                    src={
-                      lesson.coverImage
-                    }
+                    src={lessonImageUrl(lesson.coverImage)}
+                {...lessonImageDimensions(lesson.coverImage)}
                     alt={
                       localized(
                         lesson.imageAlt
@@ -2981,7 +2983,8 @@ function OwnerLessonBuilder() {
                   className="preview-slide-image"
                   loading="lazy"
                   decoding="async"
-                  src={selectedSlide.visualImage}
+                  src={lessonImageUrl(selectedSlide.visualImage)}
+                {...lessonImageDimensions(selectedSlide.visualImage)}
                   alt={
                     localized(
                       selectedSlide.visualAlt

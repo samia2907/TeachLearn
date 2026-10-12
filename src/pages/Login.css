@@ -1,4 +1,3 @@
-
 /* =========================
    TECHMINDS LOGIN DESIGN
 ========================= */
@@ -390,7 +389,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .login-page .login-guest-cta { transition: none; }
+  .login-page .login-guest-cta {
+    transition: none;
+  }
 }
 
 .login-error {
@@ -475,5 +476,395 @@ html[dir="rtl"] .login-page {
     width: 62px;
     height: 62px;
     font-size: 31px;
+  }
+}
+
+/* =========================================================
+   TECHMINDS — MOBILE HOME PAGE IMPROVEMENTS
+========================================================= */
+
+@media (max-width: 760px) {
+  .login-page {
+    min-height: 100vh;
+    padding: 84px 12px 42px;
+    overflow-x: hidden;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(124, 58, 237, 0.12), transparent 26%),
+      radial-gradient(circle at 95% 10%, rgba(59, 130, 246, 0.09), transparent 25%),
+      linear-gradient(180deg, #fbfaff 0%, #f7f7fc 100%);
+  }
+
+  .login-language-switcher {
+    top: 12px !important;
+    width: calc(100% - 24px) !important;
+    max-width: 350px;
+    min-height: 52px;
+    padding: 5px !important;
+    gap: 4px !important;
+    justify-content: space-between !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    border: 1px solid rgba(105, 64, 165, 0.10);
+    box-shadow: 0 8px 28px rgba(46, 32, 65, 0.09) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .login-language-button {
+    flex: 1;
+    min-width: 0 !important;
+    min-height: 38px !important;
+    padding: 7px 8px !important;
+    font-size: 12px !important;
+    white-space: nowrap;
+  }
+
+  .login-brand {
+    margin: 4px auto 20px;
+    max-width: 100%;
+  }
+
+  .brand-icon {
+    width: 54px;
+    height: 54px;
+    margin-bottom: 10px;
+    border-radius: 17px;
+    font-size: 27px;
+    box-shadow: 0 10px 25px rgba(79, 70, 229, 0.18);
+  }
+
+  .login-brand h1 {
+    font-size: clamp(28px, 9vw, 36px);
+    letter-spacing: -1px;
+  }
+
+  .login-brand p {
+    margin-top: 8px;
+    padding: 0 8px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .welcome-section {
+    width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+
+  .welcome-hero {
+    width: 100%;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+    padding: 26px 18px 22px !important;
+    border-radius: 22px !important;
+    
+  }
+
+  .welcome-copy {
+    width: 100% !important;
+    max-width: none !important;
+    text-align: start;
+  }
+
+  .welcome-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 14px;
+    font-size: 10px !important;
+    letter-spacing: 0.03em;
+  }
+
+  .welcome-copy h2 {
+    margin: 0 0 13px !important;
+    font-size: clamp(27px, 8.5vw, 38px) !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.7px !important;
+  }
+
+  .welcome-copy h2 span {
+    display: inline-block;
+  }
+
+  .welcome-copy > p {
+    margin: 0 !important;
+    font-size: 14px !important;
+    line-height: 1.75 !important;
+  }
+
+  .welcome-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 9px !important;
+    width: 100%;
+    margin-top: 20px !important;
+  }
+
+  .welcome-start,
+  .welcome-explore {
+    width: 100% !important;
+    min-height: 48px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px !important;
+    border-radius: 13px !important;
+    font-size: 13px !important;
+    text-align: center;
+  }
+
+  .welcome-signature {
+    margin-top: 18px !important;
+    font-size: 9px !important;
+    letter-spacing: 0.16em !important;
+    opacity: 0.75;
+  }
+
+  .innovation-art {
+    width: 100% !important;
+    min-height: 270px !important;
+    height: 270px !important;
+    margin: 4px auto 0 !important;
+    transform: none !important;
+  }
+
+  .studio-window {
+    width: min(92%, 330px) !important;
+    transform: translate(-50%, -50%) scale(0.78) !important;
+    transform-origin: center;
+  }
+
+  .innovation-orbits {
+    width: 310px !important;
+    max-width: 92vw !important;
+    height: auto !important;
+  }
+
+  .innovation-coordinate {
+    display: none !important;
+  }
+
+  .innovation-index {
+    font-size: 11px !important;
+  }
+
+  .innovation-chip {
+    transform: scale(0.82);
+  }
+
+  .innovation-features {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+    margin-top: 14px !important;
+    padding: 0 2px;
+  }
+
+  .innovation-features > span {
+    width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 10px 13px !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+  }
+
+  .idea-lab {
+    margin-top: 22px !important;
+    padding: 20px 16px !important;
+    border-radius: 20px !important;
+  }
+
+  .idea-lab-nav {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 13px !important;
+  }
+
+  .idea-lab-controls {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  .idea-lab-controls button {
+    min-width: 0 !important;
+    padding: 9px 5px !important;
+    font-size: 10px !important;
+  }
+
+  .idea-lab-content {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 12px !important;
+    margin-top: 17px !important;
+    padding: 17px !important;
+    border-radius: 16px !important;
+  }
+
+  .idea-lab-content h3 {
+    font-size: 19px !important;
+    line-height: 1.3 !important;
+  }
+
+  .idea-lab-content p {
+    font-size: 13px !important;
+    line-height: 1.65 !important;
+  }
+
+  .idea-lab-symbol {
+    font-size: 30px !important;
+  }
+
+  .welcome-section-heading {
+    margin: 30px auto 18px !important;
+    padding: 0 7px;
+    text-align: center;
+  }
+
+  .welcome-section-heading h2 {
+    margin-bottom: 8px !important;
+    font-size: 25px !important;
+    line-height: 1.25 !important;
+  }
+
+  .welcome-section-heading p {
+    margin: 0;
+    font-size: 13px !important;
+    line-height: 1.6;
+  }
+
+  .login-choice {
+    width: 100%;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .login-card {
+    padding: 24px 19px 20px;
+    border-radius: 19px;
+  }
+
+  .login-card:hover {
+    transform: none;
+  }
+
+  .login-icon {
+    width: 54px;
+    height: 54px;
+    margin-bottom: 13px;
+    border-radius: 15px;
+    font-size: 27px;
+  }
+
+  .login-card h2 {
+    font-size: 21px;
+  }
+
+  .login-card p {
+    min-height: auto;
+    margin-bottom: 18px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .login-page .login-about-footer {
+    gap: 11px;
+    margin-top: 22px;
+  }
+
+  .login-page .login-guest-cta {
+    width: 100%;
+    min-height: 49px;
+    padding: 12px 18px;
+    border-radius: 13px;
+    font-size: 14px;
+  }
+}
+
+/* =========================
+   VERY SMALL PHONES
+========================= */
+
+@media (max-width: 390px) {
+  .login-page {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .login-language-switcher {
+    width: calc(100% - 18px) !important;
+  }
+
+  .login-language-button {
+    padding: 6px 4px !important;
+    font-size: 11px !important;
+  }
+
+  .welcome-hero {
+    padding: 23px 15px 20px !important;
+  }
+
+  .welcome-copy h2 {
+    font-size: 27px !important;
+  }
+
+  .innovation-art {
+    min-height: 245px !important;
+    height: 245px !important;
+  }
+}
+
+/* ==============================================
+   TechMinds - Login Performance Improvements
+   Add at the END of src/pages/Login.css
+============================================== */
+
+/* Avoid hover effects on touch devices */
+@media (hover: none) {
+  .login-card:hover,
+  .login-page .login-card:hover {
+    transform: none;
+    box-shadow: 0 8px 24px rgba(32, 20, 60, 0.07);
+  }
+}
+
+/* Mobile performance and layout improvements */
+@media (max-width: 760px) {
+
+  /* Remove expensive blur from login cards */
+  .login-page .login-card {
+    background: #b22c2c;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  /* Improve form usability on phones */
+  .login-page .login-form input {
+    font-size: 16px;
+  }
+
+  /* Keep the illustrated code window positioned correctly */
+  .login-page .innovation-art .studio-window {
+    top: 24px !important;
+    inset-inline: 4% !important;
+    width: 92% !important;
+    max-width: 330px;
+    transform: rotate(-4deg) scale(0.88) !important;
+    transform-origin: center top;
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .login-page .login-card,
+  .login-page .login-card button,
+  .main-login-button {
+    transition: none !important;
+    transform: none !important;
   }
 }

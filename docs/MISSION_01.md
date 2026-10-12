@@ -1,6 +1,6 @@
 # Mission 01 — هل أنت أذكى من الكمبيوتر؟
 
-The existing class lesson template/publishing flow now includes one `activityType: "mission"` template. Teacher pages were not edited. Ordinary lessons still render through the original viewer; only mission lessons use the lazy-loaded `MissionPlayer`. Mission 02 is not included. This implementation targets class lessons (`/student/lessons/:lessonId`), not the separate purchased-program player.
+The teacher library imports Missions 01–06 directly from `src/data/missions/computer-science-modern-technology/` and standalone classroom lessons from `functions/content/catalog.js`. Ordinary lessons still render through the original viewer; mission lessons use the lazy-loaded `MissionPlayer`. This guide describes Mission 01's class-lesson publishing and progress flow (`/student/lessons/:lessonId`). Existing published lesson IDs and progress records are preserved.
 
 ## Files created
 
@@ -8,7 +8,7 @@ The existing class lesson template/publishing flow now includes one `activityTyp
 - `src/components/mission/MissionPlayer.css`: scoped responsive layout, RTL, focus indicators and touch controls.
 - `src/components/mission/missionEngine.js`: reusable screen validation, grading, robot simulation, resume merging and skill derivation.
 - `src/components/mission/missionRepository.js`: Firestore progress and atomic, idempotent completion.
-- `src/data/missions/mission01.js`: Arabic/English Mission 01 content, six screens, 100 XP.
+- `src/data/missions/computer-science-modern-technology/mission01.js`: Arabic/English Mission 01 content, six screens, 100 XP.
 - `tests/mission.test.mjs`: engine, resume, skills and completion transaction tests.
 - `tests/mission-rules.cjs`: non-deploying Rules API checks using mocked records.
 - `tests/mission.browser.mjs`: headless Chrome student flow with a fake repository.
@@ -18,7 +18,7 @@ The existing class lesson template/publishing flow now includes one `activityTyp
 
 ## Files modified
 
-- `src/data/lessonTemplates.js`: imports/registers Mission 01 in the existing library.
+- `src/pages/TeacherLessons.jsx`: combines standalone lessons from `functions/content/catalog.js` with direct imports from `src/data/missions/` for the existing library.
 - `src/pages/StudentLessonDetails.jsx`: routes mission lessons to their own player and progress lifecycle.
 - `src/pages/StudentLessons.jsx`: labels the new activity type “Mission” / “مهمة”.
 - `firestore.rules`: allows and validates optional mission progress and first-visit reads of a student's own absent records.

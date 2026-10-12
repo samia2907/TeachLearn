@@ -34,7 +34,7 @@ const {
 ========================================================= */
 
 const app = initializeApp();
-const {canAccessProgram, canAccessLesson, normalizeProgram, isValidManualAccess, programLessonViews} = require("./programAccessPolicy.mjs");
+const {canAccessProgram, canAccessLesson, normalizeProgram, isValidManualAccess, programLessonViews, compareProgramLessons} = require("./programAccessPolicy.mjs");
 const {isValidMissionCompletion} = require("./missionValidation");
 
 /*
@@ -1466,12 +1466,13 @@ exports.completeLesson = onCall(
       throw new HttpsError("permission-denied", "You do not have access to this lesson.");
     }
 
+    const readOnly = request.data?.readOnly === true;
     const submittedMission = request.data?.mission;
     const submittedProgress = request.data?.progress;
     const validCompletion = lesson.activityType === "mission"
       ? isValidMissionCompletion(lesson.sections, submittedMission)
       : isValidStandardLessonCompletion(lesson, submittedProgress);
-    if (!validCompletion) {
+    if (!readOnly && !validCompletion) {
       throw new HttpsError("failed-precondition", "Lesson completion could not be validated.");
     }
 
@@ -1496,12 +1497,7 @@ exports.completeLesson = onCall(
         programLessons = lessonsSnapshot.docs
           .map((item) => ({id: item.id, ...item.data()}))
           .filter((item) => item.lessonType === "commercial" && item.status === "published")
-          .sort((first, second) => {
-            const firstOrder = Number(first.order ?? first.lessonOrder ?? first.position ?? 999999);
-            const secondOrder = Number(second.order ?? second.lessonOrder ?? second.position ?? 999999);
-            if (firstOrder !== secondOrder) return firstOrder - secondOrder;
-            return Number(first.createdAt?.seconds || 0) - Number(second.createdAt?.seconds || 0);
-          });
+          .sort(compareProgramLessons);
         if (programLessons.length > 300) {
           throw new HttpsError("failed-precondition", "Program contains too many lessons.");
         }
@@ -1565,7 +1561,7 @@ exports.completeLesson = onCall(
       const currentValidCompletion = currentLesson.activityType === "mission"
         ? isValidMissionCompletion(currentLesson.sections, submittedMission)
         : isValidStandardLessonCompletion(currentLesson, submittedProgress);
-      if (!currentValidCompletion) {
+      if (!readOnly && !currentValidCompletion) {
         throw new HttpsError("failed-precondition", "Lesson completion could not be validated.");
       }
 
@@ -1583,6 +1579,9 @@ exports.completeLesson = onCall(
       }
 
       const alreadyCompleted = completionSnapshot.exists;
+      if (readOnly && !alreadyCompleted) {
+        throw new HttpsError("failed-precondition", "Lesson is not completed.");
+      }
       const totalXp = currentXp + (alreadyCompleted ? 0 : currentReward);
       const level = Math.floor(totalXp / 500) + 1;
 
@@ -1596,10 +1595,21 @@ exports.completeLesson = onCall(
         allProgramLessonsCompleted && programCompletionRef && !existingProgramCompletion?.exists
       );
 
-      const nextLesson = program && !programCompleted
-        ? programLessons.find((item, index) =>
-          item.id !== lessonId && !programCompletionSnapshots[index]?.exists
-        )
+      // Use the same ordering and access decisions as the program player.
+      const availableLessons = program ? programLessonViews({
+        lessons: programLessons, program, programId: program.id,
+        user: userData, access,
+      }) : [];
+      const currentIndex = programLessons.findIndex((item) => item.id === lessonId);
+      const pendingLessons = availableLessons.filter((item, index) =>
+        item.id !== lessonId && !item.locked && !item.previewOnly &&
+        !programCompletionSnapshots[index]?.exists
+      );
+      // Prefer later content; return to earlier unfinished content when necessary.
+      const nextLesson = !programCompleted
+        ? pendingLessons.find((item) =>
+          programLessons.findIndex((candidate) => candidate.id === item.id) > currentIndex
+        ) || pendingLessons[0] || null
         : null;
 
       if (!alreadyCompleted) {
@@ -1637,7 +1647,7 @@ exports.completeLesson = onCall(
         }, {merge: true});
       }
 
-      if (programCompletedNow) {
+      if (programCompletedNow && !readOnly) {
         transaction.set(programCompletionRef, {
           studentId: userId,
           programId: program.id,
@@ -1651,7 +1661,7 @@ exports.completeLesson = onCall(
         });
       }
 
-      if (!alreadyCompleted || programCompletedNow) {
+      if (!readOnly && (!alreadyCompleted || programCompletedNow)) {
         transaction.update(userRef, {
           ...(!alreadyCompleted ? {
             xp: totalXp,
@@ -1673,9 +1683,10 @@ exports.completeLesson = onCall(
         level,
         programId: program?.id || null,
         programCompleted,
-        programCompletedNow,
+        programCompletedNow: !readOnly && programCompletedNow,
         programTotalLessons: programLessons.length,
         nextLessonId: nextLesson?.id || null,
+        nextLessonTitle: nextLesson?.titleI18n || nextLesson?.title || null,
       };
     });
   },
@@ -2574,7 +2585,7 @@ async function processProgramPurchase(
 
           programIcon:
             programData.icon ||
-            "🚀",
+            "✨",
 
           licenseType,
 

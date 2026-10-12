@@ -1,101 +1,174 @@
-import {
-  useEffect,
-  useState,
-} from "react";
 
+import { useEffect, useMemo, useState } from "react";
 import {
   collection,
   doc,
   getDoc,
   getDocs,
-  onSnapshot,
   query,
   where,
 } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
+import { useNavigate } from "react-router-dom";
 
-import {
-  useNavigate,
-} from "react-router-dom";
-
-import {
-  auth,
-  db,
-  functions,
-} from "../firebase/firebase";
-
-import {
-  useLanguage,
-} from "../context/LanguageContext";
-
+import { auth, db, functions } from "../firebase/firebase";
+import { useLanguage } from "../context/LanguageContext";
 import "./StudentLessons.css";
 
-import { hebrewText } from "../data/hebrewText";
-
-import { normalizeProgram } from "../../functions/programAccessPolicy.mjs";
-import { studentHasProgramAccess } from "../firebase/studentProgramAccess";
-import { httpsCallable } from "firebase/functions";
-
-const checkProgramAccess = httpsCallable(
+// Server-side access decisions are authoritative.
+const getPurchasedProgram = httpsCallable(
   functions,
-  "checkProgramAccess"
+  "getPurchasedProgram"
 );
 
+const getRecentContentProgress = httpsCallable(
+  functions,
+  "getRecentContentProgress"
+);
 
-function StudentLessons() {
-  const navigate =
-    useNavigate();
-const [
-  completedLessons,
-  setCompletedLessons,
-] = useState({});
-  const {
-    language,
-    setLanguage,
-  } = useLanguage();
+const ACTIVITY_TYPES = {
+  lesson: {
+    icon: "📚",
+    en: "Lesson",
+    ar: "درس",
+    he: "שיעור",
+  },
+  mission: {
+    icon: "🎯",
+    en: "Mission",
+    ar: "مهمة",
+    he: "משימה",
+  },
+  quiz: {
+    icon: "🧩",
+    en: "Quiz",
+    ar: "اختبار",
+    he: "בוחן",
+  },
+  coding: {
+    icon: "💻",
+    en: "Coding",
+    ar: "برمجة",
+    he: "תכנות",
+  },
+  ai: {
+    icon: "🧠",
+    en: "AI",
+    ar: "ذكاء اصطناعي",
+    he: "בינה מלאכותית",
+  },
+  cyber: {
+    icon: "🔐",
+    en: "Cyber",
+    ar: "سايبر",
+    he: "סייבר",
+  },
+  external: {
+    icon: "🌐",
+    en: "External activity",
+    ar: "نشاط خارجي",
+    he: "פעילות חיצונית",
+  },
+};
 
+function timestampOf(value) {
+  if (!value) return 0;
 
-  const [
-    student,
-    setStudent,
-  ] = useState(null);
+  if (typeof value === "number") return value;
 
-  const [
-    lessons,
-    setLessons,
-  ] = useState([]);
+  if (typeof value === "string") {
+    return Date.parse(value) || 0;
+  }
 
-  const [
-    programLessons,
-    setProgramLessons,
-  ] = useState([]);
+  if (typeof value.toMillis === "function") {
+    return value.toMillis();
+  }
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
+  if (typeof value.seconds === "number") {
+    return value.seconds * 1000;
+  }
 
-  const [
-    error,
-    setError,
-  ] = useState("");
+  return 0;
+}
 
+function lessonOrder(lesson) {
+  const value = Number(
+    lesson.order ??
+      lesson.lessonOrder ??
+      lesson.position ??
+      999999
+  );
 
-  const text = (
-    english,
-    arabic,
-    hebrew
-  ) =>
-    language === "ar"
-      ? arabic
+  return Number.isFinite(value) ? value : 999999;
+}
+
+function sortLessons(lessons) {
+  return [...lessons].sort((first, second) => {
+    const orderDifference =
+      lessonOrder(first) - lessonOrder(second);
+
+    if (orderDifference) return orderDifference;
+
+    const dateDifference =
+      timestampOf(first.createdAt) -
+      timestampOf(second.createdAt);
+
+    if (dateDifference) return dateDifference;
+
+    return String(first.id).localeCompare(
+      String(second.id)
+    );
+  });
+}
+
+function lessonKey(programId, lessonId) {
+  return `${programId}::${lessonId}`;
+}
+
+export default function StudentLessons() {
+  const navigate = useNavigate();
+  const { language, setLanguage } = useLanguage();
+
+  const [student, setStudent] = useState(null);
+
+  const [classLessons, setClassLessons] = useState([]);
+  const [programGroups, setProgramGroups] = useState([]);
+
+  const [completedLessons, setCompletedLessons] =
+    useState({});
+
+  const [recentProgress, setRecentProgress] =
+    useState([]);
+
+  const [loading, setLoading] = useState(true);
+  const [classLoading, setClassLoading] = useState(true);
+  const [programsLoading, setProgramsLoading] =
+    useState(true);
+  const [progressLoading, setProgressLoading] =
+    useState(true);
+
+  const [error, setError] = useState("");
+
+  // null means: use the automatic open/closed state.
+  // Explicit student choices override that state.
+  const [expandedPrograms, setExpandedPrograms] =
+    useState({});
+
+  const [showClassLessons, setShowClassLessons] =
+    useState(true);
+
+  const isRTL = language === "ar" || language === "he";
+
+  function text(en, ar, he) {
+    return language === "ar"
+      ? ar
       : language === "he"
-        ? (hebrew || hebrewText(english))
-        : english;
+        ? he
+        : en;
+  }
 
-
-  const localized = (value) => {
-    if (!value) {
-      return "";
-    }
+  function localized(value) {
+    if (!value) return "";
 
     if (typeof value === "string") {
       return value;
@@ -112,1062 +185,987 @@ const [
     }
 
     return String(value);
-  };
+  }
 
-
-  /* ============================
-     ACTIVITY TYPES
-  ============================ */
-
-  const activityTypes = {
-    mission: {
-      icon: "🤖",
-      en: "Mission",
-      ar: "مهمة",
-    },
-    lesson: {
-      icon: "📚",
-      en: "Lesson",
-      ar: "درس",
-    },
-
-    quiz: {
-      icon: "🧩",
-      en: "Quiz",
-      ar: "اختبار",
-    },
-
-    coding: {
-      icon: "💻",
-      en: "Coding",
-      ar: "برمجة",
-    },
-
-    ai: {
-      icon: "🤖",
-      en: "AI Activity",
-      ar: "نشاط ذكاء اصطناعي",
-    },
-
-    cyber: {
-      icon: "🔐",
-      en: "Cyber Activity",
-      ar: "نشاط سايبر",
-    },
-
-    external: {
-      icon: "🌐",
-      en: "External Activity",
-      ar: "نشاط خارجي",
-    },
-  };
-
-
-  /* ============================
-     LOAD STUDENT
-  ============================ */
+  // ==========================================
+  // INITIAL DATA LOADING
+  // ==========================================
 
   useEffect(() => {
-    let unsubscribeLessons =
-      null;
+    let cancelled = false;
 
+    async function loadClassLessons(uid) {
+      try {
+        const memberships = await getDocs(
+          query(
+            collection(db, "classMembers"),
+            where("studentId", "==", uid),
+            where("status", "==", "active")
+          )
+        );
 
-    const loadStudentAndLessons =
-      async () => {
-        try {
-          setLoading(true);
-          setError("");
+        if (cancelled) return;
 
-
-          const currentUser =
-            auth.currentUser;
-
-
-          if (!currentUser) {
-            navigate("/login");
-            return;
-          }
-
-
-          const studentSnapshot =
-            await getDoc(
-              doc(
-                db,
-                "users",
-                currentUser.uid
-              )
-            );
-
-
-          if (
-            !studentSnapshot.exists()
-          ) {
-            navigate("/login");
-            return;
-          }
-
-
-          const studentData =
-            studentSnapshot.data();
-
-
-          if (
-            studentData.role !==
-            "student"
-          ) {
-            navigate("/teacher");
-            return;
-          }
-
-
-          setStudent(
-            studentData
-          );
-
-          const membershipSnapshot =
-            await getDocs(
-              query(
-                collection(
-                  db,
-                  "classMembers"
-                ),
-                where(
-                  "studentId",
-                  "==",
-                  currentUser.uid
-                ),
-                where(
-                  "status",
-                  "==",
-                  "active"
-                )
-              )
-            );
-
-          const classIds =
-            membershipSnapshot.docs
-              .map(
-                (membership) =>
-                  membership.data().classId
-              )
+        const classIds = [
+          ...new Set(
+            memberships.docs
+              .map((item) => item.data().classId)
               .filter(
-                (classId) =>
-                  typeof classId ===
-                  "string" &&
-                  classId
-              );
-
-          /*
-            Student has no class yet.
-          */
-
-          if (
-            classIds.length ===
-            0
-          ) {
-            setLessons([]);
-            setLoading(false);
-
-            return;
-          }
-
-
-          /* ======================
-             REAL-TIME LESSONS
-          ====================== */
-
-          const lessonsQuery =
-            query(
-              collection(
-                db,
-                "lessons"
-              ),
-
-              where(
-                "classId",
-                "in",
-                classIds
-              ),
-
-              where(
-                "status",
-                "==",
-                "published"
+                (id) =>
+                  typeof id === "string" &&
+                  id.length > 0
               )
-            );
+          ),
+        ];
 
-
-           unsubscribeLessons =
-  onSnapshot(
-    lessonsQuery,
-
-    async (snapshot) => {
-      const list =
-        snapshot.docs.map(
-          (lessonDocument) => ({
-            id: lessonDocument.id,
-            ...lessonDocument.data(),
-          })
-        );
-
-
-      list.sort((a, b) => {
-        const aTime =
-          a.createdAt?.seconds || 0;
-
-        const bTime =
-          b.createdAt?.seconds || 0;
-
-        return bTime - aTime;
-      });
-
-
-      setLessons(list);
-
-
-      /* =========================
-         CHECK COMPLETED LESSONS
-      ========================= */
-
-      try {
-        const completionResults =
-          await Promise.all(
-            list.map(
-              async (lesson) => {
-                const completionId =
-                  `${currentUser.uid}_${lesson.id}`;
-
-
-                const completionSnapshot =
-                  await getDoc(
-                    doc(
-                      db,
-                      "lessonCompletions",
-                      completionId
-                    )
-                  );
-
-
-                return {
-                  lessonId:
-                    lesson.id,
-
-                  completed:
-                    completionSnapshot.exists(),
-                };
-              }
-            )
-          );
-
-
-        const completionMap = {};
-
-
-        completionResults.forEach(
-          (result) => {
-            completionMap[
-              result.lessonId
-            ] =
-              result.completed;
-          }
-        );
-
-
-        setCompletedLessons(
-          completionMap
-        );
-
-      } catch (
-        completionError
-      ) {
-        console.error(
-          "Load lesson completions error:",
-          completionError
-        );
-      }
-
-
-      setLoading(false);
-    },
-            
-
-              (listenerError) => {
-                console.error(
-                  "Student lessons listener error:",
-                  listenerError
-                );
-
-
-                setError(
-                  text(
-                    "Could not load your lessons.",
-                    "تعذر تحميل الدروس."
-                  )
-                );
-
-
-                setLoading(
-                  false
-                );
-              }
-            );
-
-        } catch (loadError) {
-          console.error(
-            "Load student lessons error:",
-            loadError
-          );
-
-
-          setError(
-            text(
-              "Could not load your lessons.",
-              "تعذر تحميل الدروس."
-            )
-          );
-
-
-          setLoading(
-            false
-          );
-        }
-      };
-
-
-    loadStudentAndLessons();
-
-
-    return () => {
-      if (
-        unsubscribeLessons
-      ) {
-        unsubscribeLessons();
-      }
-    };
-
-  }, [navigate]);
-
-
-
-  /* ============================
-     MY PROGRAMS -> PROGRAM LESSONS
-     Important:
-     Students are NOT allowed to list programAccess directly in Firestore.
-     So we:
-     1. Load published programs.
-     2. Ask the secure checkProgramAccess callable which programs belong to the student.
-     3. Read the published lessons of only those programs.
-  ============================ */
-
-  useEffect(() => {
-    if (!student) {
-      return undefined;
-    }
-
-    let active = true;
-    let lessonStops = [];
-
-    const clearLessonStops = () => {
-      lessonStops.forEach((stop) => stop());
-      lessonStops = [];
-    };
-
-    const loadProgramLessons = async () => {
-      try {
-        await auth.authStateReady();
-
-        const currentUser = auth.currentUser;
-
-        if (!currentUser || !active) {
+        if (!classIds.length) {
+          setClassLessons([]);
           return;
         }
 
-        const programsSnapshot = await getDocs(
+        const snapshots = await Promise.all(
+          classIds.map((classId) =>
+            getDocs(
+              query(
+                collection(db, "lessons"),
+                where("classId", "==", classId),
+                where("status", "==", "published")
+              )
+            )
+          )
+        );
+
+        if (cancelled) return;
+
+        const unique = new Map();
+
+        snapshots.forEach((snapshot) => {
+          snapshot.docs.forEach((item) => {
+            unique.set(item.id, {
+              id: item.id,
+              ...item.data(),
+            });
+          });
+        });
+
+        setClassLessons(
+          sortLessons([...unique.values()])
+        );
+      } catch (loadError) {
+        console.error(
+          "Could not load class lessons:",
+          loadError
+        );
+
+        if (!cancelled) {
+          setError(
+            "Some class lessons could not be loaded."
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setClassLoading(false);
+        }
+      }
+    }
+
+    async function loadPrograms() {
+      try {
+        // Catalog metadata only.
+        const snapshot = await getDocs(
           query(
             collection(db, "programs"),
             where("status", "==", "published")
           )
         );
 
-        const publishedPrograms =
-          programsSnapshot.docs.map((programDoc) => ({
-            id: programDoc.id,
-            ...programDoc.data(),
-          }));
+        if (cancelled) return;
 
-        const accessResults = await Promise.all(
-          publishedPrograms.map(async (program) => {
+        const results = await Promise.all(
+          snapshot.docs.map(async (programDoc) => {
+            const programId = programDoc.id;
+
             try {
-              const hasAccess =
-                await studentHasProgramAccess(
-                  checkProgramAccess,
-                  program.id
+              // Server returns:
+              // - locked
+              // - previewOnly
+              // - allowed lesson metadata
+              const response =
+                await getPurchasedProgram({
+                  programId,
+                });
+
+              const data = response.data || {};
+
+              const lessons = Array.isArray(data.lessons)
+                ? data.lessons
+                : [];
+
+              const hasGrant = Boolean(data.access);
+
+              // A free lesson may be available
+              // without a full program purchase.
+              const hasAvailableLesson =
+                lessons.some(
+                  (lesson) =>
+                    lesson.locked !== true
                 );
 
-              return {
-                program,
-                hasAccess,
-              };
-            } catch (accessError) {
-              console.error(
-                "Program access check failed:",
-                program.id,
-                accessError
-              );
+              if (
+                !hasGrant &&
+                !data.fullAccess &&
+                !hasAvailableLesson
+              ) {
+                return null;
+              }
 
               return {
-                program,
-                hasAccess: false,
+                id: programId,
+                program: {
+                  id: programId,
+                  ...programDoc.data(),
+                },
+                lessons: sortLessons(lessons),
+                fullAccess: Boolean(data.fullAccess),
               };
+            } catch (accessError) {
+              if (
+                accessError.code !==
+                  "functions/permission-denied" &&
+                accessError.code !==
+                  "functions/not-found"
+              ) {
+                console.error(
+                  "Program access error:",
+                  programId,
+                  accessError
+                );
+              }
+
+              return null;
             }
           })
         );
 
-        if (!active) {
-          return;
-        }
+        if (cancelled) return;
 
-        const myPrograms = accessResults
-          .filter((item) => item.hasAccess)
-          .map((item) => item.program);
-
-        clearLessonStops();
-
-        if (myPrograms.length === 0) {
-          setProgramLessons([]);
-          return;
-        }
-
-        const lessonsByProgram = new Map();
-
-        const publishMergedLessons = () => {
-          if (!active) {
-            return;
-          }
-
-          const merged = Array.from(
-            lessonsByProgram.values()
-          ).flat();
-
-          merged.sort((a, b) => {
-            const aOrder =
-              Number(
-                a.order ??
-                a.lessonOrder ??
-                a.position ??
-                999999
-              );
-
-            const bOrder =
-              Number(
-                b.order ??
-                b.lessonOrder ??
-                b.position ??
-                999999
-              );
-
-            if (aOrder !== bOrder) {
-              return aOrder - bOrder;
-            }
-
-            return String(
-              a.title || ""
-            ).localeCompare(
-              String(b.title || "")
-            );
-          });
-
-          setProgramLessons(merged);
-        };
-
-        myPrograms.forEach((program) => {
-          const lessonsQuery = query(
-            collection(db, "lessons"),
-            where("programId", "==", program.id),
-            where("lessonType", "==", "commercial"),
-            where("status", "==", "published")
-          );
-
-          const stop = onSnapshot(
-            lessonsQuery,
-            (snapshot) => {
-              const programTitle =
-                localized(
-                  program.titleI18n ||
-                  program.title
-                );
-
-              const programItems =
-                snapshot.docs.map((lessonDoc) => ({
-                  id: lessonDoc.id,
-                  ...lessonDoc.data(),
-                  _programId: program.id,
-                  _programTitle: programTitle,
-                  _programAccessLesson: true,
-                }));
-
-              lessonsByProgram.set(
-                program.id,
-                programItems
-              );
-
-              publishMergedLessons();
-            },
-            (lessonError) => {
-              console.error(
-                "Program lessons query failed:",
-                program.id,
-                lessonError
-              );
-
-              lessonsByProgram.set(
-                program.id,
-                []
-              );
-
-              publishMergedLessons();
-
-              if (active) {
-                setError(
-                  text(
-                    "Could not load one of your program lessons.",
-                    "تعذر تحميل بعض دروس برنامجك."
-                  )
-                );
-              }
-            }
-          );
-
-          lessonStops.push(stop);
-        });
+        setProgramGroups(
+          results.filter(Boolean)
+        );
       } catch (loadError) {
         console.error(
-          "Load My Programs lessons failed:",
+          "Could not load programs:",
           loadError
         );
 
-        if (active) {
+        if (!cancelled) {
           setError(
-            text(
-              "Could not load your program lessons.",
-              "تعذر تحميل دروس برامجك."
-            )
+            "Could not load your programs."
           );
         }
-      }
-    };
-
-    loadProgramLessons();
-
-    const refreshOnFocus = () => {
-      clearLessonStops();
-      loadProgramLessons();
-    };
-
-    window.addEventListener(
-      "focus",
-      refreshOnFocus
-    );
-
-    return () => {
-      active = false;
-      clearLessonStops();
-
-      window.removeEventListener(
-        "focus",
-        refreshOnFocus
-      );
-    };
-  }, [language, student]);
-
-  const visibleLessons = Array.from(
-    new Map(
-      [...programLessons, ...lessons].map((lesson) => [
-        lesson._programAccessLesson
-          ? `program:${lesson._programId}:${lesson.id}`
-          : `class:${lesson.id}`,
-        lesson,
-      ])
-    ).values()
-  );
-
-
-  /* ============================
-     COMPLETION STATUS
-     Includes both class lessons and program lessons.
-  ============================ */
-
-  useEffect(() => {
-    let active = true;
-
-    const loadCompletionStatus = async () => {
-      await auth.authStateReady();
-
-      const currentUser = auth.currentUser;
-
-      if (!currentUser) {
-        return;
-      }
-
-      const allVisibleLessons = [
-        ...programLessons,
-        ...lessons,
-      ];
-
-      const uniqueLessons = Array.from(
-        new Map(
-          allVisibleLessons.map((lesson) => [
-            lesson.id,
-            lesson,
-          ])
-        ).values()
-      );
-
-      if (uniqueLessons.length === 0) {
-        if (active) {
-          setCompletedLessons({});
+      } finally {
+        if (!cancelled) {
+          setProgramsLoading(false);
         }
-        return;
       }
+    }
 
+    async function loadProgress(uid) {
+      // One query for the student's completion receipts.
       try {
-        const completionResults = await Promise.all(
-          uniqueLessons.map(async (lesson) => {
-            const completionId =
-              `${currentUser.uid}_${lesson.id}`;
-
-            const completionSnapshot =
-              await getDoc(
-                doc(
-                  db,
-                  "lessonCompletions",
-                  completionId
-                )
-              );
-
-            return {
-              lessonId: lesson.id,
-              completed: completionSnapshot.exists(),
-            };
-          })
+        const snapshot = await getDocs(
+          query(
+            collection(db, "lessonCompletions"),
+            where("studentId", "==", uid)
+          )
         );
 
-        if (!active) {
+        if (cancelled) return;
+
+        const completed = {};
+
+        snapshot.docs.forEach((item) => {
+          const lessonId = item.data().lessonId;
+
+          if (lessonId) {
+            completed[lessonId] = true;
+          }
+        });
+
+        setCompletedLessons(completed);
+      } catch (loadError) {
+        console.error(
+          "Could not load completions:",
+          loadError
+        );
+      }
+
+      // Latest bookmarks from the newer progress system.
+      try {
+        const response =
+          await getRecentContentProgress({});
+
+        if (cancelled) return;
+
+        setRecentProgress(
+          Array.isArray(response.data?.progress)
+            ? response.data.progress
+            : []
+        );
+      } catch (loadError) {
+        // Keep page usable if the callable is not deployed.
+        console.warn(
+          "Recent bookmarks unavailable:",
+          loadError
+        );
+      } finally {
+        if (!cancelled) {
+          setProgressLoading(false);
+        }
+      }
+    }
+
+    async function initialize() {
+      try {
+        await auth.authStateReady();
+
+        if (cancelled) return;
+
+        const user = auth.currentUser;
+
+        if (!user) {
+          navigate("/login", {
+            replace: true,
+          });
           return;
         }
 
-        const completionMap = {};
-
-        completionResults.forEach((result) => {
-          completionMap[result.lessonId] =
-            result.completed;
-        });
-
-        setCompletedLessons(completionMap);
-      } catch (completionError) {
-        console.error(
-          "Load all lesson completions error:",
-          completionError
+        const userSnapshot = await getDoc(
+          doc(db, "users", user.uid)
         );
-      }
-    };
 
-    loadCompletionStatus();
+        if (cancelled) return;
+
+        if (!userSnapshot.exists()) {
+          navigate("/login", {
+            replace: true,
+          });
+          return;
+        }
+
+        const profile = userSnapshot.data();
+
+        if (profile.role !== "student") {
+          navigate(
+            profile.role === "owner"
+              ? "/owner"
+              : "/teacher",
+            { replace: true }
+          );
+          return;
+        }
+
+        if (
+          (profile.accountStatus || "active") !==
+          "active"
+        ) {
+          navigate("/login", {
+            replace: true,
+          });
+          return;
+        }
+
+        setStudent(profile);
+        setLoading(false);
+
+        void loadClassLessons(user.uid);
+        void loadPrograms();
+        void loadProgress(user.uid);
+      } catch (loadError) {
+        console.error(
+          "Student lessons initialization:",
+          loadError
+        );
+
+        if (!cancelled) {
+          setError(
+            "Could not load the learning page."
+          );
+          setLoading(false);
+          setClassLoading(false);
+          setProgramsLoading(false);
+          setProgressLoading(false);
+        }
+      }
+    }
+
+    void initialize();
 
     return () => {
-      active = false;
+      cancelled = true;
     };
-  }, [lessons, programLessons]);
+  }, [navigate]);
 
-  /* ============================
-     ACTIVITY
-  ============================ */
+  // ==========================================
+  // RECENT BOOKMARKS
+  // ==========================================
 
-  const getActivity =
-    (activityType) => {
-      return (
-        activityTypes[
-          activityType
-        ] ||
-        activityTypes.lesson
+  const resumeMap = useMemo(() => {
+    const result = new Map();
+
+    const records = [...recentProgress].sort(
+      (a, b) =>
+        timestampOf(b.updatedAt) -
+        timestampOf(a.updatedAt)
+    );
+
+    records.forEach((record) => {
+      if (
+        record.programId &&
+        record.contentId &&
+        record.status === "in_progress"
+      ) {
+        const key = lessonKey(
+          record.programId,
+          record.contentId
+        );
+
+        if (!result.has(key)) {
+          result.set(key, record);
+        }
+      }
+    });
+
+    return result;
+  }, [recentProgress]);
+
+  // ==========================================
+  // PROGRAM STATISTICS
+  // ==========================================
+
+  const groupsWithStats = useMemo(() => {
+    const enriched = programGroups.map((group) => {
+      const lessons = group.lessons;
+      const total = lessons.length;
+
+      const completed = lessons.filter(
+        (lesson) =>
+          completedLessons[lesson.id] === true
+      ).length;
+
+      const percent = total
+        ? Math.round((completed / total) * 100)
+        : 0;
+
+      const allCompleted =
+        total > 0 && completed === total;
+
+      // Only lessons the server permits.
+      const availableUnfinished = lessons.filter(
+        (lesson) =>
+          lesson.locked !== true &&
+          lesson.previewOnly !== true &&
+          !completedLessons[lesson.id]
       );
-    };
 
+      const current = availableUnfinished
+        .filter((lesson) =>
+          resumeMap.has(
+            lessonKey(group.id, lesson.id)
+          )
+        )
+        .sort((first, second) => {
+          const firstBookmark = resumeMap.get(
+            lessonKey(group.id, first.id)
+          );
 
+          const secondBookmark = resumeMap.get(
+            lessonKey(group.id, second.id)
+          );
 
-  const renderLessonCard = (lesson) => {
+          return (
+            timestampOf(secondBookmark?.updatedAt) -
+            timestampOf(firstBookmark?.updatedAt)
+          );
+        })[0];
+
+      const next =
+        current ||
+        availableUnfinished[0] ||
+        null;
+
+      const preview = next
+        ? null
+        : lessons.find(
+            (lesson) =>
+              lesson.locked !== true &&
+              lesson.previewOnly === true
+          ) || null;
+
+      // Find the most recent progress in this program.
+      // This is separate from choosing the next lesson.
+      const recentAt = lessons.reduce(
+        (latest, lesson) => {
+          if (lesson.locked === true) {
+            return latest;
+          }
+
+          const bookmark = resumeMap.get(
+            lessonKey(group.id, lesson.id)
+          );
+
+          return Math.max(
+            latest,
+            timestampOf(bookmark?.updatedAt)
+          );
+        },
+        0
+      );
+
+      return {
+        ...group,
+        total,
+        completed,
+        percent,
+        allCompleted,
+        current,
+        next,
+        preview,
+        recentAt,
+      };
+    });
+
+    return enriched.sort((first, second) => {
+      if (first.recentAt !== second.recentAt) {
+        return second.recentAt - first.recentAt;
+      }
+
+      const firstOrder = Number(
+        first.program.order ?? 999999
+      );
+
+      const secondOrder = Number(
+        second.program.order ?? 999999
+      );
+
+      return firstOrder - secondOrder;
+    });
+  }, [programGroups, completedLessons, resumeMap]);
+
+  // Automatically expand only one program:
+  // 1. The most recently active unfinished program
+  // 2. Otherwise the first unfinished program
+  // 3. Otherwise the first completed program
+  const automaticOpenId = useMemo(() => {
+    if (!groupsWithStats.length) return null;
+
+    const active = groupsWithStats.find(
+      (group) =>
+        !group.allCompleted &&
+        group.current &&
+        group.recentAt > 0
+    );
+
+    if (active) return active.id;
+
+    const unfinished = groupsWithStats.find(
+      (group) => !group.allCompleted
+    );
+
+    return unfinished?.id ||
+      groupsWithStats[0].id;
+  }, [groupsWithStats]);
+
+  const completedCount = useMemo(() => {
+    const all = [
+      ...classLessons,
+      ...programGroups.flatMap(
+        (group) => group.lessons
+      ),
+    ];
+
+    return new Set(
+      all
+        .filter(
+          (lesson) =>
+            completedLessons[lesson.id]
+        )
+        .map((lesson) => lesson.id)
+    ).size;
+  }, [
+    classLessons,
+    programGroups,
+    completedLessons,
+  ]);
+
+  const totalLessons =
+    classLessons.length +
+    programGroups.reduce(
+      (sum, group) =>
+        sum + group.lessons.length,
+      0
+    );
+
+  // ==========================================
+  // NAVIGATION AND EXPANSION
+  // ==========================================
+
+  function openLesson(lesson, programId = null) {
+    if (lesson.locked === true) {
+      return;
+    }
+
+    if (programId) {
+      navigate(
+        `/programs/${encodeURIComponent(
+          programId
+        )}/lessons/${encodeURIComponent(lesson.id)}`
+      );
+    } else {
+      navigate(
+        `/student/lessons/${encodeURIComponent(
+          lesson.id
+        )}`
+      );
+    }
+  }
+
+  function isProgramExpanded(id) {
+    if (
+      Object.prototype.hasOwnProperty.call(
+        expandedPrograms,
+        id
+      )
+    ) {
+      return expandedPrograms[id];
+    }
+
+    // While bookmarks are loading, don't automatically
+    // open the wrong program and switch it later.
+    if (progressLoading) return false;
+
+    return id === automaticOpenId;
+  }
+
+  function toggleProgram(id) {
+    setExpandedPrograms((previous) => ({
+      ...previous,
+      [id]: !isProgramExpanded(id),
+    }));
+  }
+
+  // ==========================================
+  // RENDER A SINGLE LESSON
+  // ==========================================
+
+  function renderLessonRow(
+    lesson,
+    index,
+    programId = null,
+    recommendedId = null
+  ) {
+    const completed =
+      completedLessons[lesson.id] === true;
+
+    const locked =
+      lesson.locked === true;
+
+    const previewOnly =
+      lesson.previewOnly === true;
+
+    const bookmark = programId
+      ? resumeMap.get(
+          lessonKey(programId, lesson.id)
+        )
+      : null;
+
+    const inProgress =
+      !locked &&
+      !completed &&
+      !previewOnly &&
+      bookmark?.status === "in_progress";
+
+    const recommended =
+      !locked &&
+      !completed &&
+      !previewOnly &&
+      recommendedId === lesson.id;
+
     const activity =
-      getActivity(
-        lesson.activityType
-      );
+      ACTIVITY_TYPES[
+        lesson.activityType ||
+          lesson.contentType
+      ] || ACTIVITY_TYPES.lesson;
 
-    const isCompleted =
-      completedLessons[
-        lesson.id
-      ] === true;
+    const description = locked
+      ? ""
+      : localized(
+          lesson.descriptionI18n ||
+            lesson.description
+        );
+
+    const lessonTitle =
+      localized(
+        lesson.titleI18n ||
+          lesson.title
+      ) ||
+      text("Lesson", "درس", "שיעור");
 
     return (
       <article
-        className="student-lesson-card"
-        key={
-          lesson._programAccessLesson
-            ? `program:${lesson._programId}:${lesson.id}`
-            : `class:${lesson.id}`
-        }
+        key={`${programId || "class"}-${lesson.id}`}
+        className={[
+          "tm-lesson-row",
+          completed ? "is-completed" : "",
+          locked ? "is-locked" : "",
+          previewOnly ? "is-preview" : "",
+          inProgress ? "is-current" : "",
+          recommended ? "is-recommended" : "",
+        ].join(" ")}
       >
+        <div className="tm-lesson-number">
+          {locked
+            ? "🔒"
+            : completed
+              ? "✓"
+              : index + 1}
+        </div>
 
-        <div className="student-lesson-card-top">
+        <div className="tm-lesson-icon">
+          {locked ? "🔐" : activity.icon}
+        </div>
 
-          <div className="student-lesson-icon">
-            {activity.icon}
-          </div>
-
-          <div className="student-lesson-type">
-            {text(
-              activity.en,
-              activity.ar
-            )}
-          </div>
-
-          {isCompleted && (
-            <div className="student-lesson-completed-badge">
-              ✅{" "}
-              {lesson.activityType === "mission"
+        <div className="tm-lesson-info">
+          <div className="tm-lesson-status-line">
+            <span className="tm-lesson-type">
+              {locked
                 ? text(
-                    "Mission completed",
-                    "تمت المهمة",
-                    "המשימה הושלמה"
+                    "Locked lesson",
+                    "درس مقفل",
+                    "שיעור נעול"
                   )
                 : text(
-                    "Lesson completed",
-                    "تم إنهاء الدرس",
-                    "השיעור הושלם"
+                    activity.en,
+                    activity.ar,
+                    activity.he
                   )}
+            </span>
+
+            {locked && (
+              <span className="tm-status locked">
+                🔒{" "}
+                {text(
+                  "Locked",
+                  "مقفل",
+                  "נעול"
+                )}
+              </span>
+            )}
+
+            {!locked && previewOnly && (
+              <span className="tm-status preview">
+                ✨{" "}
+                {text(
+                  "Free preview",
+                  "تجربة مجانية",
+                  "תצוגה מקדימה"
+                )}
+              </span>
+            )}
+
+            {!locked &&
+              !previewOnly &&
+              completed && (
+                <span className="tm-status completed">
+                  ✓{" "}
+                  {text(
+                    "Completed",
+                    "مكتمل",
+                    "הושלם"
+                  )}
+                </span>
+              )}
+
+            {inProgress && (
+              <span className="tm-status current">
+                {text(
+                  "In progress",
+                  "قيد التعلّم",
+                  "בתהליך"
+                )}
+              </span>
+            )}
+
+            {recommended && (
+              <span className="tm-status recommended">
+                {text(
+                  "Next step",
+                  "خطوتك القادمة",
+                  "השלב הבא"
+                )}
+              </span>
+            )}
+          </div>
+
+          <h3>{lessonTitle}</h3>
+
+          {description && (
+            <p className="tm-lesson-description">
+              {description}
+            </p>
+          )}
+
+          {!locked && (
+            <div className="tm-lesson-details">
+              <span>
+                ⏱{" "}
+                {lesson.estimatedMinutes ||
+                  lesson.minutes ||
+                  0}{" "}
+                {text(
+                  "min",
+                  "دقيقة",
+                  "דקות"
+                )}
+              </span>
+
+              {!previewOnly && (
+                <span>
+                  ⭐ {lesson.xpReward || 0} XP
+                </span>
+              )}
+
+              {inProgress && (
+                <span>
+                  {text(
+                    "Section",
+                    "القسم",
+                    "חלק"
+                  )}{" "}
+                  {Number(
+                    bookmark.lastSectionIndex || 0
+                  ) + 1}
+                </span>
+              )}
             </div>
           )}
-
         </div>
 
-        <div className="student-lesson-program-name">
-          {lesson._programAccessLesson
-            ? (
-                <>
-                  🚀{" "}
-                  {text(
-                    "Program:",
-                    "البرنامج:",
-                    "תוכנית:"
-                  )}{" "}
-                  {lesson._programTitle ||
-                    text(
-                      "Program",
-                      "برنامج",
-                      "תוכנית"
-                    )}
-                </>
-              )
-            : (
-                <>
-                  🏫{" "}
-                  {text(
-                    "Class:",
-                    "الصف:",
-                    "כיתה:"
-                  )}{" "}
-                  {lesson.className ||
-                    student?.className ||
-                    text(
-                      "Class lesson",
-                      "درس صف",
-                      "שיעור כיתה"
-                    )}
-                </>
-              )}
-        </div>
-
-        <h2>
-          {localized(
-            lesson.titleI18n ||
-            lesson.title
-          )}
-        </h2>
-
-        <p className="student-lesson-description">
-          {localized(
-            lesson.descriptionI18n ||
-            lesson.description
-          ) ||
-            text(
-              "A new learning adventure is waiting for you.",
-              "مغامرة تعليمية جديدة بانتظارك."
-            )}
-        </p>
-
-        <div className="student-lesson-meta">
-
-          <span>
-            ⏱{" "}
-            {lesson.estimatedMinutes || 0}{" "}
+        {locked ? (
+          <span className="tm-locked-label">
+            🔒{" "}
             {text(
-              "min",
-              "دقيقة"
+              "Not available",
+              "غير متاح",
+              "לא זמין"
             )}
           </span>
-
-          <span className="lesson-xp-pill">
-            ⭐ +{lesson.xpReward || 0} XP
-          </span>
-
-        </div>
-
-        <button
-          type="button"
-          className={
-            isCompleted
-              ? "start-student-lesson completed"
-              : "start-student-lesson"
-          }
-          onClick={() =>
-            navigate(
-              lesson._programAccessLesson
-                ? `/programs/${lesson._programId}/lessons/${lesson.id}`
-                : `/student/lessons/${lesson.id}`
-            )
-          }
-        >
-          {isCompleted
-            ? text(
-                lesson.activityType === "mission"
-                  ? "Review Mission"
-                  : "Review Lesson",
-                lesson.activityType === "mission"
-                  ? "مراجعة المهمة"
-                  : "مراجعة الدرس",
-                lesson.activityType === "mission"
-                  ? "צפייה חוזרת במשימה"
-                  : "חזרה על השיעור"
-              )
-            : text(
-                lesson.activityType === "mission"
-                  ? "Start Mission"
-                  : "Start Lesson",
-                lesson.activityType === "mission"
-                  ? "ابدأ المهمة"
-                  : "ابدأ الدرس",
-                lesson.activityType === "mission"
-                  ? "התחל משימה"
-                  : "התחל שיעור"
-              )}
-
-          {" "}
-          {isCompleted ? "🔄" : "🚀"}
-        </button>
-
+        ) : (
+          <button
+            type="button"
+            className={[
+              "tm-open-lesson",
+              completed ? "review" : "",
+              inProgress ? "continue" : "",
+              recommended ? "recommended" : "",
+            ].join(" ")}
+            onClick={() =>
+              openLesson(lesson, programId)
+            }
+          >
+            {previewOnly
+              ? text(
+                  "Preview",
+                  "جرّب الدرس",
+                  "תצוגה מקדימה"
+                )
+              : completed
+                ? text(
+                    "Review",
+                    "مراجعة",
+                    "חזרה"
+                  )
+                : inProgress
+                  ? text(
+                      "Continue",
+                      "أكمل",
+                      "המשך"
+                    )
+                  : text(
+                      "Start",
+                      "ابدأ",
+                      "התחל"
+                    )}
+            <span aria-hidden="true"> ↗</span>
+          </button>
+        )}
       </article>
     );
-  };
+  }
 
-
-  /* ============================
-     LOADING
-  ============================ */
+  // ==========================================
+  // INITIAL LOADING
+  // ==========================================
 
   if (loading) {
     return (
-      <div className="student-lessons-loading">
-
-        <div>
-          📚
-        </div>
-
+      <div
+        className="student-lessons-loading"
+        dir={isRTL ? "rtl" : "ltr"}
+      >
+        <div>📚</div>
 
         <p>
           {text(
             "Loading your lessons...",
-            "جارٍ تحميل دروسك..."
+            "جارٍ تحميل دروسك...",
+            "טוען את השיעורים שלך..."
           )}
         </p>
-
       </div>
     );
   }
 
+  if (!student) return null;
 
-  /* ============================
-     PAGE
-  ============================ */
+  // ==========================================
+  // MAIN PAGE
+  // ==========================================
 
   return (
     <div
       className="student-lessons-page"
-      dir={
-        language === "ar" || language === "he"
-          ? "rtl"
-          : "ltr"
-      }
+      dir={isRTL ? "rtl" : "ltr"}
     >
-
-      {/* =====================
-          TOPBAR
-      ====================== */}
+      {/* HEADER */}
 
       <header className="student-lessons-topbar">
-
         <div>
-
           <button
             type="button"
             className="student-lessons-back"
             onClick={() =>
-              navigate(
-                "/student"
-              )
+              navigate("/student")
             }
           >
-            {language === "ar"
-              ? "↩ رجوع للرئيسية"
-              : language === "he"
-                ? "→ חזרה ללוח הבקרה"
-                : "← Back to Dashboard"}
+            {text(
+              "← Back to Dashboard",
+              "↩ رجوع للرئيسية",
+              "→ חזרה ללוח הבקרה"
+            )}
           </button>
-
 
           <h1>
             📚{" "}
             {text(
-              "My Lessons",
-              "دروسي",
-              "השיעורים שלי"
+              "My Learning Journey",
+              "رحلتي التعليمية",
+              "מסע הלמידה שלי"
             )}
           </h1>
 
-
           <p>
-            {student?.className
-              ? text(
-                  `Lessons for ${student.className}`,
-                  `دروس صف ${student.className}`
-                )
-              : text(
-                  "Your learning lessons.",
-                  "دروسك التعليمية.",
-                  "השיעורים שלך."
-                )}
+            {text(
+              "Your programs and lessons, organized in one place.",
+              "كل برامجك ودروسك مرتبة بمكان واحد.",
+              "כל התוכניות והשיעורים שלך במקום אחד."
+            )}
           </p>
-
         </div>
-
 
         <div className="student-lessons-language">
-
-          <button
-            type="button"
-            className={
-              language === "en"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setLanguage("en")
-            }
-          >
-            EN
-          </button>
-
-
-          <button
-            type="button"
-            className={
-              language === "ar"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setLanguage("ar")
-            }
-          >
-            عربي
-          </button>
-
-          <button
-            type="button"
-            className={
-              language === "he"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setLanguage("he")
-            }
-          >
-            עברית
-          </button>
-
+          {[
+            ["en", "EN"],
+            ["ar", "عربي"],
+            ["he", "עברית"],
+          ].map(([code, label]) => (
+            <button
+              key={code}
+              type="button"
+              className={
+                language === code
+                  ? "active"
+                  : ""
+              }
+              aria-pressed={
+                language === code
+              }
+              onClick={() =>
+                setLanguage(code)
+              }
+            >
+              {label}
+            </button>
+          ))}
         </div>
-
       </header>
 
+      {/* SUMMARY */}
 
-      {/* =====================
-          CLASS INFORMATION
-      ====================== */}
-
-      {student?.classId && (
-        <section className="student-lessons-class">
-
-          <div className="student-lessons-class-icon">
-            🏫
-          </div>
-
+      <section className="tm-journey-summary">
+        <div>
+          <span>🎓</span>
 
           <div>
-
             <small>
               {text(
-                "My Class",
-                "صفي",
-                "הכיתה שלי"
+                "My Programs",
+                "برامجي",
+                "התוכניות שלי"
               )}
             </small>
 
-
-            <h2>
-              {student.className ||
-                text(
-                  "My Class",
-                  "صفي"
-                )}
-            </h2>
-
-
-            <p>
-              {student.classCode}
-            </p>
-
-          </div>
-
-
-          <div className="student-lessons-count">
-
             <strong>
-              {visibleLessons.length}
+              {programsLoading
+                ? "…"
+                : programGroups.length}
             </strong>
+          </div>
+        </div>
 
+        <div>
+          <span>📚</span>
 
-            <span>
+          <div>
+            <small>
               {text(
                 "Lessons",
-                "دروس"
+                "الدروس",
+                "שיעורים"
               )}
-            </span>
+            </small>
 
+            <strong>
+              {programsLoading ||
+              classLoading
+                ? "…"
+                : totalLessons}
+            </strong>
           </div>
+        </div>
 
-        </section>
-      )}
+        <div>
+          <span>✅</span>
 
+          <div>
+            <small>
+              {text(
+                "Completed",
+                "دروس منجزة",
+                "שיעורים שהושלמו"
+              )}
+            </small>
 
-      {/* ERROR */}
+            <strong>
+              {progressLoading
+                ? "…"
+                : completedCount}
+            </strong>
+          </div>
+        </div>
+      </section>
+
+      {/* ERRORS */}
 
       {error && (
         <div className="student-lessons-error">
@@ -1175,134 +1173,533 @@ const [
         </div>
       )}
 
+      <div className="student-lessons-sections">
+        {/* PROGRAMS */}
 
-      {/* =====================
-          NO CLASS
-      ====================== */}
+        <section className="student-lessons-section">
+          <div className="student-lessons-section-header">
+            <div>
+              <small>
+                {text(
+                  "LEARNING PROGRAMS",
+                  "البرامج التعليمية",
+                  "תוכניות למידה"
+                )}
+              </small>
 
-      {programLessons.length === 0 && lessons.length === 0 ? (
+              <h2>
+                🎯{" "}
+                {text(
+                  "My Programs",
+                  "برامجي التعليمية",
+                  "התוכניות שלי"
+                )}
+              </h2>
 
-        <section className="student-lessons-empty">
+              <p>
+                {text(
+                  "Continue your learning where you stopped.",
+                  "تابع رحلتك التعليمية من وين وقفت.",
+                  "המשיכו ללמוד מהמקום שבו עצרתם."
+                )}
+              </p>
+            </div>
 
-          <div>
-            📚
+            <strong>
+              {programsLoading
+                ? "…"
+                : programGroups.length}
+            </strong>
           </div>
 
-          <h2>
-            {text(
-              "No lessons yet",
-              "لا توجد دروس بعد",
-              "אין שיעורים עדיין"
-            )}
-          </h2>
+          {programsLoading ? (
+            <div className="tm-program-loading">
+              {text(
+                "Loading programs...",
+                "جارٍ تحميل البرامج...",
+                "טוען תוכניות..."
+              )}
+            </div>
+          ) : !groupsWithStats.length ? (
+            <div className="tm-program-empty">
+              <span>📘</span>
 
-          <p>
-            {text(
-              "Lessons from My Programs or your class will appear here.",
-              "دروس «برامجي» أو دروس الصف ستظهر هنا.",
-              "השיעורים מהתוכניות שלי או מהכיתה יופיעו כאן."
-            )}
-          </p>
+              <h3>
+                {text(
+                  "No programs yet",
+                  "ما في برامج بعد",
+                  "אין עדיין תוכניות"
+                )}
+              </h3>
 
+              <p>
+                {text(
+                  "Explore new learning programs.",
+                  "استكشف البرامج التعليمية المتاحة.",
+                  "גלו תוכניות לימוד חדשות."
+                )}
+              </p>
+
+              <button
+                type="button"
+                onClick={() =>
+                  navigate("/student/programs")
+                }
+              >
+                {text(
+                  "Explore Programs",
+                  "استكشف البرامج",
+                  "גלו תוכניות"
+                )}
+              </button>
+            </div>
+          ) : (
+            <div className="tm-programs-list">
+              {groupsWithStats.map(
+                (group) => {
+                  const expanded =
+                    isProgramExpanded(group.id);
+
+                  const recommended =
+                    group.next ||
+                    group.preview;
+
+                  const isActiveProgram =
+                    group.id === automaticOpenId &&
+                    !group.allCompleted;
+
+                  const hasUnfinished =
+                    group.lessons.some(
+                      (lesson) =>
+                        !lesson.locked &&
+                        !lesson.previewOnly &&
+                        !completedLessons[lesson.id]
+                    );
+
+                  return (
+                    <section
+                      key={group.id}
+                      className={[
+                        "tm-program-card",
+                        isActiveProgram
+                          ? "tm-program-active"
+                          : "",
+                        group.allCompleted
+                          ? "tm-program-finished"
+                          : "",
+                      ].join(" ")}
+                    >
+                      {/* PROGRAM HEADER */}
+
+                      <div className="tm-program-heading">
+                        <div className="tm-program-symbol">
+                          {group.program.icon || "💻"}
+                        </div>
+
+                        <div className="tm-program-heading-info">
+                          <div className="tm-program-heading-badges">
+                            <span className="tm-program-eyebrow">
+                              {text(
+                                "LEARNING PROGRAM",
+                                "برنامج تعليمي",
+                                "תוכנית לימוד"
+                              )}
+                            </span>
+
+                            {isActiveProgram &&
+                              !progressLoading && (
+                                <span className="tm-active-program-badge">
+                                  ✨{" "}
+                                  {text(
+                                    "Continue here",
+                                    "كمّل من هون",
+                                    "ממשיכים מכאן"
+                                  )}
+                                </span>
+                              )}
+
+                            {group.allCompleted &&
+                              !progressLoading && (
+                                <span className="tm-finished-program-badge">
+                                  🏆{" "}
+                                  {text(
+                                    "Completed",
+                                    "مكتمل",
+                                    "הושלם"
+                                  )}
+                                </span>
+                              )}
+                          </div>
+
+                          <h2>
+                            {localized(
+                              group.program.titleI18n ||
+                                group.program.title
+                            )}
+                          </h2>
+
+                          <p>
+                            {localized(
+                              group.program.descriptionI18n ||
+                                group.program.description ||
+                                group.program.summary
+                            )}
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="tm-program-toggle"
+                          aria-expanded={expanded}
+                          onClick={() =>
+                            toggleProgram(group.id)
+                          }
+                        >
+                          {expanded
+                            ? text(
+                                "Hide lessons",
+                                "إخفاء الدروس",
+                                "הסתר שיעורים"
+                              )
+                            : text(
+                                "Show lessons",
+                                "عرض الدروس",
+                                "הצג שיעורים"
+                              )}
+
+                          <span aria-hidden="true">
+                            {expanded ? "⌃" : "⌄"}
+                          </span>
+                        </button>
+                      </div>
+
+                      {/* PROGRESS */}
+
+                      <div className="tm-program-progress">
+                        <div className="tm-program-progress-text">
+                          <strong>
+                            {progressLoading
+                              ? "…"
+                              : `${group.percent}%`}{" "}
+                            {text(
+                              "completed",
+                              "مكتمل",
+                              "הושלם"
+                            )}
+                          </strong>
+
+                          <span>
+                            {progressLoading
+                              ? "…"
+                              : group.completed}
+                            {" / "}
+                            {group.total}{" "}
+                            {text(
+                              "lessons",
+                              "دروس",
+                              "שיעורים"
+                            )}
+                          </span>
+                        </div>
+
+                        <div
+                          className="tm-progress-track"
+                          role="progressbar"
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-valuenow={
+                            progressLoading
+                              ? 0
+                              : group.percent
+                          }
+                          aria-label={text(
+                            "Program progress",
+                            "نسبة إنجاز البرنامج",
+                            "התקדמות בתוכנית"
+                          )}
+                        >
+                          <div
+                            style={{
+                              width: progressLoading
+                                ? "0%"
+                                : `${group.percent}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* CONGRATULATIONS */}
+
+                      {!progressLoading &&
+                        group.allCompleted && (
+                          <div
+                            className="tm-program-congratulations"
+                            role="status"
+                          >
+                            <span className="tm-congrats-icon">
+                              🏆
+                            </span>
+
+                            <div>
+                              <small>
+                                {text(
+                                  "AMAZING ACHIEVEMENT",
+                                  "إنجاز رائع",
+                                  "הישג מדהים"
+                                )}
+                              </small>
+
+                              <strong>
+                                {text(
+                                  "Congratulations! You completed this program!",
+                                  "مبروك! خلّصت البرنامج بنجاح!",
+                                  "כל הכבוד! סיימתם את התוכנית בהצלחה!"
+                                )}
+                              </strong>
+
+                              <p>
+                                {text(
+                                  "You finished every lesson. Keep learning and exploring!",
+                                  "أنهيت كل دروس البرنامج! استمر بالتعلّم واكتشاف مهارات جديدة.",
+                                  "סיימתם את כל השיעורים! המשיכו ללמוד ולגלות מיומנויות חדשות."
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                      {/* NEXT LESSON */}
+
+                      {!progressLoading &&
+                        !group.allCompleted &&
+                        recommended && (
+                          <div className="tm-program-next">
+                            <div>
+                              <small>
+                                {group.current
+                                  ? text(
+                                      "PICK UP WHERE YOU LEFT OFF",
+                                      "كمّل من وين وقفت",
+                                      "המשיכו מהמקום שבו עצרתם"
+                                    )
+                                  : group.next
+                                    ? text(
+                                        "YOUR NEXT STEP",
+                                        "خطوتك القادمة",
+                                        "השלב הבא שלך"
+                                      )
+                                    : text(
+                                        "FREE PREVIEW",
+                                        "تجربة مجانية",
+                                        "תצוגה מקדימה"
+                                      )}
+                              </small>
+
+                              <strong>
+                                {localized(
+                                  recommended.titleI18n ||
+                                    recommended.title
+                                )}
+                              </strong>
+
+                              {group.current && (
+                                <span className="tm-next-hint">
+                                  {text(
+                                    "Your previous progress is saved.",
+                                    "تقدّمك السابق محفوظ.",
+                                    "ההתקדמות הקודמת שלך נשמרה."
+                                  )}
+                                </span>
+                              )}
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                openLesson(
+                                  recommended,
+                                  group.id
+                                )
+                              }
+                            >
+                              {group.current
+                                ? text(
+                                    "Continue learning",
+                                    "أكمل التعلّم",
+                                    "המשך ללמוד"
+                                  )
+                                : group.next
+                                  ? text(
+                                      "Start lesson",
+                                      "ابدأ الدرس",
+                                      "התחל שיעור"
+                                    )
+                                  : text(
+                                      "Try preview",
+                                      "جرّب الدرس",
+                                      "נסו שיעור לדוגמה"
+                                    )}
+                              <span aria-hidden="true">
+                                {" "}↗
+                              </span>
+                            </button>
+                          </div>
+                        )}
+
+                      {!progressLoading &&
+                        !group.allCompleted &&
+                        !recommended && (
+                          <div className="tm-program-no-lessons">
+                            🔒{" "}
+                            {text(
+                              "No additional lessons are available in this program right now.",
+                              "ما في دروس إضافية مفتوحة بهذا البرنامج حاليًا.",
+                              "אין שיעורים נוספים זמינים כרגע בתוכנית."
+                            )}
+                          </div>
+                        )}
+
+                      {/* PROGRAM LESSONS */}
+
+                      {expanded && (
+                        <div className="tm-program-lessons">
+                          <div className="tm-program-lessons-heading">
+                            <h3>
+                              {text(
+                                "Program lessons",
+                                "دروس البرنامج",
+                                "שיעורי התוכנית"
+                              )}
+                            </h3>
+
+                            <span>
+                              {group.total}{" "}
+                              {text(
+                                "lessons",
+                                "دروس",
+                                "שיעורים"
+                              )}
+                            </span>
+                          </div>
+
+                          {group.lessons.length ? (
+                            <div className="tm-lesson-list">
+                              {group.lessons.map(
+                                (lesson, index) =>
+                                  renderLessonRow(
+                                    lesson,
+                                    index,
+                                    group.id,
+                                    group.next?.id
+                                  )
+                              )}
+                            </div>
+                          ) : (
+                            <p className="tm-program-no-lessons">
+                              {text(
+                                "No published lessons yet.",
+                                "لا توجد دروس منشورة بعد.",
+                                "אין עדיין שיעורים שפורסמו."
+                              )}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </section>
+                  );
+                }
+              )}
+            </div>
+          )}
         </section>
 
-      ) : (
+        {/* CLASS LESSONS */}
 
-        <div className="student-lessons-sections">
-
-          {programLessons.length > 0 && (
-            <section className="student-lessons-section">
-
-              <div className="student-lessons-section-header">
-                <div>
-                  <small>
-                    {text(
-                      "MY PROGRAMS",
-                      "برامجي"
-                    )}
-                  </small>
-
-                  <h2>
-                    📘{" "}
-                    {text(
-                      "Program Lessons",
-                      "دروس برامجي",
-                      "שיעורי התוכניות שלי"
-                    )}
-                  </h2>
-
-                  <p>
-                    {text(
-                      "All lessons available to you from your selected programs.",
-                      "كل الدروس المتاحة لك من البرامج الموجودة في «برامجي»."
-                    )}
-                  </p>
-                </div>
-
-                <strong>
-                  {programLessons.length}
-                </strong>
-              </div>
-
-              <div className="student-lessons-grid">
-                {programLessons.map(
-                  renderLessonCard
+        <section className="student-lessons-section">
+          <div className="student-lessons-section-header">
+            <div>
+              <small>
+                {text(
+                  "CLASSROOM",
+                  "الصف",
+                  "כיתה"
                 )}
-              </div>
+              </small>
 
-            </section>
-          )}
-
-          {lessons.length > 0 && (
-            <section className="student-lessons-section">
-
-              <div className="student-lessons-section-header">
-                <div>
-                  <small>
-                    {text(
-                      "CLASS",
-                      "الصف"
-                    )}
-                  </small>
-
-                  <h2>
-                    🏫{" "}
-                    {text(
-                      "Class Lessons",
-                      "دروس الصف",
-                      "שיעורי הכיתה"
-                    )}
-                  </h2>
-
-                  <p>
-                    {text(
-                      "Lessons published by your teacher.",
-                      "الدروس التي نشرها لك المعلّم."
-                    )}
-                  </p>
-                </div>
-
-                <strong>
-                  {lessons.length}
-                </strong>
-              </div>
-
-              <div className="student-lessons-grid">
-                {lessons.map(
-                  renderLessonCard
+              <h2>
+                🏫{" "}
+                {text(
+                  "Class lessons",
+                  "دروس الصف",
+                  "שיעורי הכיתה"
                 )}
-              </div>
+              </h2>
 
-            </section>
+              <p>
+                {text(
+                  "Lessons published by your teachers.",
+                  "الدروس اللي نشرها معلموك.",
+                  "שיעורים שפורסמו על ידי המורים."
+                )}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className="tm-class-toggle"
+              aria-expanded={
+                showClassLessons
+              }
+              aria-label={text(
+                "Show or hide class lessons",
+                "إظهار أو إخفاء دروس الصف",
+                "הצגה או הסתרה של שיעורי הכיתה"
+              )}
+              onClick={() =>
+                setShowClassLessons(
+                  (value) => !value
+                )
+              }
+            >
+              {showClassLessons
+                ? "⌃"
+                : "⌄"}
+            </button>
+          </div>
+
+          {showClassLessons && (
+            <div className="tm-class-lessons-card">
+              {classLoading ? (
+                <div className="tm-class-empty">
+                  {text(
+                    "Loading class lessons...",
+                    "جارٍ تحميل دروس الصف...",
+                    "טוען שיעורי כיתה..."
+                  )}
+                </div>
+              ) : classLessons.length ? (
+                <div className="tm-lesson-list">
+                  {classLessons.map(
+                    (lesson, index) =>
+                      renderLessonRow(
+                        lesson,
+                        index
+                      )
+                  )}
+                </div>
+              ) : (
+                <div className="tm-class-empty">
+                  {text(
+                    "No class lessons have been published yet.",
+                    "ما في دروس صف منشورة بعد.",
+                    "עדיין לא פורסמו שיעורים לכיתה."
+                  )}
+                </div>
+              )}
+            </div>
           )}
-
-        </div>
-
-      )}
-
+        </section>
+      </div>
     </div>
   );
 }
-
-
-export default StudentLessons;

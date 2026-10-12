@@ -4,11 +4,9 @@ import {
   collection,
   serverTimestamp,
 } from "firebase/firestore";
-
 import { db } from "../firebase/firebase";
 import { useLanguage } from "../context/LanguageContext";
 import "./Courses.css";
-
 const content = {
   ar: {
     courses: [
@@ -79,7 +77,6 @@ const content = {
     phoneInvalid: "يرجى إدخال رقم هاتف صحيح.",
     footer: "تعليم ممتع، دعم شخصي ومهارات للمستقبل.",
   },
-
   en: {
     courses: [
       {
@@ -149,7 +146,6 @@ const content = {
     phoneInvalid: "Please enter a valid phone number.",
     footer: "Engaging learning, personal support and skills for the future.",
   },
-
   he: {
     courses: [
       {
@@ -220,7 +216,6 @@ const content = {
     footer: "למידה מהנה, תמיכה אישית ומיומנויות לעתיד.",
   },
 };
-
 const initialForm = {
   studentName: "",
   parentName: "",
@@ -230,45 +225,35 @@ const initialForm = {
   preferredTime: "",
   notes: "",
 };
-
 function Courses() {
   const { language } = useLanguage();
-
   const lang =
     language === "ar" || language === "he"
       ? language
       : "en";
-
   const c = content[lang];
-
   const whatsappUrl =
     `https://wa.me/972549308793?text=${encodeURIComponent(c.whatsappMessage)}`;
-
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
-
   const updateField = (field, value) => {
     setForm((current) => ({
       ...current,
       [field]: value,
     }));
-
     if (status !== "idle") {
       setStatus("idle");
       setMessage("");
     }
   };
-
   const selectCourse = (courseId) => {
     setForm((current) => ({
       ...current,
       courseId,
     }));
-
     setStatus("idle");
     setMessage("");
-
     window.setTimeout(() => {
       document
         .getElementById("registration")
@@ -278,10 +263,8 @@ function Courses() {
         });
     }, 50);
   };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     const requiredValues = [
       form.studentName,
       form.parentName,
@@ -290,7 +273,6 @@ function Courses() {
       form.courseId,
       form.preferredTime,
     ];
-
     if (
       requiredValues.some(
         (value) => !String(value).trim()
@@ -300,23 +282,18 @@ function Courses() {
       setMessage(c.required);
       return;
     }
-
     const cleanPhone = form.phone.replace(/\s+/g, "");
-
-    if (!/^[0-9+\-()]{8,20}$/.test(cleanPhone)) {
+    if (!/^[0-9+()-]{8,20}$/.test(cleanPhone)) {
       setStatus("error");
       setMessage(c.phoneInvalid);
       return;
     }
-
     const selectedCourse = c.courses.find(
       (course) => course.id === form.courseId
     );
-
     try {
       setStatus("loading");
       setMessage("");
-
       await addDoc(
         collection(db, "courseRegistrations"),
         {
@@ -336,7 +313,6 @@ function Courses() {
           createdAt: serverTimestamp(),
         }
       );
-
       setForm(initialForm);
       setStatus("success");
       setMessage(c.success);
@@ -345,12 +321,10 @@ function Courses() {
         "Course registration error:",
         error
       );
-
       setStatus("error");
       setMessage(c.error);
     }
   };
-
   return (
     <main
       className="courses-page"
@@ -361,11 +335,8 @@ function Courses() {
           <span className="courses-eyebrow">
             {c.eyebrow}
           </span>
-
           <h1>{c.title}</h1>
-
           <p>{c.intro}</p>
-
           <div className="courses-hero-actions">
             <a
               href="#available-courses"
@@ -373,14 +344,12 @@ function Courses() {
             >
               {c.explore}
             </a>
-
             <a
               href="#registration"
               className="courses-secondary-btn"
             >
               {c.register}
             </a>
-
             <a
               href={whatsappUrl}
               target="_blank"
@@ -392,20 +361,16 @@ function Courses() {
             </a>
           </div>
         </div>
-
         <div className="courses-hero-card">
           <span className="hero-card-icon">
             💻
           </span>
-
           <strong>
             {c.heroCardTitle}
           </strong>
-
           <p>{c.heroCardText}</p>
         </div>
       </section>
-
       <section
         id="available-courses"
         className="courses-section"
@@ -415,7 +380,6 @@ function Courses() {
           <h2>{c.availableTitle}</h2>
           <p>{c.availableText}</p>
         </div>
-
         <div className="courses-grid">
           {c.courses.map((course) => (
             <article
@@ -425,11 +389,8 @@ function Courses() {
               <span className="course-badge">
                 {course.badge}
               </span>
-
               <h3>{course.title}</h3>
-
               <p>{course.description}</p>
-
               <ul className="course-meta">
                 {course.meta.map((item) => (
                   <li key={item}>
@@ -437,7 +398,6 @@ function Courses() {
                   </li>
                 ))}
               </ul>
-
               <button
                 type="button"
                 className="course-card-btn"
@@ -451,20 +411,17 @@ function Courses() {
           ))}
         </div>
       </section>
-
       <section className="zoom-section">
         <div>
           <span className="zoom-icon">
             🎥
           </span>
         </div>
-
         <div>
           <h2>{c.zoomTitle}</h2>
           <p>{c.zoomText}</p>
         </div>
       </section>
-
       <section
         id="registration"
         className="registration-preview"
@@ -474,7 +431,6 @@ function Courses() {
           <h2>{c.readyTitle}</h2>
           <p>{c.readyText}</p>
         </div>
-
         <form
           className="course-registration-form"
           onSubmit={handleSubmit}
@@ -494,7 +450,6 @@ function Courses() {
                 required
               />
             </label>
-
             <label>
               <span>{c.parentName} *</span>
               <input
@@ -509,7 +464,6 @@ function Courses() {
                 required
               />
             </label>
-
             <label>
               <span>{c.grade} *</span>
               <input
@@ -524,7 +478,6 @@ function Courses() {
                 required
               />
             </label>
-
             <label>
               <span>{c.phone} *</span>
               <input
@@ -540,7 +493,6 @@ function Courses() {
                 required
               />
             </label>
-
             <label>
               <span>{c.course} *</span>
               <select
@@ -556,7 +508,6 @@ function Courses() {
                 <option value="">
                   {c.chooseCourse}
                 </option>
-
                 {c.courses.map((course) => (
                   <option
                     key={course.id}
@@ -567,7 +518,6 @@ function Courses() {
                 ))}
               </select>
             </label>
-
             <label>
               <span>{c.preferredTime} *</span>
               <input
@@ -583,7 +533,6 @@ function Courses() {
               />
             </label>
           </div>
-
           <label className="course-form-notes">
             <span>{c.notes}</span>
             <textarea
@@ -597,7 +546,6 @@ function Courses() {
               }
             />
           </label>
-
           {message && (
             <div
               className={`course-form-message ${
@@ -610,7 +558,6 @@ function Courses() {
               {message}
             </div>
           )}
-
           <button
             type="submit"
             className="course-submit-btn"
@@ -620,7 +567,6 @@ function Courses() {
               ? c.sending
               : c.submit}
           </button>
-
           <a
             href={whatsappUrl}
             target="_blank"
@@ -632,7 +578,6 @@ function Courses() {
           </a>
         </form>
       </section>
-
       <a
         href={whatsappUrl}
         target="_blank"
@@ -643,7 +588,6 @@ function Courses() {
       >
         <span aria-hidden="true">💬</span>
       </a>
-
       <footer className="courses-footer">
         <strong>TechMinds</strong>
         <span>{c.footer}</span>
@@ -651,5 +595,4 @@ function Courses() {
     </main>
   );
 }
-
 export default Courses;

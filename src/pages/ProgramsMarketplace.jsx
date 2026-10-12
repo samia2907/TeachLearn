@@ -127,6 +127,7 @@ function ProgramsMarketplace() {
         value[language] ||
         value.en ||
         value.ar ||
+        value.he ||
         ""
       );
     };
@@ -151,7 +152,11 @@ function ProgramsMarketplace() {
           auth.currentUser;
 
 
-        if (!user) { setUserProfile({ role: "guest" });
+        if (!user) {
+          setAccessMap({});
+          setClasses([]);
+          setSelectedClasses({});
+          setUserProfile({ role: "guest" });
           return;
         }
 
@@ -313,7 +318,34 @@ function ProgramsMarketplace() {
           setClasses(list);
 
 
+          if (list.length > 0) {
+            setSelectedClasses(
+              (current) => {
+                const next = {
+                  ...current,
+                };
 
+
+                programs.forEach(
+                  (program) => {
+                    if (
+                      !next[
+                        program.id
+                      ]
+                    ) {
+                      next[
+                        program.id
+                      ] =
+                        list[0].id;
+                    }
+                  }
+                );
+
+
+                return next;
+              }
+            );
+          }
         }
       );
 
@@ -321,19 +353,11 @@ function ProgramsMarketplace() {
     return () =>
       unsubscribe();
 
-  }, [userProfile?.uid, userProfile?.role]);
+  }, [
+    userProfile,
+    programs,
+  ]);
 
-  // Catalog changes update defaults without restarting the Firestore listener.
-  useEffect(() => {
-    if (userProfile?.role !== "teacher" || classes.length === 0) return;
-    setSelectedClasses(current => {
-      const next = { ...current };
-      programs.forEach(program => {
-        if (!next[program.id]) next[program.id] = classes[0].id;
-      });
-      return next;
-    });
-  }, [classes, programs, userProfile?.role]);
 
   /* =====================================================
      LOAD PROGRAM ACCESS
@@ -341,19 +365,16 @@ function ProgramsMarketplace() {
 
   useEffect(() => {
     let active = true;
-    let running = false;
-    let queued = false;
     const checkAccess =
       async () => {
         if (
-          !active || !userProfile?.uid || programs.length === 0
+          !userProfile?.uid || programs.length === 0
         ) {
+          if (active) {
+            setAccessMap({});
+          }
           return;
         }
-        // Keep one batch in flight; replay invalidations received during it.
-        if (running) { queued = true; return; }
-        running = true;
-        try {
 
 
         const result = {};
@@ -386,26 +407,17 @@ function ProgramsMarketplace() {
 
 
         if (active) setAccessMap(result);
-        } finally {
-          running = false;
-          if (queued && active) {
-            queued = false;
-            void checkAccess();
-          }
-        }
       };
 
 
+    checkAccess();
     // Recheck when returning from Paddle or another tab; checkout also waits for the entitlement.
     window.addEventListener("focus", checkAccess);
     const refresh = window.setInterval(checkAccess, 10000);
     const stopAccess = userProfile?.uid ? onSnapshot(
       query(collection(db, 'programAccess'), where('userId', '==', userProfile.uid)),
       checkAccess,
-      failure => {
-        console.error('Program access subscription failed', failure.code);
-        void checkAccess();
-      },
+      failure => console.error('Program access subscription failed', failure.code),
     ) : () => {};
     return () => {
       active = false;
@@ -476,7 +488,8 @@ function ProgramsMarketplace() {
   const hasProgramAccess =
     (program) =>
       userProfile?.role === "owner" ||
-      Boolean(accessMap[program.id]) ||
+      (userProfile?.role !== "guest" &&
+        Boolean(accessMap[program.id])) ||
       normalizeProgram(program).accessType === "free";
 
 
@@ -765,7 +778,7 @@ function ProgramsMarketplace() {
   ) {
     return (
       <div className="marketplace-loading">
-        🚀
+        ✨
 
         <p>
           {text(
@@ -825,7 +838,7 @@ function ProgramsMarketplace() {
 
 
           <h1>
-            🚀{" "}
+            ✨{" "}
             {text(
               "Learning Programs",
               "البرامج التعليمية",
@@ -1090,7 +1103,7 @@ function ProgramsMarketplace() {
 
                     <div className="marketplace-program-icon">
                       {program.icon ||
-                        "🚀"}
+                        "✨"}
                     </div>
 
 
@@ -1209,7 +1222,17 @@ function ProgramsMarketplace() {
                       )}
                       {hasAccess || normalizeProgram(program).accessType === 'free' ? (
                         <button type="button" className="marketplace-open-button" onClick={() => openProgram(program.id)}>
-                          {text("Open / Continue", "فتح / متابعة", "פתיחה / המשך")}
+                          {userProfile?.role === "guest"
+                            ? text(
+                                "Open Program",
+                                "فتح البرنامج",
+                                "פתיחת התוכנית"
+                              )
+                            : text(
+                                "Open / Continue",
+                                "فتح / متابعة",
+                                "פתיחה / המשך"
+                              )}
                         </button>
                       ) : (
                         <button type="button" className="marketplace-buy-button" disabled={manualAccessMode ? normalizeProgram(program).accessType === 'class' : !['paid', 'free'].includes(normalizeProgram(program).accessType)} onClick={() => openProgram(program.id)}>

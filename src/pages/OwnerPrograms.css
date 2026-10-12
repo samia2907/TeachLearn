@@ -1609,3 +1609,15 @@ input[type="number"] {
   color: #64748b !important;
   -webkit-text-fill-color: #64748b !important;
 }
+/* Keep each translation's name and description together. */
+.owner-program-modal .program-translations { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.owner-program-modal .program-language-fields { display: flex; flex-direction: column; gap: 16px; min-width: 0; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; }
+.owner-program-modal .program-language-fields label { min-width: 0; overflow-wrap: anywhere; }
+.owner-program-modal .program-language-fields input,
+.owner-program-modal .program-language-fields textarea { width: 100%; min-width: 0; font-size: 16px; text-align: start; }
+.owner-program-modal { max-height: calc(100dvh - 32px); overflow-y: auto; }
+@media (max-width: 700px) {
+  .owner-program-modal .program-translations { grid-template-columns: minmax(0, 1fr); }
+  .owner-program-modal-overlay { padding: 12px; }
+  .owner-program-modal { padding: 16px; }
+}

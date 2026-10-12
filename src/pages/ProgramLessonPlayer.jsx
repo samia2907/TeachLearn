@@ -1,4 +1,17 @@
+import { lessonImageUrl, lessonImageDimensions } from "../utils/lessonImages";
 import { useContentProgress } from '../progress/useContentProgress';
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -6,7 +19,31 @@ import ProgressNotice from '../progress/ProgressNotice';
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 import { subscribeProgramContent } from '../access/programAccessClient';
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -14,7 +51,31 @@ import { createPracticeRepository } from '../components/mission/missionRepositor
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 import '../pages/ProgramAccess.css';
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -22,7 +83,31 @@ import {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   lazy,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -30,7 +115,31 @@ import {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   useEffect,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -38,11 +147,47 @@ import {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   useRef,
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   useState,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -62,7 +207,67 @@ import {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -70,11 +275,47 @@ import {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   useParams,
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   Navigate,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -86,11 +327,59 @@ import {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   useLanguage,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -102,7 +391,43 @@ import {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import "./ProgramLessonPlayer.css";
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -110,11 +435,47 @@ import { getLessonSections, isCodingConfig } from "../components/code/codingConf
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 import { useCodeText } from "../components/code/codeText";
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 const CodeRunner = lazy(() => import("../components/code/CodeRunner"));
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -126,13 +487,115 @@ const MissionPlayer = lazy(() => import("../components/mission/MissionPlayer"));
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { hebrewText } from "../data/hebrewText";
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 import { auth, functions } from "../firebase/firebase";
 
+
+
+
+
+
+
 import { httpsCallable } from "firebase/functions";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -156,7 +619,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   const [locked, setLocked] = useState(false);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -164,7 +651,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   const practiceRepository = useMemo(() => createPracticeRepository(), []);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -172,7 +683,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   const [codingResults, setCodingResults] = useState({});
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -180,7 +715,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   const [studentId, setStudentId] = useState(null);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -188,7 +747,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   const navigate =
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -200,7 +783,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -208,7 +827,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     lessonId,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -220,7 +863,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -228,7 +907,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     setLanguage,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -244,7 +947,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const [
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -252,7 +1003,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     setProgram,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -264,7 +1039,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const [
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -272,7 +1083,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     setLesson,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -284,7 +1119,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const [
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -292,7 +1163,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     setLoading,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -304,7 +1199,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const [
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -312,7 +1243,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     setError,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -324,7 +1279,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const [
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -332,7 +1323,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     setCurrentSlide,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -344,7 +1359,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const [
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -352,11 +1403,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     setAnswers,
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   ] = useState({});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -368,7 +1467,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     checkedAnswers,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -376,9 +1499,30 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   ] = useState({});
 
+
+
+
+
+
+
   const [interactionAnswers, setInteractionAnswers] = useState({});
+
+
+
   const [interactionChecked, setInteractionChecked] = useState({});
 
 
@@ -387,7 +1531,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const [
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -395,7 +1575,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     setCompleted,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -403,11 +1607,81 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   const [completing, setCompleting] = useState(false);
+
+
+
+
+
+
 
   const [completionError, setCompletionError] = useState('');
 
+
+
+
+
+
+
   const [completionResult, setCompletionResult] = useState(null);
+  // Reloading a completed screen reads its receipt; it never submits completion again.
+  useEffect(() => {
+    if (!completed || completionResult || !lesson?.id || lesson.id !== lessonId || lesson.previewOnly || learnerRole !== 'student') return;
+    let active = true;
+    httpsCallable(functions, 'completeLesson')({ lessonId: lesson.id, readOnly: true })
+      .then(response => { if (active) setCompletionResult(response.data); })
+      .catch(() => { /* Keep review/back available when the summary cannot be loaded. */ });
+    return () => { active = false; };
+  }, [completed, completionResult, lesson?.id, lessonId, lesson?.previewOnly, learnerRole]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -423,7 +1697,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
      TRANSLATION
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -435,39 +1733,49 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const text = (
-
-
 
     english,
 
+    arabic,
 
-
-    arabic
-
-
+    hebrew = hebrewText(english)
 
   ) =>
 
-
-
     language === "ar"
-
-
 
       ? arabic
 
-
-
       : language === "he"
 
+        ? hebrew
 
-
-        ? hebrewText(english)
-
-
-
-      : english;
+        : english;
 
 
 
@@ -476,10 +1784,92 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const sectionTypeLabel = (type) => {
+
+    const labels = {
+
+      content: text("Content", "محتوى", "תוכן"),
+
+      explain: text("Explanation", "شرح", "הסבר"),
+
+      question: text("Question", "سؤال", "שאלה"),
+
+      multipleChoice: text("Multiple choice", "اختيار من متعدد", "בחירה מרובה"),
+
+      classification: text("Classification", "تصنيف", "מיון"),
+
+      task: text("Task", "مهمة", "משימה"),
+
+      challenge: text("Challenge", "تحدي", "אתגר"),
+
+      summary: text("Summary", "ملخص", "סיכום"),
+
+      reflection: text("Reflection", "تأمل", "רפלקציה"),
+
+      coding: text("Coding", "برمجة", "תכנות"),
+
+    };
+
+
+
+    return labels[type] || type || text("Content", "محتوى", "תוכן");
+
+  };
 
 
 
   const errorText = useRef(text);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -491,7 +1881,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const localized =
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -499,7 +1925,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       if (!value) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -507,7 +1957,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -523,7 +2021,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         typeof value ===
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -531,7 +2053,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       ) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -539,7 +2085,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -555,23 +2149,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         value[language] ||
-
-
 
         value.en ||
 
-
-
         value.ar ||
 
-
+        value.he ||
 
         ""
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       );
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -587,11 +2213,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   /* =====================================================
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
      LOAD LESSON SECURELY
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -603,7 +2289,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   useEffect(() => {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -611,7 +2333,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     setCurrentSlide(0); setCompleted(false); setCompleting(false); setCompletionError(''); setCompletionResult(null); setAnswers({}); setCheckedAnswers({}); setInteractionAnswers({}); setInteractionChecked({}); setCodingResults({}); setCodingAnswers({});
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -619,7 +2365,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       const found = data.lessons?.find(item => item.id === lessonId);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -627,11 +2397,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       setLocked(Boolean(found?.locked)); setLesson(current => JSON.stringify(current) === JSON.stringify(found || null) ? current : found || null); setLoading(false);
 
 
 
-      setError(found ? '' : errorText.current('Lesson could not be found.', 'لم يتم العثور على الدرس.'));
+
+
+
+
+
+
+
+
+
+
+
+
+      setError(found ? '' : errorText.current('Lesson could not be found.', 'لم يتم العثور على الدرس.', 'לא ניתן למצוא את השיעור.'));
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -639,7 +2445,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       console.error('Lesson access load failed', failure.code, failure.message);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -647,11 +2477,47 @@ function ProgramLessonPlayer() {
 
 
 
-      setError(errorText.current('Could not open the lesson.', 'تعذر فتح الدرس.'));
+
+
+
+
+
+
+
+
+
+
+
+
+      setError(errorText.current('Could not open the lesson.', 'تعذر فتح الدرس.', 'לא ניתן לפתוח את השיעור.'));
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
     }, { lessonId });
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -667,11 +2533,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   /* =====================================================
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
      SECTIONS
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -683,7 +2609,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const sections = useMemo(() => getLessonSections(lesson), [lesson]);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -691,7 +2653,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     enabled: !loading && !locked && learnerRole === 'student' && Boolean(lesson) && !lesson.previewOnly && lesson.activityType !== 'mission' && sections.length > 0,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -699,7 +2685,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     snapshot: useMemo(() => ({ lastSectionIndex: currentSlide, status: completed ? 'completed' : 'in_progress',
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -707,7 +2717,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     onRestore: saved => {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -715,7 +2749,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       setCurrentSlide(Math.min(saved.lastSectionIndex, sections.length - 1));
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -723,13 +2781,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       setCodingAnswers(saved.state?.codingAnswers || {}); setCodingResults(saved.state?.codingResults || {});
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
       setCompleted(saved.status === 'completed');
 
+
+
+
+
+
+
       // Open the saved slide even when revisiting completed content.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -737,11 +2837,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   });
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   const codingKey = section => lessonId + ":" + (section.id || sections.indexOf(section));
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -757,7 +2893,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const section =
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -765,7 +2949,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       currentSlide
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -781,7 +2989,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const progress =
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -789,7 +3045,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       ? Math.round(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -797,7 +3077,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             (
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -805,7 +3109,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             ) /
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -813,7 +3141,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           ) *
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -821,7 +3173,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         )
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -837,11 +3213,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   /* =====================================================
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
      SECTION VALUES
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -853,11 +3289,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const sectionTitle =
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     localized(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -865,7 +3349,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     ) ||
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -873,7 +3381,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       section?.heading
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -881,35 +3413,63 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     text(
 
+      `Slide ${currentSlide + 1}`,
 
+      `الشريحة ${currentSlide + 1}`,
 
-      `Slide ${
-
-
-
-        currentSlide + 1
-
-
-
-      }`,
-
-
-
-      `الشريحة ${
-
-
-
-        currentSlide + 1
-
-
-
-      }`
-
-
+      `שקופית ${currentSlide + 1}`
 
     );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -925,7 +3485,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     localized(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -933,11 +3517,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     ) ||
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     localized(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -945,7 +3565,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     ) ||
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -953,11 +3597,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       section?.description
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     ) ||
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -973,7 +3653,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const question =
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -981,11 +3709,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       section?.question
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1001,7 +3789,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     localized(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1009,7 +3821,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1025,7 +3885,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     localized(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1033,7 +3917,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1049,7 +3981,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     localized(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1057,7 +4013,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1073,7 +4077,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     Array.isArray(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1081,11 +4109,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     )
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       ? section.options
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1101,7 +4165,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const slideKind =
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1109,11 +4221,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       ? "challenge"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       : section?.type ||
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1129,7 +4277,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const slideThemes = {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1137,7 +4333,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       themeColor: "#6d28d9",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1145,11 +4365,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       surfaceColor: "#f5f3ff",
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     },
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1157,7 +4413,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       themeColor: "#7c3aed",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1165,11 +4445,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       surfaceColor: "#fdf4ff",
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     },
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1177,7 +4493,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       themeColor: "#059669",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1185,17 +4525,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       surfaceColor: "#ecfdf5",
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     },
 
+
+
+
+
+
+
     classification: {
+
+
+
       themeColor: "#7c3aed",
+
+
+
       accentColor: "#06b6d4",
+
+
+
       surfaceColor: "#f5f3ff",
+
+
+
     },
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1203,7 +4597,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       themeColor: "#ea580c",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1211,11 +4629,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       surfaceColor: "#fff7ed",
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     },
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1223,7 +4677,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       themeColor: "#e11d48",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1231,11 +4709,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       surfaceColor: "#fff1f2",
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     },
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1243,7 +4757,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       themeColor: "#0891b2",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1251,11 +4789,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       surfaceColor: "#ecfeff",
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     },
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1263,7 +4837,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       themeColor: "#9333ea",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1271,7 +4869,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       surfaceColor: "#faf5ff",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1279,7 +4901,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1295,7 +4965,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     slideThemes[slideKind] ||
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1311,11 +5005,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const slideThemeColor =
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     section?.themeColor ||
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1331,11 +5085,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const slideAccentColor =
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     section?.accentColor ||
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1351,11 +5165,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const slideSurfaceColor =
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     section?.surfaceColor ||
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1371,11 +5245,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   /* =====================================================
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
      ANSWERS
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1387,21 +5321,99 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const selectAnswer = (index) => {
+
+
+
     const alreadyCorrect =
+
+
+
       checkedAnswers[currentSlide] &&
+
+
+
       Number(answers[currentSlide]) === Number(section?.correctAnswer);
+
+
+
+
+
+
 
     if (alreadyCorrect) return;
 
+
+
+
+
+
+
     setAnswers((current) => ({ ...current, [currentSlide]: index }));
 
+
+
+
+
+
+
     if (checkedAnswers[currentSlide]) {
+
+
+
       setCheckedAnswers((current) => ({ ...current, [currentSlide]: false }));
+
+
+
     }
+
+
+
   };
 
+
+
+
+
+
+
   const checkAnswer =
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1409,7 +5421,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       if (
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1417,7 +5453,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           currentSlide
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1425,7 +5485,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       ) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1433,7 +5517,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1449,7 +5581,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         (current) => ({
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1461,7 +5617,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           [currentSlide]:
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1469,7 +5661,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         })
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1477,7 +5693,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1493,7 +5757,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     checkedAnswers[
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1501,7 +5789,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     ] &&
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1509,7 +5821,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       answers[
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1517,7 +5853,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       ]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1525,7 +5885,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       Number(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1533,7 +5917,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           ?.correctAnswer
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1549,63 +5957,279 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const classificationAnswer = interactionAnswers[currentSlide] || {};
 
+
+
+
+
+
+
   const classificationCorrect =
+
+
+
     section?.type === "classification" &&
+
+
+
     Array.isArray(section?.items) &&
+
+
+
     section.items.length > 0 &&
+
+
+
     section.items.every(
+
+
+
       (item) => classificationAnswer[item.id] === item.correctCategory
+
+
+
     );
+
+
+
+
+
+
 
   const chooseClassification = (itemId, categoryId) => {
+
+
+
     if (interactionChecked[currentSlide] && classificationCorrect) return;
 
+
+
+
+
+
+
     setInteractionChecked((current) => ({
+
+
+
       ...current,
+
+
+
       [currentSlide]: false,
+
+
+
     }));
+
+
+
+
+
+
 
     setInteractionAnswers((current) => ({
+
+
+
       ...current,
+
+
+
       [currentSlide]: {
+
+
+
         ...(current[currentSlide] || {}),
+
+
+
         [itemId]: categoryId,
+
+
+
       },
+
+
+
     }));
+
+
+
   };
+
+
+
+
+
+
 
   const checkClassification = () => {
+
+
+
     if (!section?.items?.length) return;
 
+
+
+
+
+
+
     const allAnswered = section.items.every(
+
+
+
       (item) => classificationAnswer[item.id]
+
+
+
     );
+
+
+
     if (!allAnswered) return;
 
+
+
+
+
+
+
     setInteractionChecked((current) => ({
+
+
+
       ...current,
+
+
+
       [currentSlide]: true,
+
+
+
     }));
+
+
+
   };
 
+
+
+
+
+
+
   const requiresCorrectAnswer =
+
+
+
     section?.type === "multipleChoice" && options.length > 0;
 
+
+
+
+
+
+
   const requiresClassification =
+
+
+
     section?.type === "classification";
 
+
+
+
+
+
+
   const canAdvance =
+
+
+
     (!requiresCorrectAnswer || Boolean(isCorrect)) &&
+
+
+
     (!requiresClassification ||
+
+
+
       (interactionChecked[currentSlide] && classificationCorrect));
+
+
+
+
+
+
 
   /* =====================================================
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
      NAVIGATION
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1617,7 +6241,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const previousSlide =
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1625,7 +6285,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       if (
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1633,7 +6317,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         0
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1641,7 +6349,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         setCurrentSlide(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1649,7 +6381,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         );
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1657,7 +6413,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1671,146 +6475,587 @@ function ProgramLessonPlayer() {
 
   const nextSlide =
 
+
+
+
+
+
+
     async () => {
 
+
+
+
+
+
+
       if (completing) return;
+
+
+
       if (!canAdvance) return;
 
+
+
+
+
+
+
       if (isCodingConfig(section?.codingConfig) && !codingResults[codingKey(section)]) return;
+
+
+
+
+
+
 
       if (currentSlide === sections.length - 1 && !codingReady) return;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       if (currentSlide < sections.length - 1) {
+
+
+
+
+
+
 
         setCurrentSlide(currentSlide + 1);
 
+
+
+
+
+
+
         return;
 
+
+
+
+
+
+
       }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
       // Preview, teacher and owner practice never awards student XP.
 
+
+
+
+
+
+
       if (lesson.previewOnly || learnerRole !== 'student') {
+
+
+
+
+
+
 
         setCompleted(true);
 
+
+
+
+
+
+
         return;
 
+
+
+
+
+
+
       }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
       const selectedAnswers = {};
 
+
+
+
+
+
+
       const answerResults = {};
+
+
+
+
+
+
 
       const taskAnswers = {};
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       sections.forEach((item, index) => {
+
+
+
+
+
+
 
         if (!item.id) return;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         if (item.type === 'multipleChoice') {
+
+
+
+
+
+
 
           selectedAnswers[item.id] = answers[index];
 
+
+
+
+
+
+
           answerResults[item.id] =
+
+
+
+
+
+
 
             checkedAnswers[index] &&
 
+
+
+
+
+
+
             Number(answers[index]) === Number(item.correctAnswer ?? item.correctOptionId ?? item.answer)
+
+
+
+
+
+
 
               ? 'correct'
 
+
+
+
+
+
+
               : 'pending';
+
+
+
+
+
+
 
         } else if (isCodingConfig(item.codingConfig)) {
 
+
+
+
+
+
+
           answerResults[item.id] = codingResults[codingKey(item)] ? 'correct' : 'pending';
 
+
+
+
+
+
+
         }
+
+
+
+
+
+
 
       });
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       try {
 
+
+
+
+
+
+
         setCompleting(true);
+
+
+
+
+
+
 
         setCompletionError('');
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         const response = await httpsCallable(functions, 'completeLesson')({
+
+
+
+
+
+
 
           lessonId: lesson.id,
 
+
+
+
+
+
+
           progress: {
+
+
+
+
+
+
 
             currentSlide: sections.length - 1,
 
+
+
+
+
+
+
             maxUnlockedSlide: sections.length - 1,
+
+
+
+
+
+
 
             selectedAnswers,
 
+
+
+
+
+
+
             answerResults,
+
+
+
+
+
+
 
             taskAnswers,
 
+
+
+
+
+
+
           },
+
+
+
+
+
+
 
         });
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         const result = response?.data;
+
+
+
+
+
+
 
         if (!result || !Number.isFinite(result.xp) || typeof result.alreadyCompleted !== 'boolean') {
 
+
+
+
+
+
+
           throw new Error('invalid-completion-response');
+
+
+
+
+
+
 
         }
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         setCompletionResult(result);
+
+
+
+
+
+
 
         setCompleted(true);
 
+
+
+
+
+
+
       } catch (error) {
+
+
+
+
+
+
 
         console.error('Complete program lesson:', error);
 
+
+
+
+
+
+
         setCompletionError(
+
+
+
+
+
+
 
           language === 'ar'
 
+
+
+
+
+
+
             ? 'تعذر إنهاء الدرس. تحقق من الاتصال وحاول مجددًا.'
+
+
+
+
+
+
 
             : language === 'he'
 
+
+
+
+
+
+
               ? 'לא ניתן להשלים את השיעור. בדקו את החיבור ונסו שוב.'
+
+
+
+
+
+
 
               : 'Could not complete the lesson. Check your connection and try again.'
 
+
+
+
+
+
+
         );
+
+
+
+
+
+
 
       } finally {
 
+
+
+
+
+
+
         setCompleting(false);
+
+
+
+
+
+
 
       }
 
+
+
+
+
+
+
     };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1820,7 +7065,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     () => {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1828,27 +7097,135 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       setAnswers({});
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
       setCheckedAnswers({});
 
+
+
+
+
+
+
       setInteractionAnswers({});
+
+
+
       setInteractionChecked({});
+
+
+
       setCompletionResult(null);
+
+
+
       setCompletionError('');
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       setCompleted(false);
+
+
+
       setCompletionResult(null);
+
+
+
       setCompletionError("");
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1864,11 +7241,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
      LOADING
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   ===================================================== */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1884,7 +7309,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   if (!resume.ready) return <ProgressNotice progress={resume} />;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1896,11 +7369,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     return (
 
 
 
-      <div className="program-player-loading">
+
+
+
+
+
+
+
+
+
+
+
+
+      <div className="program-player-loading" dir={language === "en" ? "ltr" : "rtl"}>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1912,11 +7433,59 @@ function ProgramLessonPlayer() {
 
 
 
-          🚀
+
+
+
+
+
+
+
+
+
+
+
+
+          ✨
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1928,19 +7497,31 @@ function ProgramLessonPlayer() {
 
 
 
-          {text(
 
 
 
-            "Loading lesson...",
 
 
 
-            "جارٍ تحميل الدرس..."
 
 
 
-          )}
+
+
+
+          {text("Loading lesson...", "جارٍ تحميل الدرس...", "השיעור נטען...")}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1952,7 +7533,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       </div>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1960,7 +7577,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1976,7 +7641,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
      ERROR
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1988,7 +7677,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   if (
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1996,7 +7721,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     !lesson
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2004,11 +7753,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     return (
 
 
 
-      <div className="program-player-error">
+
+
+
+
+
+
+
+
+
+
+
+
+      <div className="program-player-error" dir={language === "en" ? "ltr" : "rtl"}>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2024,11 +7821,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           <div>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             🔒
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2040,23 +7885,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           <h2>
 
 
 
-            {text(
 
 
 
-              "Lesson unavailable",
 
 
 
-              "الدرس غير متاح"
 
 
 
-            )}
+
+
+
+            {text("Lesson unavailable", "الدرس غير متاح", "השיעור אינו זמין")}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2068,11 +7949,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           <p>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             {error}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2084,7 +8013,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           <button
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2092,7 +8057,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             onClick={() =>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2100,7 +8089,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 `/programs/${programId}`
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2108,7 +8121,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2116,23 +8153,59 @@ function ProgramLessonPlayer() {
 
 
 
-            {text(
 
 
 
-              "Back to Program",
 
 
 
-              "العودة إلى البرنامج"
 
 
 
-            )}
+
+
+
+            {text("Back to Program", "العودة إلى البرنامج", "חזרה לתוכנית")}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
           </button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2148,7 +8221,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       </div>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2156,7 +8265,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2168,11 +8313,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     return (
 
 
 
-      <>{lesson.previewOnly && <p className="access-preview-notice" dir={language === 'en' ? 'ltr' : 'rtl'}>{language === 'ar' ? 'معاينة مجانية · جرّب المهمة. يُحفظ التقدم في هذه الجلسة فقط.' : language === 'he' ? 'התנסות חינם · נסו את המשימה. ההתקדמות נשמרת במפגש זה בלבד.' : 'Free preview · Try the mission. Progress is kept for this session only.'}</p>}<Suspense fallback={<div className="program-player-loading">🤖</div>}>
+
+
+
+
+
+
+
+
+
+
+
+
+      <>{lesson.previewOnly && <p className="access-preview-notice" dir={language === 'en' ? 'ltr' : 'rtl'}>{language === 'ar' ? 'معاينة مجانية · جرّب المهمة. يُحفظ التقدم في هذه الجلسة فقط.' : language === 'he' ? 'התנסות חינם · נסו את המשימה. ההתקדמות נשמרת במפגש זה בלבד.' : 'Free preview · Try the mission. Progress is kept for this session only.'}</p>}<Suspense fallback={<div className="program-player-loading" dir={language === "en" ? "ltr" : "rtl"}>🤖</div>}>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2180,7 +8361,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           key={`${studentId}:${lesson.id}:${lesson.previewOnly}`}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2188,7 +8393,32 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           student={missionStudent}
+          onNext={nextId => navigate(`/programs/${programId}/lessons/${nextId}`)}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2196,7 +8426,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           onExit={() => navigate(`/programs/${programId}`)}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2204,11 +8458,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       </Suspense></>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     );
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2224,11 +8514,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   /* =====================================================
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
      EMPTY
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2240,7 +8590,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   if (
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2248,7 +8634,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     0
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2256,11 +8666,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     return (
 
 
 
-      <div className="program-player-error">
+
+
+
+
+
+
+
+
+
+
+
+
+      <div className="program-player-error" dir={language === "en" ? "ltr" : "rtl"}>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2276,7 +8734,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           <div>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2284,7 +8778,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2296,19 +8826,31 @@ function ProgramLessonPlayer() {
 
 
 
-            {text(
 
 
 
-              "This lesson is empty",
 
 
 
-              "هذا الدرس لا يحتوي على محتوى"
 
 
 
-            )}
+
+
+
+            {text("This lesson is empty", "هذا الدرس لا يحتوي على محتوى", "השיעור הזה עדיין ריק")}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2320,7 +8862,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           <button
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2328,7 +8906,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             onClick={() =>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2336,7 +8938,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 `/programs/${programId}`
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2344,7 +8970,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2352,19 +9002,31 @@ function ProgramLessonPlayer() {
 
 
 
-            {text(
 
 
 
-              "Back",
 
 
 
-              "رجوع"
 
 
 
-            )}
+
+
+
+            {text("Back", "رجوع", "חזרה")}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2376,7 +9038,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2388,7 +9098,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     );
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2404,7 +9138,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   /* =====================================================
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2412,7 +9194,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   ===================================================== */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2421,322 +9239,252 @@ function ProgramLessonPlayer() {
 
 
   if (completed) {
-
-
+    const completedLessonTitle =
+      localized(lesson?.title) ||
+      text(
+        "Interactive Lesson",
+        "درس تفاعلي",
+        "שיעור אינטראקטיבי"
+      );
 
     return (
-
-
-
-      <div className="program-player-complete">
-
-
-
-
-
-
-
-        <div className="program-player-complete-card">
-
-
-
-
-
-
-
-          <div className="complete-trophy">
-
-
-
-            🏆
-
-
-
-          </div>
-
-
-
-
-
-
-
-
-
-
-
-          <small>
-
-
-
-            TechMinds
-
-
-
-          </small>
-
-
-
-
-
-
-
-
-
-
-
-          <h1>
-
-
-
-            {completionResult?.programCompleted
-
-              ? (language === 'ar' ? 'أكملت البرنامج!' : language === 'he' ? 'התוכנית הושלמה!' : 'Program Completed!')
-
-              : text("Lesson Completed!", "أكملت الدرس!")}
-
-
-
-          </h1>
-
-
-
-
-
-
-
-
-
-
-
-          <p>
-
-
-
-            {completionResult?.programCompleted
-
-              ? (language === 'ar'
-
-                  ? 'عمل رائع! أكملت جميع الدروس المطلوبة في هذا البرنامج.'
-
-                  : language === 'he'
-
-                    ? 'עבודה מצוינת! השלמת את כל השיעורים הנדרשים בתוכנית.'
-
-                    : 'Excellent work! You completed every required lesson in this program.')
-
-              : text("Great work! You reached the end of this lesson.", "عمل رائع! وصلت إلى نهاية هذا الدرس.")}
-
-
-
-          </p>
-
-
-
-
-
-
-
-
-
-
-
-          {Number.isFinite(completionResult?.totalXp) && (
-
-            <p>⭐ +{completionResult.xp} XP · {language === 'ar' ? 'المجموع' : language === 'he' ? 'סה״כ' : 'Total'} {completionResult.totalXp} XP · {language === 'ar' ? 'المستوى' : language === 'he' ? 'רמה' : 'Level'} {completionResult.level}</p>
-
-          )}
-
-
-
-          {completionError && <p role="alert">{completionError}</p>}
-
-
-
-          <div className="complete-actions">
-
-
-
-
-
-
-
-            <button
-
-
-
-              type="button"
-
-
-
-              className="complete-secondary"
-
-
-
-              onClick={
-
-
-
-                restartLesson
-
-
-
-              }
-
-
-
+      <div
+        className="program-player-complete"
+        dir={language === "en" ? "ltr" : "rtl"}
+      >
+        <div className="program-player-complete-shell">
+          <div
+            className="program-player-complete-glow"
+            aria-hidden="true"
+          />
+
+          <section className="program-player-complete-card">
+            <div className="complete-brand">
+              <span className="complete-brand-mark">TM</span>
+              <span>TechMinds</span>
+            </div>
+
+            <div
+              className="complete-trophy-wrap"
+              aria-hidden="true"
             >
+              <span className="complete-spark complete-spark-one">✦</span>
+              <span className="complete-spark complete-spark-two">✦</span>
+              <div className="complete-trophy">🏆</div>
+            </div>
 
+            <div className="complete-copy">
+              <span className="complete-kicker">
+                {completionResult?.programCompleted
+                  ? text(
+                      "PROGRAM COMPLETE",
+                      "اكتمل البرنامج",
+                      "התוכנית הושלמה"
+                    )
+                  : text(
+                      "LESSON COMPLETE",
+                      "اكتمل الدرس",
+                      "השיעור הושלם"
+                    )}
+              </span>
 
+              <h1>
+                {completionResult?.programCompleted
+                  ? text(
+                      "🎉 Program Complete!",
+                      "🎉 أكملت البرنامج!",
+                      "🎉 השלמת את התוכנית!"
+                    )
+                  : text(
+                      "You did it!",
+                      "أحسنت! أنهيت الدرس",
+                      "כל הכבוד! סיימתם את השיעור"
+                    )}
+              </h1>
 
-              🔄{" "}
+              <p className="complete-lesson-name">
+                {completedLessonTitle}
+              </p>
 
+              <p className="complete-message">
+                {completionResult?.programCompleted
+                  ? text(
+                      "Great work! You completed all required lessons and missions.",
+                      "عمل رائع! أكملت جميع الدروس والمهمات المطلوبة.",
+                      "עבודה מצוינת! השלמת את כל השיעורים והמשימות הנדרשים."
+                    )
+                  : text(
+                      "Great work! Your progress has been saved. You can review the lesson or continue your journey.",
+                      "عمل رائع! تم حفظ تقدمك. يمكنك مراجعة الدرس أو متابعة رحلتك التعليمية.",
+                      "עבודה מצוינת! ההתקדמות נשמרה. אפשר לחזור על השיעור או להמשיך במסע הלמידה."
+                    )}
+              </p>
+            </div>
 
-
-
-
-
-
-              {text(
-
-
-
-                "Restart",
-
-
-
-                "إعادة الدرس"
-
-
-
-              )}
-
-
-
-            </button>
-
-
-
-
-
-
-
-
-
-
-
-            {!completionResult?.programCompleted && completionResult?.nextLessonId && (
-
-              <button
-
-                type="button"
-
-                className="complete-primary"
-
-                onClick={() => navigate(`/programs/${programId}/lessons/${completionResult.nextLessonId}`)}
-
+            {Number.isFinite(completionResult?.totalXp) && (
+              <div
+                className="complete-stats"
+                aria-label={text(
+                  "Completion summary",
+                  "ملخص الإنجاز",
+                  "סיכום ההישג"
+                )}
               >
+                <div className="complete-stat">
+                  <span className="complete-stat-icon">⭐</span>
+                  <small>
+                    {text(
+                      "Earned",
+                      "XP المكتسبة",
+                      "XP שנצבר"
+                    )}
+                  </small>
+                  <strong><bdi dir="ltr">+{completionResult.xp} XP</bdi></strong>
+                </div>
 
-                {language === 'ar' ? 'الدرس التالي' : language === 'he' ? 'השיעור הבא' : 'Next Lesson'}
+                <div className="complete-stat">
+                  <span className="complete-stat-icon">✨</span>
+                  <small>
+                    {text(
+                      "Total XP",
+                      "مجموع XP",
+                      'סה״כ XP'
+                    )}
+                  </small>
+                  <strong>{completionResult.totalXp} XP</strong>
+                </div>
 
-              </button>
-
+                <div className="complete-stat">
+                  <span className="complete-stat-icon">✨</span>
+                  <small>
+                    {text(
+                      "Level",
+                      "المستوى",
+                      "רמה"
+                    )}
+                  </small>
+                  <strong>{completionResult.level}</strong>
+                </div>
+              </div>
             )}
 
+            {completionError && (
+              <p
+                className="complete-error"
+                role="alert"
+              >
+                {completionError}
+              </p>
+            )}
 
+            {!completionResult?.programCompleted && completionResult?.nextLessonId && (
+              <div className="complete-next-summary">
+                <h2>✨ {text('Next mission', 'المهمة التالية', 'המשימה הבאה')}</h2>
+                {completionResult.nextLessonTitle && <p>{localized(completionResult.nextLessonTitle)}</p>}
+              </div>
+            )}
+            <div className="complete-actions">
+              {!completionResult?.programCompleted &&
+                completionResult?.nextLessonId && (
+                  <button
+                    type="button"
+                    className="complete-primary complete-next"
+                    onClick={() =>
+                      navigate(
+                        `/programs/${programId}/lessons/${completionResult.nextLessonId}`
+                      )
+                    }
+                  >
+                    <span>
+                      {text(
+                        "Start Next Mission",
+                        "ابدأ المهمة التالية",
+                        "התחילו את המשימה הבאה"
+                      )}
+                    </span>
+                    <span aria-hidden="true">
+                      {language === "en" ? "→" : "←"}
+                    </span>
+                  </button>
+                )}
 
-            <button
+              <button
+                type="button"
+                className="complete-secondary"
+                onClick={restartLesson}
+              >
+                <span aria-hidden="true">↻</span>
+                {text(
+                  "Review Lesson",
+                  "مراجعة الدرس",
+                  "חזרה על השיעור"
+                )}
+              </button>
 
+              <button
+                type="button"
+                className={completionResult?.programCompleted ? "complete-primary" : "complete-secondary"}
+                onClick={() =>
+                  navigate(`/programs/${programId}`)
+                }
+              >
+                <span aria-hidden="true">⌂</span>
+                {text(
+                  "Back to Program",
+                  "العودة إلى البرنامج",
+                  "חזרה לתוכנית"
+                )}
+              </button>
+            </div>
 
-
-              type="button"
-
-
-
-              className="complete-primary"
-
-
-
-              onClick={() =>
-
-
-
-                navigate(
-
-
-
-                  `/programs/${programId}`
-
-
-
-                )
-
-
-
-              }
-
-
-
-            >
-
-
-
-              ✅{" "}
-
-
-
-
-
-
-
+            <p className="complete-footnote">
               {text(
-
-
-
-                "Back to Program",
-
-
-
-                "العودة إلى البرنامج"
-
-
-
+                "Keep going — every lesson builds a new skill.",
+                "استمر — كل درس يبني مهارة جديدة.",
+                "ממשיכים קדימה — כל שיעור בונה מיומנות חדשה."
               )}
-
-
-
-            </button>
-
-
-
-
-
-
-
-          </div>
-
-
-
-
-
-
-
+            </p>
+          </section>
         </div>
-
-
-
-
-
-
-
       </div>
-
-
-
     );
-
-
-
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2752,11 +9500,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
      PAGE
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   ===================================================== */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2768,11 +9564,49 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     <div
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       className={`program-player-page slide-theme-${slideKind}`}
+
+      dir={language === "en" ? "ltr" : "rtl"}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2780,7 +9614,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         "--lesson-theme":
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2788,7 +9646,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           "#6d28d9",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2796,7 +9678,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           lesson.accentColor ||
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2804,7 +9710,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         "--lesson-surface":
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2812,7 +9742,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           "#f5f3ff",
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2820,11 +9774,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           lesson.coverImage
 
 
 
-            ? `url("${lesson.coverImage}")`
+
+
+
+
+
+
+
+
+
+
+
+
+            ? `url("${lessonImageUrl(lesson.coverImage)}")`
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2832,7 +9822,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         "--type-color":
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2840,7 +9854,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         "--type-accent":
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2848,7 +9886,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         "--type-soft":
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2856,11 +9918,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       }}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     >
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2876,7 +9986,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       {lesson.previewOnly && <p className="access-preview-notice">{language === 'ar' ? 'معاينة مجانية' : language === 'he' ? 'התנסות חינם' : 'Free preview'}</p>}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2892,7 +10050,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         <button
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2900,7 +10094,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           className="player-back"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2908,7 +10126,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             navigate(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2916,7 +10158,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             )
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2924,19 +10190,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         >
 
 
 
-          {language === "ar"
 
 
 
-            ? "→"
 
 
 
-            : "←"}
+
+
+
+
+
+
+          {language === "en" ? "←" : "→"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2952,23 +10258,83 @@ function ProgramLessonPlayer() {
 
 
 
-          {text(
 
 
 
-            "Program",
 
 
 
-            "البرنامج"
 
 
 
-          )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          {text("Program", "البرنامج", "התוכנית")}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
         </button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2988,7 +10354,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           <small>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2996,11 +10398,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               program?.title
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             )}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3012,7 +10450,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           <strong>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3020,7 +10494,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               lesson?.title
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3028,23 +10526,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               lesson?.name ||
 
 
 
-              text(
 
 
 
-                "Lesson",
 
 
 
-                "درس"
 
 
 
-              )}
+
+
+
+              text("Lesson", "درس", "שיעור")}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3056,7 +10578,67 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3076,7 +10658,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           <button
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3084,7 +10702,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             className={
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3092,7 +10734,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 ? "active"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3100,11 +10766,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             }
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             onClick={() =>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3112,11 +10814,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             }
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           >
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3124,7 +10862,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           </button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3140,7 +10926,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             type="button"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3148,7 +10958,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               language === "ar"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3156,11 +10990,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 : ""
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3168,7 +11038,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               setLanguage("ar")
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3176,7 +11070,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           >
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3184,6 +11102,18 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           </button>
 
 
@@ -3192,15 +11122,87 @@ function ProgramLessonPlayer() {
 
 
 
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           <button
+
+
+
             type="button"
+
+
+
             className={language === "he" ? "active" : ""}
+
+
+
             onClick={() => setLanguage("he")}
+
+
+
           >
+
+
+
             עברית
+
+
+
           </button>
+
+
+
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3220,7 +11222,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       <section
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3228,7 +11278,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           lesson.coverImage
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3236,7 +11310,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             : "no-cover"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3244,7 +11342,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         aria-label={localized(lesson.title)}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3252,7 +11374,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         <div className="player-lesson-hero-overlay" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3268,7 +11426,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           <div className="player-lesson-hero-text">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3280,19 +11486,31 @@ function ProgramLessonPlayer() {
 
 
 
-              {text(
 
 
 
-                "Interactive Lesson",
 
 
 
-                "درس تفاعلي"
 
 
 
-              )}
+
+
+
+              {text("Interactive Lesson", "درس تفاعلي", "שיעור אינטראקטיבי")}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3304,7 +11522,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             <h1>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3312,11 +11566,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 lesson.title
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               )}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3328,7 +11618,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             {localized(lesson.description) && (
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3336,7 +11662,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 {localized(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3344,7 +11694,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 )}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3352,7 +11726,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3368,7 +11778,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
               <span>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3376,19 +11822,31 @@ function ProgramLessonPlayer() {
 
 
 
-                {text(
 
 
 
-                  "min",
 
 
 
-                  "دقيقة"
 
 
 
-                )}
+
+
+
+                {text("min", "دقيقة", "דקות")}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3400,7 +11858,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
               <span>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3408,7 +11902,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               </span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3420,27 +11950,75 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 📚 {sections.length}{" "}
 
 
 
-                {text(
 
 
 
-                  "slides",
 
 
 
-                  "شرائح"
 
 
 
-                )}
+
+
+
+                {text("slides", "شرائح", "שקופיות")}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
               </span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3449,6 +12027,30 @@ function ProgramLessonPlayer() {
 
 
             </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3468,7 +12070,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           {lesson.coverImage && (
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3476,12 +12126,52 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               <img
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 decoding="async"
-                src={lesson.coverImage}
+
+
+
+                src={lessonImageUrl(lesson.coverImage)}
+                {...lessonImageDimensions(lesson.coverImage)}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3489,7 +12179,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   localized(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3497,7 +12211,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   ) ||
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3505,7 +12243,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                     lesson.title
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3513,7 +12275,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3521,11 +12307,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               />
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             </div>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3537,7 +12359,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3553,11 +12411,83 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       <ProgressNotice progress={resume} />
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
       {/* PROGRESS */}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3573,7 +12503,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         <div className="player-progress-info">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3585,19 +12563,31 @@ function ProgramLessonPlayer() {
 
 
 
-            {text(
 
 
 
-              "Lesson Progress",
 
 
 
-              "تقدم الدرس"
 
 
 
-            )}
+
+
+
+            {text("Lesson Progress", "تقدم الدرس", "התקדמות בשיעור")}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3613,7 +12603,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           <strong>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3621,7 +12659,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               1}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3629,7 +12691,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             {sections.length}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3641,7 +12727,67 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3661,7 +12807,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           <div
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3669,7 +12851,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             style={{
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3677,11 +12883,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 `${progress}%`,
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             }}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3693,7 +12935,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3713,7 +13003,67 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       {/* SLIDE */}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3729,7 +13079,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         <section className={`player-slide-card player-slide-${slideKind}`}>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3745,7 +13143,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             <span className="player-slide-number">
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3753,11 +13187,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 1}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             </span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3777,7 +13271,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
               {section.challenge
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3785,7 +13315,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 : section.type ===
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3793,20 +13347,83 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 ? "❓"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 : section.type ===
+
+
+
                   "classification"
+
+
+
                 ? "🎯"
+
+
+
                 : section.type ===
+
+
+
                   "multipleChoice"
+
+
+
                 ? "🧩"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 : section.type ===
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3814,11 +13431,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 ? "🛠️"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 : section.type ===
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3826,11 +13479,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 ? "🔥"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 : section.type ===
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3838,7 +13527,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 ? "📝"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3846,7 +13559,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   "reflection"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3854,7 +13591,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 : "📚"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3870,23 +13643,55 @@ function ProgramLessonPlayer() {
 
 
 
-              {section.type ||
 
 
 
-                text(
 
 
 
-                  "content",
 
 
 
-                  "محتوى"
 
 
 
-                )}
+
+
+
+
+
+
+
+
+
+
+
+
+              {sectionTypeLabel(section.type)}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3902,7 +13707,67 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3922,11 +13787,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             <h1>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               {sectionTitle}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3942,11 +13855,83 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             {(section?.emoji ||
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               section?.visualImage) && (
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3962,7 +13947,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 {section?.emoji && (
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3970,7 +13991,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                     {section.emoji}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3978,7 +14023,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3990,12 +14071,52 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   <img
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                     decoding="async"
-                src={section.visualImage}
+
+
+
+                src={lessonImageUrl(section.visualImage)}
+                {...lessonImageDimensions(section.visualImage)}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4003,7 +14124,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                       localized(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4011,7 +14156,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                       ) ||
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4019,7 +14188,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                     }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4027,7 +14220,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4043,7 +14272,67 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4059,7 +14348,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               <p className="player-main-text">
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4067,11 +14380,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               </p>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4087,7 +14460,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               <div className={`player-task-card ${
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4095,7 +14492,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   ? "challenge"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4103,7 +14524,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               }`}>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4111,7 +14556,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   {section?.challenge
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4119,7 +14588,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                     : "🛠️"}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4131,7 +14624,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 <div>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4139,39 +14668,63 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                     {section?.challenge
 
 
 
-                      ? text(
 
 
 
-                          "Challenge",
 
 
 
-                          "تحدّي"
 
 
 
-                        )
 
 
 
-                      : text(
+                      ? text("Challenge", "تحدّي", "אתגר")
 
 
 
-                          "Your Mission",
 
 
 
-                          "مهمتك"
 
 
 
-                        )}
+
+
+
+
+
+
+                      : text("Your Mission", "مهمتك", "המשימה שלך")}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4183,7 +14736,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                   <p>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4191,7 +14780,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   </p>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4199,11 +14812,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               </div>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4219,7 +14892,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               <div className="player-info-box">
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4231,7 +14928,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 <div>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4239,19 +14972,31 @@ function ProgramLessonPlayer() {
 
 
 
-                    {text(
 
 
 
-                      "Important",
 
 
 
-                      "معلومة مهمة"
 
 
 
-                    )}
+
+
+
+                    {text("Important", "معلومة مهمة", "חשוב")}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4263,7 +15008,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                   <p>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4271,7 +15052,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   </p>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4279,11 +15084,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               </div>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4299,7 +15164,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               <div className="player-extra-challenge">
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4311,7 +15200,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 <div>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4319,19 +15244,31 @@ function ProgramLessonPlayer() {
 
 
 
-                    {text(
 
 
 
-                      "Challenge",
 
 
 
-                      "تحدّي"
 
 
 
-                    )}
+
+
+
+                    {text("Challenge", "تحدّي", "אתגר")}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4343,7 +15280,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                   <p>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4351,7 +15324,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   </p>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4359,11 +15356,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               </div>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4379,7 +15436,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               <Suspense fallback={<p>{codeText("editorLoading")}</p>}>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4387,7 +15468,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   key={codingKey(section)}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4395,7 +15500,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   initialCode={codingAnswers[codingKey(section)]}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4403,7 +15532,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   onResult={result => {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4411,7 +15564,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                     setCodingResults(previous => ({ ...previous, [codingKey(section)]: result.passed }));
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4419,11 +15596,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 />
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               </Suspense>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4435,7 +15648,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             {question && (
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4447,23 +15696,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 <small>
 
 
 
-                  {text(
 
 
 
-                    "QUESTION",
 
 
 
-                    "سؤال"
 
 
 
-                  )}
+
+
+
+                  {text("QUESTION", "سؤال", "שאלה")}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4479,11 +15764,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 <h2>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   {question}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4495,11 +15840,83 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
               </div>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4512,94 +15929,382 @@ function ProgramLessonPlayer() {
 
 
             {section.type === "classification" && (
+
+
+
               <div className="player-classification">
+
+
+
                 <div className="classification-items">
+
+
+
                   {section.items?.map((item) => (
+
+
+
                     <div className="classification-item" key={item.id}>
+
+
+
                       <strong>{localized(item.label)}</strong>
 
+
+
+
+
+
+
                       <div className="classification-category-buttons">
+
+
+
                         {section.categories?.map((category) => {
+
+
+
                           const selected =
+
+
+
                             classificationAnswer[item.id] === category.id;
+
+
+
                           const checked = interactionChecked[currentSlide];
+
+
+
                           const correct = item.correctCategory === category.id;
 
+
+
+
+
+
+
                           let className = "classification-category";
+
+
+
                           if (selected) className += " selected";
+
+
+
                           if (checked && selected && correct) className += " correct";
+
+
+
                           if (checked && selected && !correct) className += " wrong";
 
+
+
+
+
+
+
                           return (
+
+
+
                             <button
+
+
+
                               key={category.id}
+
+
+
                               type="button"
+
+
+
                               className={className}
+
+
+
                               onClick={() =>
+
+
+
                                 chooseClassification(item.id, category.id)
+
+
+
                               }
+
+
+
                             >
+
+
+
                               {category.emoji && <span>{category.emoji}</span>}
+
+
+
                               {localized(category.label)}
+
+
+
                             </button>
+
+
+
                           );
+
+
+
                         })}
+
+
+
                       </div>
+
+
+
                     </div>
+
+
+
                   ))}
+
+
+
                 </div>
 
+
+
+
+
+
+
                 {!(
+
+
+
                   interactionChecked[currentSlide] &&
+
+
+
                   classificationCorrect
+
+
+
                 ) && (
+
+
+
                   <button
+
+
+
                     type="button"
+
+
+
                     className="player-check-answer"
+
+
+
                     disabled={
+
+
+
                       !section.items?.every(
+
+
+
                         (item) => classificationAnswer[item.id]
+
+
+
                       )
+
+
+
                     }
+
+
+
                     onClick={checkClassification}
+
+
+
                   >
+
+
+
                     {language === "ar"
+
+
+
                       ? "تحقق من التصنيف"
+
+
+
                       : language === "he"
+
+
+
                       ? "בדקו את המיון"
+
+
+
                       : "Check Classification"}
+
+
+
                   </button>
+
+
+
                 )}
 
+
+
+
+
+
+
                 {interactionChecked[currentSlide] && (
+
+
+
                   <div
+
+
+
                     className={
+
+
+
                       classificationCorrect
+
+
+
                         ? "player-feedback correct-feedback"
+
+
+
                         : "player-feedback wrong-feedback"
+
+
+
                     }
+
+
+
                   >
+
+
+
                     {classificationCorrect
+
+
+
                       ? language === "ar"
+
+
+
                         ? "✅ ممتاز! صنّفت جميع العناصر بشكل صحيح."
+
+
+
                         : language === "he"
+
+
+
                         ? "✅ מצוין! מיינתם את כל הפריטים נכון."
+
+
+
                         : "✅ Excellent! Everything is classified correctly."
+
+
+
                       : language === "ar"
+
+
+
                       ? "❌ في تصنيف غير صحيح. غيّره وحاول مرة أخرى."
+
+
+
                       : language === "he"
+
+
+
                       ? "❌ יש מיון שגוי. שנו אותו ונסו שוב."
+
+
+
                       : "❌ Something is misplaced. Change it and try again."}
+
+
+
                   </div>
+
+
+
                 )}
+
+
+
               </div>
+
+
+
             )}
+
+
+
+
+
+
 
             {options.length >
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               0 && (
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4615,7 +16320,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 {options.map(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4623,7 +16364,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                     option,
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4631,7 +16396,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   ) => {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4639,7 +16428,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                       answers[
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4647,11 +16460,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                       ] ===
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                       index;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4667,11 +16540,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                       checkedAnswers[
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                         currentSlide
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4687,7 +16596,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                     const correct =
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4695,7 +16652,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                         section
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4703,7 +16684,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                       ) ===
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4719,7 +16724,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                     let optionClass =
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4735,7 +16788,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                     if (
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4743,11 +16844,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                     ) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                       optionClass +=
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4755,7 +16892,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4771,7 +16956,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                       checked &&
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4779,7 +16988,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                     ) {
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4787,11 +17020,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                         " correct";
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4807,7 +17100,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                       checked &&
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4815,7 +17132,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                       !correct
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4823,7 +17164,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                       optionClass +=
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4831,7 +17196,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4847,7 +17260,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                       <button
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4855,11 +17292,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                           index
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                         }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4867,7 +17340,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                         className={
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4875,7 +17372,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                         }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4883,7 +17404,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                           selectAnswer(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4891,11 +17436,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                           )
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                         }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4907,7 +17488,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                         <span>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4915,7 +17532,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                             65 +
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4923,7 +17564,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                           )}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4939,7 +17604,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                         <strong>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4947,7 +17660,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                             option
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4955,7 +17692,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                             String(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4963,7 +17724,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                             )}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4975,7 +17760,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                       </button>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4983,11 +17804,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   }
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5003,7 +17872,67 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5019,7 +17948,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               0 &&
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5027,7 +17980,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 currentSlide
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5039,7 +18016,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
               <button
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5047,7 +18060,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 className="player-check-answer"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5055,7 +18092,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   answers[
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5063,11 +18124,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   ] === undefined
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5075,7 +18172,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   checkAnswer
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5083,11 +18204,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               >
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 {language === "ar" ? "تحقق من الإجابة" : language === "he" ? "בדיקת תשובה" : "Check Answer"}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5099,7 +18256,67 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5115,7 +18332,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               currentSlide
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5127,7 +18368,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
               <div
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5135,7 +18412,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   isCorrect
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5143,11 +18444,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                     : "player-feedback wrong-feedback"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5159,39 +18496,87 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 {isCorrect
 
 
 
-                  ? `✅ ${text(
 
 
 
-                      "Correct! Great job.",
 
 
 
-                      "إجابة صحيحة! أحسنت."
 
 
 
-                    )}`
 
 
 
-                  : `❌ ${text(
+                  ? `✅ ${text("Correct! Great job.", "إجابة صحيحة! أحسنت.", "נכון! כל הכבוד.")}`
 
 
 
-                      "Not quite yet. Choose another answer and try again.",
 
 
 
-                      "ليست صحيحة بعد. اختر إجابة أخرى وحاول مجددًا."
 
 
 
-                    )}`}
+
+
+
+
+
+
+                  : `❌ ${text("Not quite yet. Choose another answer and try again.", "ليست صحيحة بعد. اختر إجابة أخرى وحاول مجددًا.", "עדיין לא נכון. בחרו תשובה אחרת ונסו שוב.")}`}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5207,7 +18592,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5223,7 +18656,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5243,7 +18724,67 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       {/* FOOTER */}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5259,7 +18800,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         <button
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5267,7 +18844,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           className="player-prev"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5275,7 +18876,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             currentSlide ===
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5283,7 +18908,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5291,7 +18940,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             previousSlide
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5299,19 +18972,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         >
 
 
 
-          {language === "ar"
 
 
 
-            ? "→"
 
 
 
-            : "←"}
+
+
+
+
+
+
+          {language === "en" ? "←" : "→"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5327,23 +19040,83 @@ function ProgramLessonPlayer() {
 
 
 
-          {text(
 
 
 
-            "Previous",
 
 
 
-            "السابق"
 
 
 
-          )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          {text("Previous", "السابق", "הקודם")}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
         </button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5363,7 +19136,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           {sections.map(
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5371,11 +19180,47 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               item,
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
               index
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5387,7 +19232,43 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
               <button
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5395,7 +19276,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   item.id ||
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5403,7 +19308,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5411,7 +19340,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 className={
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5419,7 +19372,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                   currentSlide
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5427,7 +19404,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                     : index <
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5435,7 +19436,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                     ? "visited"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5443,32 +19468,75 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
                 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
                 disabled={index > currentSlide}
+
+
+
                 onClick={() => { if (index <= currentSlide) setCurrentSlide(index); }}
 
 
 
-                aria-label={
 
 
 
-                  `Slide ${
 
 
 
-                    index + 1
 
 
 
-                  }`
 
 
 
-                }
+                aria-label={text(
+
+                  `Slide ${index + 1}`,
+
+                  `الشريحة ${index + 1}`,
+
+                  `שקופית ${index + 1}`
+
+                )}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5480,11 +19548,71 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             )
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5504,7 +19632,55 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         <button
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5512,7 +19688,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           className="player-next"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5520,7 +19720,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           onClick={
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5528,7 +19752,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5536,7 +19784,31 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
           {currentSlide ===
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5544,37 +19816,91 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
             1
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
             ? (completing
 
+
+
+
+
+
+
                 ? (language === 'ar' ? 'جارٍ الحفظ...' : language === 'he' ? 'שומר...' : 'Saving...')
 
-                : text(
-
-                    "Complete Lesson",
-
-                    "إنهاء الدرس"
-
-                  ))
 
 
 
-            : text(
 
 
 
-                "Next",
+                : text("Complete Lesson", "إنهاء الدرس", "סיום השיעור"))
 
 
 
-                "التالي"
 
 
 
-              )}
+
+
+
+
+
+
+
+
+
+            : text("Next", "التالي", "הבא")}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5590,15 +19916,55 @@ function ProgramLessonPlayer() {
 
 
 
-          {language === "ar"
 
 
 
-            ? "←"
 
 
 
-            : "→"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          {language === "en" ? "→" : "←"}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5610,11 +19976,59 @@ function ProgramLessonPlayer() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
         {completionError && (
+
+
+
+
+
+
 
           <p role="alert" className="program-player-error-message">{completionError}</p>
 
+
+
+
+
+
+
         )}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5628,25 +20042,15 @@ function ProgramLessonPlayer() {
 
 
 
-
-
     </div>
-
-
 
   );
 
 
 
+
+
 }
-
-
-
-
-
-
-
-
 
 
 
